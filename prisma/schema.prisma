@@ -10,10 +10,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Property {
+model User {
+  leases Lease[]
   id Int @id @default(autoincrement())
-  city String
+  firstName String
+  email String @unique
+  hash String
+  imgUrl String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map(name: "user")
+}
+
+model Lease {
+  leaseImages LeaseImage[]
+  user User @relation(fields: [userId], references: [id])
+  id Int @id @default(autoincrement())
   userId Int
+  city String
+  description String
+  surface Int
+  room Int
+  startDate DateTime
+  endDate DateTime
+  isDateFlexible Boolean
+  pricePerMonth Int?
+  pricePeriod Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map(name: "lease")
+}
+
+model LeaseImage {
+  lease Lease @relation(fields: [leaseId], references: [id])
+  id Int @id @default(autoincrement())
+  leaseId Int
+  url String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map(name: "lease_img")
 }
