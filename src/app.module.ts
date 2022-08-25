@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
-import { PropertyModule } from './property/property.module';
+import { LeaseModule } from './lease/lease.module';
 
 @Module({
-  imports: [PrismaModule, PropertyModule],
+  imports: [PrismaModule, LeaseModule],
   controllers: [],
   providers: [],
 })
