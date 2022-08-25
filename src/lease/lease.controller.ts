@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { LeaseService } from './lease.service';
 
-@Controller('lease')
+@Controller('leases')
 export class LeaseController {
   constructor(private leaseService: LeaseService) {}
   @Get()
