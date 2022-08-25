@@ -4,8 +4,9 @@ import { faker } from '@faker-js/faker';
 const prisma = new PrismaClient();
 
 const fakeUser = (): any => ({
-  firstName: 'test', // faker.name.firstName()
-  email: 'test@test.com', // faker.internet.email()
+  firstName: 'Julien', // faker.name.firstName()
+  lastName: 'Dupuis', // faker.name.lastName()
+  email: 'julien@dupuis.com', // faker.internet.email()
   hash: '$2a$10$tDyVlcnuYnazlxntXJ0kMODUn9HQ7x6YfOghsCAT1wBTFksRfUFna', // faker.internet.password()
   imgUrl: faker.internet.avatar(),
 });
