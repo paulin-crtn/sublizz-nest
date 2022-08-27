@@ -6,6 +6,7 @@ import { SignInDto, SignUpDto } from './dto';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @HttpCode(HttpStatus.CREATED)
   @Post('signup')
   signUp(@Body() dto: SignUpDto) {
     return this.authService.signUp(dto);
