@@ -91,6 +91,40 @@ export class AuthService {
   }
 
   /**
+   * Check the refresh token and issue new tokens
+   *
+   * @param refreshToken
+   * @returns
+   */
+  async checkRefreshToken(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; newRefreshToken: string }> {
+    // Check refresh token is set
+    if (!refreshToken) {
+      throw new ForbiddenException('Refresh token is missing.');
+    }
+    // Find user by refresh token
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        refreshToken,
+      },
+    });
+    // If user does not exist throw exception
+    if (!user) {
+      throw new ForbiddenException('Refresh token is invalid.');
+    }
+    // If refresh token is expired throw exception
+    if (new Date(Date.now()) > user.refreshTokenExpiresAt) {
+      throw new ForbiddenException('Refresh token is expired.');
+    }
+    // Generate new tokens
+    const accessToken = await this.issueAccessToken(user.id, user.email);
+    const newRefreshToken = await this.issueRefreshToken(user.id);
+    // Return new tokens
+    return { accessToken, newRefreshToken };
+  }
+
+  /**
    * Issue an access token
    *
    * @param userId
@@ -135,31 +169,20 @@ export class AuthService {
     return refreshToken;
   }
 
-  async checkRefreshToken(
-    refreshToken: string,
-  ): Promise<{ accessToken: string; newRefreshToken: string }> {
-    // Check refresh token is set
-    if (!refreshToken) {
-      throw new ForbiddenException('Refresh token is missing.');
-    }
-    // Find user by refresh token
-    const user = await this.prismaService.user.findFirst({
+  /**
+   * Log out a user
+   *
+   * @param userId
+   */
+  async logout(userId: number) {
+    return await this.prismaService.user.update({
       where: {
-        refreshToken,
+        id: userId,
+      },
+      data: {
+        refreshToken: null,
+        refreshTokenExpiresAt: null,
       },
     });
-    // If user does not exist throw exception
-    if (!user) {
-      throw new ForbiddenException('Refresh token is invalid.');
-    }
-    // If refresh token is expired throw exception
-    if (new Date(Date.now()) > user.refreshTokenExpiresAt) {
-      throw new ForbiddenException('Refresh token is expired.');
-    }
-    // Generate new tokens
-    const accessToken = await this.issueAccessToken(user.id, user.email);
-    const newRefreshToken = await this.issueRefreshToken(user.id);
-    // Return new tokens
-    return { accessToken, newRefreshToken };
   }
 }

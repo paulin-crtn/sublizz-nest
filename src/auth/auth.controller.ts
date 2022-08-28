@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
+import { GetUser } from './decorator';
 import { SignInDto, SignUpDto } from './dto';
 import { JwtGuard } from './guard';
 
@@ -58,9 +59,12 @@ export class AuthController {
   }
 
   @UseGuards(JwtGuard)
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Post('logout')
-  async logout() {}
+  async logout(@GetUser('id') userId: number) {
+    await this.authService.logout(userId);
+    return;
+  }
 
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
