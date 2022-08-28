@@ -96,27 +96,9 @@ export class AuthService {
    * @param refreshToken
    * @returns
    */
-  async checkRefreshToken(
-    refreshToken: string,
+  async refreshTokens(
+    user: User,
   ): Promise<{ accessToken: string; newRefreshToken: string }> {
-    // Check refresh token is set
-    if (!refreshToken) {
-      throw new ForbiddenException('Refresh token is missing.');
-    }
-    // Find user by refresh token
-    const user = await this.prismaService.user.findFirst({
-      where: {
-        refreshToken,
-      },
-    });
-    // If user does not exist throw exception
-    if (!user) {
-      throw new ForbiddenException('Refresh token is invalid.');
-    }
-    // If refresh token is expired throw exception
-    if (new Date(Date.now()) > user.refreshTokenExpiresAt) {
-      throw new ForbiddenException('Refresh token is expired.');
-    }
     // Generate new tokens
     const accessToken = await this.issueAccessToken(user.id, user.email);
     const newRefreshToken = await this.issueRefreshToken(user.id);
@@ -132,17 +114,18 @@ export class AuthService {
    * @returns
    */
   async issueAccessToken(userId: number, email: string): Promise<string> {
+    // Payload
     const payload = {
       sub: userId,
       email,
     };
-
-    const accessToken = await this.jwtService.signAsync(payload, {
+    // Generate JWT access token
+    const jwtAccessToken = await this.jwtService.signAsync(payload, {
       expiresIn: '15m',
-      secret: this.configService.get('JWT_SECRET'),
+      secret: this.configService.get('ACCESS_JWT_SECRET'),
     });
 
-    return accessToken;
+    return jwtAccessToken;
   }
 
   /**
@@ -151,22 +134,30 @@ export class AuthService {
    * @param userId
    */
   async issueRefreshToken(userId: number): Promise<string> {
+    // Generate the refresh token
     const refreshToken = randomToken.generate(32);
-    const refreshTokenExpiresAt = new Date(
-      Date.now() + 1000 * 60 * 60 * 24 * 7,
-    ); // 1 week
-
+    const refreshTokenHash = await argon.hash(refreshToken);
+    // Save the refresh token hash
     await this.prismaService.user.update({
       where: {
         id: userId,
       },
       data: {
-        refreshToken,
-        refreshTokenExpiresAt,
+        refreshTokenHash,
       },
     });
-
-    return refreshToken;
+    // Payload
+    const payload = {
+      sub: userId,
+      refreshToken,
+    };
+    // Generate JWT refresh token
+    const jwtRefreshToken = await this.jwtService.signAsync(payload, {
+      expiresIn: '1w',
+      secret: this.configService.get('REFRESH_JWT_SECRET'),
+    });
+    // Return the refresh token
+    return jwtRefreshToken;
   }
 
   /**
@@ -180,8 +171,7 @@ export class AuthService {
         id: userId,
       },
       data: {
-        refreshToken: null,
-        refreshTokenExpiresAt: null,
+        refreshTokenHash: null,
       },
     });
   }

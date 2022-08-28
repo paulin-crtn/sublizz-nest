@@ -5,7 +5,10 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class AccessJwtStrategy extends PassportStrategy(
+  Strategy,
+  'access-jwt',
+) {
   constructor(
     configService: ConfigService,
     private prismaService: PrismaService,
@@ -13,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get('JWT_SECRET'),
+      secretOrKey: configService.get('ACCESS_JWT_SECRET'),
     });
   }
 
@@ -22,8 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       where: { id: payload.sub },
     });
     delete user.passwordHash;
-    delete user.refreshToken;
-    delete user.refreshTokenExpiresAt;
+    delete user.refreshTokenHash;
     return user;
   }
 }

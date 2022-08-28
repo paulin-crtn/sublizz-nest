@@ -1,6 +1,6 @@
 import { AuthGuard } from '@nestjs/passport';
 
-export class JwtGuard extends AuthGuard('jwt') {
+export class AccessJwtGuard extends AuthGuard('access-jwt') {
   constructor() {
     super();
   }

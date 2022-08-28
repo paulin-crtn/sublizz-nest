@@ -7,15 +7,15 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { User } from '@prisma/client';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { GetUser } from './decorator';
 import { SignInDto, SignUpDto } from './dto';
-import { JwtGuard } from './guard';
+import { AccessJwtGuard, RefreshJwtGuard } from './guard';
 
 /* -------------------------------------------------------------------------- */
 /*                                  CONSTANT                                  */
@@ -58,7 +58,7 @@ export class AuthController {
     return { access_token: accessToken };
   }
 
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessJwtGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('logout')
   async logout(@GetUser('id') userId: number) {
@@ -66,14 +66,15 @@ export class AuthController {
     return;
   }
 
+  @UseGuards(RefreshJwtGuard)
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
   async refresh(
-    @Req() request: Request,
+    @GetUser() user: User,
     @Res({ passthrough: true }) response: Response,
   ) {
     const { accessToken, newRefreshToken } =
-      await this.authService.checkRefreshToken(request.cookies?.refresh_token);
+      await this.authService.refreshTokens(user);
     response.cookie(COOKIE_NAME, newRefreshToken, COOKIE_OPTIONS);
     return { access_token: accessToken };
   }
