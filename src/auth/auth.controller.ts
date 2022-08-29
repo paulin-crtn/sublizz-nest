@@ -7,13 +7,12 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  Res,
   UseGuards,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { GetUser } from './decorator';
+import { ResCookie } from './decorator/set-cookie.decorator';
 import { SignInDto, SignUpDto } from './dto';
 import { AccessJwtGuard, RefreshJwtGuard } from './guard';
 
@@ -38,10 +37,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post('signup')
-  async signUp(
-    @Body() dto: SignUpDto,
-    @Res({ passthrough: true }) response: Response,
-  ) {
+  async signUp(@Body() dto: SignUpDto, @ResCookie() response: any) {
     const { accessToken, refreshToken } = await this.authService.signUp(dto);
     response.cookie(COOKIE_NAME, refreshToken, COOKIE_OPTIONS);
     return { access_token: accessToken };
@@ -49,12 +45,19 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('signin')
-  async signIn(
-    @Body() dto: SignInDto,
-    @Res({ passthrough: true }) response: Response,
-  ) {
+  async signIn(@Body() dto: SignInDto, @ResCookie() response: any) {
     const { accessToken, refreshToken } = await this.authService.signIn(dto);
     response.cookie(COOKIE_NAME, refreshToken, COOKIE_OPTIONS);
+    return { access_token: accessToken };
+  }
+
+  @UseGuards(RefreshJwtGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('refresh')
+  async refresh(@GetUser() user: User, @ResCookie() response: any) {
+    const { accessToken, newRefreshToken } =
+      await this.authService.refreshTokens(user);
+    response.cookie(COOKIE_NAME, newRefreshToken, COOKIE_OPTIONS);
     return { access_token: accessToken };
   }
 
@@ -64,18 +67,5 @@ export class AuthController {
   async logout(@GetUser('id') userId: number) {
     await this.authService.logout(userId);
     return;
-  }
-
-  @UseGuards(RefreshJwtGuard)
-  @HttpCode(HttpStatus.OK)
-  @Post('refresh')
-  async refresh(
-    @GetUser() user: User,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    const { accessToken, newRefreshToken } =
-      await this.authService.refreshTokens(user);
-    response.cookie(COOKIE_NAME, newRefreshToken, COOKIE_OPTIONS);
-    return { access_token: accessToken };
   }
 }
