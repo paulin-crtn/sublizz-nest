@@ -5,6 +5,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SignInDto, SignUpDto } from './dto';
+import validate from 'deep-email-validator';
 import * as argon from 'argon2';
 import * as randomToken from 'rand-token';
 
@@ -26,6 +27,21 @@ export class AuthService {
     accessToken: string;
     refreshToken: string;
   }> {
+    // Validates email addresses based on regex, common typos,
+    // disposable email blacklists, DNS records and SMTP server response.
+    const res = await validate({
+      email: dto.email,
+      sender: dto.email,
+      validateRegex: true,
+      validateMx: true,
+      validateTypo: true,
+      validateDisposable: true,
+      validateSMTP: false, // Timeout issue
+    });
+    if (!res.valid) {
+      console.log(res);
+      throw new ForbiddenException('Email is not valid.');
+    }
     // Generate the password hash
     const passwordHash = await argon.hash(dto.password);
     try {
