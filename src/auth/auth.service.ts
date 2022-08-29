@@ -109,7 +109,7 @@ export class AuthService {
   /**
    * Check the refresh token and issue new tokens
    *
-   * @param refreshToken
+   * @param user
    * @returns
    */
   async refreshTokens(

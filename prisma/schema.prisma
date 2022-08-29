@@ -13,9 +13,10 @@ datasource db {
 model User {
   leases Lease[]
   id Int @id @default(autoincrement())
-  firstName String
-  lastName String
-  email String @unique
+  firstName String @db.VarChar(20)
+  lastName String @db.VarChar(20)
+  email String @db.VarChar(30) @unique
+  isEmailVerified Boolean @default(false)
   passwordHash String
   refreshTokenHash String?
   imgUrl String?
@@ -32,7 +33,7 @@ model Lease {
 
   id Int @id @default(autoincrement())
   userId Int
-  city String
+  city String @db.VarChar(30)
   description String
   surface Int
   room Int
