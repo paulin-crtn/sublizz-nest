@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = env("DATABASE_URL")
 }
 
 model User {
@@ -29,7 +29,7 @@ model User {
 model Lease {
   leaseImages LeaseImage[]
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   id Int @id @default(autoincrement())
   userId Int
@@ -39,9 +39,8 @@ model Lease {
   room Int
   startDate DateTime
   endDate DateTime
-  isDateFlexible Boolean
-  pricePerMonth Int?
-  pricePeriod Int?
+  isDateFlexible Int
+  pricePerMonth Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -49,7 +48,7 @@ model Lease {
 }
 
 model LeaseImage {
-  lease Lease @relation(fields: [leaseId], references: [id])
+  lease Lease @relation(fields: [leaseId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   
   id Int @id @default(autoincrement())
   leaseId Int

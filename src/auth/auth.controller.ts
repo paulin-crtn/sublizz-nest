@@ -10,9 +10,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
+import { GetUser } from 'src/user/decorator';
 import { AuthService } from './auth.service';
-import { GetUser } from './decorator';
-import { ResCookie } from './decorator/set-cookie.decorator';
+import { ResCookie } from './decorator';
 import { SignInDto, SignUpDto } from './dto';
 import { AccessJwtGuard, RefreshJwtGuard } from './guard';
 

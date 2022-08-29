@@ -23,8 +23,8 @@ const fakeLease = (userId: number): any => ({
   room: faker.datatype.number({ min: 1, max: 7 }),
   startDate: faker.date.soon(10),
   endDate: faker.date.future(),
-  isDateFlexible: faker.datatype.boolean(),
-  pricePeriod: faker.datatype.number({ min: 100, max: 1000 }),
+  isDateFlexible: faker.datatype.number({ min: 0, max: 1 }),
+  pricePerMonth: faker.datatype.number({ min: 200, max: 2000 }),
 });
 
 const fakeLeaseImage = (leaseId: number) => ({
