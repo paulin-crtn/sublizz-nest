@@ -1,12 +1,12 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { SignInDto, SignUpDto } from './dto';
+import { ConfigService } from '@nestjs/config';
+import { User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { SignInDto, SignUpDto } from './dto';
 import * as argon from 'argon2';
 import * as randomToken from 'rand-token';
-import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -166,7 +166,7 @@ export class AuthService {
    * @param userId
    */
   async logout(userId: number) {
-    return await this.prismaService.user.update({
+    await this.prismaService.user.update({
       where: {
         id: userId,
       },
@@ -174,5 +174,6 @@ export class AuthService {
         refreshTokenHash: null,
       },
     });
+    return true;
   }
 }
