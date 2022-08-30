@@ -7,13 +7,20 @@ export class LeaseService {
   constructor(private prismaService: PrismaService) {}
 
   async index() {
-    return await this.prismaService.lease.findMany();
+    return await this.prismaService.lease.findMany({
+      include: {
+        leaseImages: true,
+      },
+    });
   }
 
   async show(id: number) {
     return await this.prismaService.lease.findUnique({
       where: {
         id,
+      },
+      include: {
+        leaseImages: true,
       },
     });
   }
