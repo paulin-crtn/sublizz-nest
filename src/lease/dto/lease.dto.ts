@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsDate,
   IsNotEmpty,
   IsNumber,
@@ -56,4 +57,7 @@ export class LeaseDto {
   @Min(200)
   @Max(2000)
   pricePerMonth: number;
+
+  @IsArray()
+  leaseImages: string[];
 }

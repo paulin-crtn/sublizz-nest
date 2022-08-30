@@ -36,7 +36,7 @@ export class LeaseService {
     });
   }
 
-  async getUserLease(userId: number, id: number) {
+  async getUserLease(id: number, userId: number) {
     return await this.prismaService.lease.findFirst({
       where: {
         id,
@@ -50,25 +50,25 @@ export class LeaseService {
 
   async store(userId: number, dto: LeaseDto) {
     // TO DO : check start date is before end date
-    // TO DO : lease image : insert + dto
+    // TO DO : check leaseImages is array of string (url)
+    const { leaseImages, ...lease } = dto;
     return await this.prismaService.lease.create({
       data: {
         userId,
-        ...dto,
-        // leaseImages: {
-        //   create: [
-        //     {
-        //       url: 'http://test.com/image',
-        //     },
-        //   ],
-        // },
+        ...lease,
+        leaseImages: {
+          createMany: {
+            data: leaseImages.map((url: string) => ({ url })),
+          },
+        },
+      },
+      include: {
+        leaseImages: true,
       },
     });
   }
 
-  async update(userId: number, id: number, dto: LeaseDto) {
-    // TO DO : check start date is before end date
-    // TO DO : lease image : insert + dto
+  async update(id: number, userId: number, dto: LeaseDto) {
     const lease = await this.prismaService.lease.findUnique({
       where: {
         id,
@@ -77,17 +77,29 @@ export class LeaseService {
     if (!lease || lease.userId !== userId) {
       throw new ForbiddenException('Access to resource denied.');
     }
+    // TO DO : check start date is before end date
+    // TO DO : check leaseImages is array of string (url)
+    const { leaseImages, ...leaseDto } = dto;
     return await this.prismaService.lease.update({
       where: {
         id,
       },
       data: {
-        ...dto,
+        ...leaseDto,
+        leaseImages: {
+          deleteMany: {},
+          createMany: {
+            data: leaseImages.map((url: string) => ({ url })),
+          },
+        },
+      },
+      include: {
+        leaseImages: true,
       },
     });
   }
 
-  async delete(userId: number, id: number) {
+  async delete(id: number, userId: number) {
     const lease = await this.prismaService.lease.findUnique({
       where: {
         id,

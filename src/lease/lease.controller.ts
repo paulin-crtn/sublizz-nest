@@ -45,7 +45,7 @@ export class LeaseController {
     @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return this.leaseService.getUserLease(userId, id);
+    return this.leaseService.getUserLease(id, userId);
   }
 
   @UseGuards(AccessJwtGuard)
@@ -63,7 +63,7 @@ export class LeaseController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: LeaseDto,
   ) {
-    return this.leaseService.update(userId, id, dto);
+    return this.leaseService.update(id, userId, dto);
   }
 
   @UseGuards(AccessJwtGuard)
@@ -71,6 +71,6 @@ export class LeaseController {
   @Delete(':id')
   delete(@GetUser('id') userId: number, @Param('id', ParseIntPipe) id: number) {
     console.log(id);
-    return this.leaseService.delete(userId, id);
+    return this.leaseService.delete(id, userId);
   }
 }
