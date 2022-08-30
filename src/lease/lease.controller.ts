@@ -21,14 +21,31 @@ export class LeaseController {
   constructor(private leaseService: LeaseService) {}
   @HttpCode(HttpStatus.OK)
   @Get()
-  index() {
-    return this.leaseService.index();
+  getLeases() {
+    return this.leaseService.getLeases();
+  }
+
+  @UseGuards(AccessJwtGuard)
+  @HttpCode(HttpStatus.OK)
+  @Get('user')
+  getUserLeases(@GetUser('id') userId: number) {
+    return this.leaseService.getUserLeases(userId);
   }
 
   @HttpCode(HttpStatus.OK)
   @Get(':id')
-  show(@Param('id', ParseIntPipe) id: number) {
-    return this.leaseService.show(id);
+  getLease(@Param('id', ParseIntPipe) id: number) {
+    return this.leaseService.getLease(id);
+  }
+
+  @UseGuards(AccessJwtGuard)
+  @HttpCode(HttpStatus.OK)
+  @Get('user/:id')
+  getUserLease(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.leaseService.getUserLease(userId, id);
   }
 
   @UseGuards(AccessJwtGuard)
@@ -42,18 +59,18 @@ export class LeaseController {
   @HttpCode(HttpStatus.OK)
   @Put(':id')
   update(
-    @Param('id', ParseIntPipe) id: number,
     @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() dto: LeaseDto,
   ) {
-    return this.leaseService.update(userId, dto);
+    return this.leaseService.update(userId, id, dto);
   }
 
   @UseGuards(AccessJwtGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  delete(@Param('id', ParseIntPipe) id: number) {
+  delete(@GetUser('id') userId: number, @Param('id', ParseIntPipe) id: number) {
     console.log(id);
-    return this.leaseService.delete(id);
+    return this.leaseService.delete(userId, id);
   }
 }

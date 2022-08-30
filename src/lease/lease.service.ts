@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LeaseDto } from './dto';
 
@@ -6,7 +6,7 @@ import { LeaseDto } from './dto';
 export class LeaseService {
   constructor(private prismaService: PrismaService) {}
 
-  async index() {
+  async getLeases() {
     return await this.prismaService.lease.findMany({
       include: {
         leaseImages: true,
@@ -14,10 +14,33 @@ export class LeaseService {
     });
   }
 
-  async show(id: number) {
+  async getUserLeases(userId: number) {
+    return await this.prismaService.lease.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        leaseImages: true,
+      },
+    });
+  }
+
+  async getLease(id: number) {
     return await this.prismaService.lease.findUnique({
       where: {
         id,
+      },
+      include: {
+        leaseImages: true,
+      },
+    });
+  }
+
+  async getUserLease(userId: number, id: number) {
+    return await this.prismaService.lease.findFirst({
+      where: {
+        id,
+        userId,
       },
       include: {
         leaseImages: true,
@@ -31,28 +54,48 @@ export class LeaseService {
     return await this.prismaService.lease.create({
       data: {
         userId,
-        city: dto.city,
-        description: dto.description,
-        surface: dto.surface,
-        room: dto.room,
-        startDate: dto.startDate,
-        endDate: dto.endDate,
-        isDateFlexible: dto.isDateFlexible,
-        pricePerMonth: dto.pricePerMonth,
+        ...dto,
+        // leaseImages: {
+        //   create: [
+        //     {
+        //       url: 'http://test.com/image',
+        //     },
+        //   ],
+        // },
       },
     });
-
-    // leaseImages: {
-    //   create: [{
-    //     leaseId: 1
-    //     url: ''
-    //   }],
-    // },
   }
 
-  async update(userId: number, dto: LeaseDto) {}
+  async update(userId: number, id: number, dto: LeaseDto) {
+    // TO DO : check start date is before end date
+    // TO DO : lease image : insert + dto
+    const lease = await this.prismaService.lease.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!lease || lease.userId !== userId) {
+      throw new ForbiddenException('Access to resource denied.');
+    }
+    return await this.prismaService.lease.update({
+      where: {
+        id,
+      },
+      data: {
+        ...dto,
+      },
+    });
+  }
 
-  async delete(id: number) {
+  async delete(userId: number, id: number) {
+    const lease = await this.prismaService.lease.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!lease || lease.userId !== userId) {
+      throw new ForbiddenException('Access to resource denied.');
+    }
     await this.prismaService.lease.delete({
       where: {
         id,
