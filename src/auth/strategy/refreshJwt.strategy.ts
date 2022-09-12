@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -36,7 +36,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
     });
     // If user does not exist throw exception
     if (!user) {
-      throw new ForbiddenException('User does not exist.');
+      throw new UnauthorizedException('User does not exist.');
     }
     // Compare password
     const isRefreshTokenCorrect = await argon.verify(
@@ -45,7 +45,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
     );
     // If password incorrect throw exception
     if (!isRefreshTokenCorrect) {
-      throw new ForbiddenException('Invalid refresh token.');
+      throw new UnauthorizedException('Invalid refresh token.');
     }
     // Return user
     delete user.passwordHash;

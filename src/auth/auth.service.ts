@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
@@ -39,8 +44,7 @@ export class AuthService {
       validateSMTP: false, // Timeout issue
     });
     if (!res.valid) {
-      console.log(res);
-      throw new ForbiddenException('Email is not valid.');
+      throw new BadRequestException('Email is not valid.');
     }
     // Generate the password hash
     const passwordHash = await argon.hash(dto.password);
@@ -63,7 +67,7 @@ export class AuthService {
       // Catch unique constraint violation error
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw new ForbiddenException('Email already taken.');
+          throw new ConflictException('Email already taken.');
         }
       }
       throw error;
@@ -88,7 +92,7 @@ export class AuthService {
     });
     // If user does not exist throw exception
     if (!user) {
-      throw new ForbiddenException('Email does not exist.');
+      throw new UnauthorizedException('Email does not exist.');
     }
     // Compare password
     const isPasswordCorrect = await argon.verify(
@@ -97,7 +101,7 @@ export class AuthService {
     );
     // If password incorrect throw exception
     if (!isPasswordCorrect) {
-      throw new ForbiddenException('Incorrect password.');
+      throw new UnauthorizedException('Incorrect password.');
     }
     // Generate tokens
     const accessToken = await this.issueAccessToken(user.id, user.email);
