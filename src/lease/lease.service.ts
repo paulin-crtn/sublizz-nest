@@ -55,6 +55,8 @@ export class LeaseService {
     return await this.prismaService.lease.create({
       data: {
         userId,
+        gpsLatitude: '1.3456', // TODO
+        gpsLongitude: '-98.6573', // TODO
         ...lease,
         leaseImages: {
           createMany: {
@@ -85,6 +87,8 @@ export class LeaseService {
         id,
       },
       data: {
+        gpsLatitude: '1.3456', // TODO
+        gpsLongitude: '-98.6573', // TODO
         ...leaseDto,
         leaseImages: {
           deleteMany: {},

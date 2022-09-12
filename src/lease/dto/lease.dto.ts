@@ -4,6 +4,7 @@ import {
   IsDate,
   IsNotEmpty,
   IsNumber,
+  IsNumberString,
   IsString,
   Length,
   Max,
@@ -11,6 +12,21 @@ import {
 } from 'class-validator';
 
 export class LeaseDto {
+  @IsNotEmpty()
+  @IsNumberString()
+  @Length(1, 7)
+  houseNumber: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @Length(3, 30)
+  street: string;
+
+  @IsNotEmpty()
+  @IsNumberString()
+  @Length(5, 5)
+  postCode: string;
+
   @IsNotEmpty()
   @IsString()
   @Length(3, 30)
