@@ -1,9 +1,18 @@
+/* -------------------------------------------------------------------------- */
+/*                                   IMPORTS                                  */
+/* -------------------------------------------------------------------------- */
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import * as argon from 'argon2';
 
+/* -------------------------------------------------------------------------- */
+/*                               INITIALIZATION                               */
+/* -------------------------------------------------------------------------- */
 const prisma = new PrismaClient();
 
+/* -------------------------------------------------------------------------- */
+/*                             FAKE DATA FUNCTIONS                            */
+/* -------------------------------------------------------------------------- */
 const fakeUser = async (): Promise<any> => {
   const passwordHash: string = await argon.hash('password');
   return {
@@ -11,13 +20,18 @@ const fakeUser = async (): Promise<any> => {
     lastName: 'Lastname', // faker.name.lastName()
     email: 'email@gmail.com', // faker.internet.email()
     passwordHash, // faker.internet.password()
-    imgUrl: faker.internet.avatar(),
+    profilePictureUrl: faker.internet.avatar(),
   };
 };
 
 const fakeLease = (userId: number): any => ({
   userId,
+  houseNumber: faker.address.buildingNumber(),
+  street: faker.address.street(),
+  postCode: faker.address.zipCode(),
   city: faker.address.cityName(),
+  gpsLatitude: faker.address.latitude(),
+  gpsLongitude: faker.address.longitude(),
   description: faker.lorem.lines(),
   surface: faker.datatype.number({ min: 10, max: 100 }),
   room: faker.datatype.number({ min: 1, max: 7 }),
@@ -32,11 +46,14 @@ const fakeLeaseImage = (leaseId: number) => ({
   url: faker.image.imageUrl(),
 });
 
+/* -------------------------------------------------------------------------- */
+/*                                MAIN FUNCTION                               */
+/* -------------------------------------------------------------------------- */
 const main = async () => {
   // Initialization
   console.log('Seeding database...');
   const leaseIds: number[] = [];
-  // Create fake user
+  // Create 1 fake user
   const user = await prisma.user.create({ data: await fakeUser() });
   // Create 3 fake lease
   for (let index = 0; index < 3; index++) {

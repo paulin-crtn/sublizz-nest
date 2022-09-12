@@ -12,14 +12,17 @@ datasource db {
 
 model User {
   leases Lease[]
+  emailVerification EmailVerification[]
+  passwordReset PasswordReset[]
+
   id Int @id @default(autoincrement())
   firstName String @db.VarChar(20)
   lastName String @db.VarChar(20)
   email String @db.VarChar(30) @unique
-  isEmailVerified Boolean @default(false)
+  emailVerifiedAt DateTime?
   passwordHash String
   refreshTokenHash String?
-  imgUrl String?
+  profilePictureUrl String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -33,7 +36,12 @@ model Lease {
 
   id Int @id @default(autoincrement())
   userId Int
+  houseNumber String @db.VarChar(7)
+  street String @db.VarChar(30)
+  postCode String @db.VarChar(5)
   city String @db.VarChar(30)
+  gpsLatitude String @db.VarChar(10)
+  gpsLongitude String @db.VarChar(10)
   description String
   surface Int
   room Int
@@ -57,4 +65,29 @@ model LeaseImage {
   updatedAt DateTime @updatedAt
 
   @@map(name: "lease_img")
+}
+
+model EmailVerification {
+  user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  
+  id Int @id @default(autoincrement())
+  userId Int
+  email String
+  tokenHash String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map(name: "email_verification")
+}
+
+model PasswordReset {
+  user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  
+  id Int @id @default(autoincrement())
+  userId Int
+  tokenHash String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map(name: "password_reset")
 }
