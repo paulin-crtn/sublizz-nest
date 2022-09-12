@@ -37,10 +37,8 @@ export class AuthController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post('signup')
-  async signUp(@Body() dto: SignUpDto, @ResCookie() response: any) {
-    const { accessToken, refreshToken } = await this.authService.signUp(dto);
-    response.cookie(COOKIE_NAME, refreshToken, COOKIE_OPTIONS);
-    return { access_token: accessToken };
+  async signUp(@Body() dto: SignUpDto) {
+    return await this.authService.signUp(dto);
   }
 
   @HttpCode(HttpStatus.OK)

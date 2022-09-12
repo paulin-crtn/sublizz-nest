@@ -4,6 +4,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { LeaseModule } from './lease/lease.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { LeaseModule } from './lease/lease.module';
     AuthModule,
     UserModule,
     LeaseModule,
+    MailModule,
   ],
   controllers: [],
   providers: [],

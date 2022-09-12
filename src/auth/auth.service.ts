@@ -9,6 +9,7 @@ import { User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { MailService } from 'src/mail/mail.service';
 import { SignInDto, SignUpDto } from './dto';
 import validate from 'deep-email-validator';
 import * as argon from 'argon2';
@@ -20,6 +21,7 @@ export class AuthService {
     private prismaService: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private mailService: MailService,
   ) {}
 
   /**
@@ -28,10 +30,7 @@ export class AuthService {
    * @param dto
    * @returns
    */
-  async signUp(dto: SignUpDto): Promise<{
-    accessToken: string;
-    refreshToken: string;
-  }> {
+  async signUp(dto: SignUpDto): Promise<boolean> {
     // Validates email addresses based on regex, common typos,
     // disposable email blacklists, DNS records and SMTP server response.
     const res = await validate({
@@ -58,11 +57,14 @@ export class AuthService {
           passwordHash,
         },
       });
-      // Generate tokens
-      const accessToken = await this.issueAccessToken(user.id, user.email);
-      const refreshToken = await this.issueRefreshToken(user.id);
-      // Return tokens
-      return { accessToken, refreshToken };
+      // Generate email verification token
+      const token = randomToken.generate(16);
+      const tokenHash = await argon.hash(token);
+      // Save token hash
+
+      // Send email
+      await this.mailService.sendUserConfirmation(user, tokenHash);
+      return true;
     } catch (error) {
       // Catch unique constraint violation error
       if (error instanceof PrismaClientKnownRequestError) {
