@@ -6,15 +6,18 @@ import { User } from '@prisma/client';
 export class MailService {
   constructor(private mailerService: MailerService) {}
 
+  /**
+   * Send a confirmation email to the user
+   *
+   * @param user
+   * @param token
+   */
   async sendUserConfirmation(user: User, token: string) {
-    console.log(user, user.firstName);
-
-    const url = `example.com/auth/confirm?token=${token}`;
+    const url = `${process.env.DOMAIN}/auth/confirm_email?user_email=${user.email}&token=${token}`;
     await this.mailerService.sendMail({
       to: user.email,
-      // from: '"Support Team" <support@example.com>', // override default from
-      subject: 'Welcome to Nice App! Confirm your Email',
-      template: './confirmation', // `.hbs` extension is appended automatically
+      subject: 'Veuillez confirmer votre email pour valider votre inscription',
+      template: './confirmation',
       context: {
         firstName: user.firstName,
         url,
