@@ -104,8 +104,10 @@ export class AuthService {
       throw new UnauthorizedException('Incorrect password.');
     }
     // Generate tokens
-    const accessToken = await this.issueAccessToken(user.id, user.email);
-    const refreshToken = await this.issueRefreshToken(user.id);
+    const [accessToken, refreshToken] = await Promise.all([
+      this.issueAccessToken(user.id, user.email),
+      this.issueRefreshToken(user.id),
+    ]);
     // Return tokens
     return { accessToken, refreshToken };
   }
@@ -120,8 +122,10 @@ export class AuthService {
     user: User,
   ): Promise<{ accessToken: string; newRefreshToken: string }> {
     // Generate new tokens
-    const accessToken = await this.issueAccessToken(user.id, user.email);
-    const newRefreshToken = await this.issueRefreshToken(user.id);
+    const [accessToken, newRefreshToken] = await Promise.all([
+      this.issueAccessToken(user.id, user.email),
+      this.issueRefreshToken(user.id),
+    ]);
     // Return new tokens
     return { accessToken, newRefreshToken };
   }
