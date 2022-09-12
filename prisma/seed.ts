@@ -28,7 +28,7 @@ const fakeLease = (userId: number): any => ({
   userId,
   houseNumber: faker.address.buildingNumber(),
   street: faker.address.street(),
-  postCode: faker.address.zipCode(),
+  postCode: faker.address.zipCode('#####'),
   city: faker.address.cityName(),
   gpsLatitude: faker.address.latitude(),
   gpsLongitude: faker.address.longitude(),
