@@ -30,7 +30,7 @@ export class AuthService {
    * @param dto
    * @returns
    */
-  async signUp(dto: SignUpDto): Promise<boolean> {
+  async signUp(dto: SignUpDto): Promise<void> {
     // Validates email addresses based on regex, common typos,
     // disposable email blacklists, DNS records and SMTP server response.
     const res = await validate({
@@ -52,19 +52,14 @@ export class AuthService {
       const user = await this.prismaService.user.create({
         data: {
           firstName: dto.firstName,
-          lastName: dto.lastName,
           email: dto.email,
           passwordHash,
         },
       });
-      // Generate email verification token
-      const token = randomToken.generate(16);
-      const tokenHash = await argon.hash(token);
-      // Save token hash
-
-      // Send email
-      await this.mailService.sendUserConfirmation(user, tokenHash);
-      return true;
+      // Send a verification email to user
+      const emailVerificationToken = randomToken.generate(16);
+      await this.storeEmailVerificationToken(user, emailVerificationToken);
+      await this.mailService.sendUserConfirmation(user, emailVerificationToken);
     } catch (error) {
       // Catch unique constraint violation error
       if (error instanceof PrismaClientKnownRequestError) {
@@ -145,13 +140,11 @@ export class AuthService {
       sub: userId,
       email,
     };
-    // Generate JWT access token
-    const jwtAccessToken = await this.jwtService.signAsync(payload, {
+    // JWT access token
+    return await this.jwtService.signAsync(payload, {
       expiresIn: '15m',
       secret: this.configService.get('ACCESS_JWT_SECRET'),
     });
-
-    return jwtAccessToken;
   }
 
   /**
@@ -177,13 +170,11 @@ export class AuthService {
       sub: userId,
       refreshToken,
     };
-    // Generate JWT refresh token
-    const jwtRefreshToken = await this.jwtService.signAsync(payload, {
+    // JWT refresh token
+    return await this.jwtService.signAsync(payload, {
       expiresIn: '1w',
       secret: this.configService.get('REFRESH_JWT_SECRET'),
     });
-    // Return the refresh token
-    return jwtRefreshToken;
   }
 
   /**
@@ -200,6 +191,21 @@ export class AuthService {
         refreshTokenHash: null,
       },
     });
-    return true;
+  }
+
+  /**
+   * Get verification email token
+   *
+   * @param user
+   */
+  async storeEmailVerificationToken(user: User, token: string): Promise<void> {
+    const emailVerificationTokenHash = await argon.hash(token);
+    await this.prismaService.emailVerification.create({
+      data: {
+        userId: user.id,
+        email: user.email,
+        tokenHash: emailVerificationTokenHash,
+      },
+    });
   }
 }
