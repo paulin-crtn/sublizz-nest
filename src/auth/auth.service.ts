@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { User } from '@prisma/client';
+import { EmailVerification, prisma, User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -57,9 +57,16 @@ export class AuthService {
         },
       });
       // Send a verification email to user
-      const emailVerificationToken = randomToken.generate(16);
-      await this.storeEmailVerificationToken(user, emailVerificationToken);
-      await this.mailService.sendUserConfirmation(user, emailVerificationToken);
+      const token = randomToken.generate(16);
+      const emailVerification = await this.storeEmailVerificationToken(
+        user,
+        token,
+      );
+      await this.mailService.sendUserConfirmation(
+        user,
+        token,
+        emailVerification.id,
+      );
     } catch (error) {
       // Catch unique constraint violation error
       if (error instanceof PrismaClientKnownRequestError) {
@@ -203,9 +210,12 @@ export class AuthService {
    * @param user
    * @param token
    */
-  async storeEmailVerificationToken(user: User, token: string): Promise<void> {
+  async storeEmailVerificationToken(
+    user: User,
+    token: string,
+  ): Promise<EmailVerification> {
     const emailVerificationTokenHash = await argon.hash(token);
-    await this.prismaService.emailVerification.create({
+    return await this.prismaService.emailVerification.create({
       data: {
         userId: user.id,
         email: user.email,
@@ -214,5 +224,46 @@ export class AuthService {
     });
   }
 
-  async confirmEmail() {}
+  /**
+   * Confirm user email
+   *
+   * @param emailVerificationId
+   * @param token
+   */
+  async confirmUserEmail(
+    emailVerificationId: number,
+    token: string,
+  ): Promise<{ userEmail: string }> {
+    // Find email verification
+    const emailVerification =
+      await this.prismaService.emailVerification.findUnique({
+        where: {
+          id: emailVerificationId,
+        },
+      });
+    // If email verification does not exist throw exception
+    if (!emailVerification) {
+      throw new UnauthorizedException('Email verification id does not exist.');
+    }
+    // Compare token
+    const isTokenCorrect = await argon.verify(
+      emailVerification.tokenHash,
+      token,
+    );
+    // If token incorrect throw exception
+    if (!isTokenCorrect) {
+      throw new UnauthorizedException('Incorrect token.');
+    }
+    // Update user
+    await this.prismaService.user.update({
+      where: {
+        id: emailVerification.userId,
+      },
+      data: {
+        email: emailVerification.email,
+        emailVerifiedAt: new Date(Date.now()),
+      },
+    });
+    return { userEmail: emailVerification.email };
+  }
 }

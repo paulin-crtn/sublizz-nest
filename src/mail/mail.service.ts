@@ -11,9 +11,14 @@ export class MailService {
    *
    * @param user
    * @param token
+   * @param emailVerificationId
    */
-  async sendUserConfirmation(user: User, token: string) {
-    const url = `${process.env.DOMAIN}/auth/confirm_email?user_email=${user.email}&token=${token}`;
+  async sendUserConfirmation(
+    user: User,
+    token: string,
+    emailVerificationId: number,
+  ) {
+    const url = `${process.env.DOMAIN}/auth/confirm-user-email?emailVerificationId=${emailVerificationId}&token=${token}`;
     await this.mailerService.sendMail({
       to: user.email,
       subject: 'Veuillez confirmer votre email pour valider votre inscription',

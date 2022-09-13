@@ -7,7 +7,9 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  ParseIntPipe,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
@@ -68,8 +70,11 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('confirm_email')
-  async confirmEmail() {
-    return await this.authService.confirmEmail();
+  @Get('confirm-user-email')
+  async confirmUserEmail(
+    @Query('emailVerificationId', ParseIntPipe) emailVerificationId: number,
+    @Query('token') token: string,
+  ) {
+    return await this.authService.confirmUserEmail(emailVerificationId, token);
   }
 }
