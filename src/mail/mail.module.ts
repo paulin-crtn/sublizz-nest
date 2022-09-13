@@ -10,12 +10,12 @@ import { join } from 'path';
   imports: [
     MailerModule.forRoot({
       transport: {
-        host: 'smtp.mailtrap.io',
-        port: 2525,
+        host: process.env.MAIL_HOST,
+        port: +process.env.MAIL_PORT,
         secure: false,
         auth: {
-          user: '247da8e8f58325',
-          pass: 'ec9f2da88139b3',
+          user: process.env.MAIL_USER,
+          pass: process.env.MAIL_PASSWORD,
         },
       },
       defaults: {
