@@ -4,6 +4,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -64,5 +65,11 @@ export class AuthController {
   @Post('logout')
   async logout(@GetUser('id') userId: number) {
     return await this.authService.logout(userId);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('confirm_email')
+  async confirmEmail() {
+    return await this.authService.confirmEmail();
   }
 }

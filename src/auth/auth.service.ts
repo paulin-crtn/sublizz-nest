@@ -91,6 +91,10 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Email does not exist.');
     }
+    // If user's email is not verified throw exception
+    if (!user.emailVerifiedAt) {
+      throw new UnauthorizedException('Email must be verified.');
+    }
     // Compare password
     const isPasswordCorrect = await argon.verify(
       user.passwordHash,
@@ -209,4 +213,6 @@ export class AuthService {
       },
     });
   }
+
+  async confirmEmail() {}
 }

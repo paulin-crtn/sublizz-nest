@@ -29,10 +29,6 @@ export class AccessJwtStrategy extends PassportStrategy(
     if (!user) {
       throw new UnauthorizedException('User does not exist.');
     }
-    // If user's email is not verified throw exception
-    if (!user.emailVerifiedAt) {
-      throw new UnauthorizedException('Email must be verified.');
-    }
     // Return user
     delete user.passwordHash;
     delete user.refreshTokenHash;
