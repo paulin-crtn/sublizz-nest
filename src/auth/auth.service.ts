@@ -182,7 +182,7 @@ export class AuthService {
    *
    * @param userId
    */
-  async logout(userId: number) {
+  async logout(userId: number): Promise<void> {
     await this.prismaService.user.update({
       where: {
         id: userId,
@@ -194,9 +194,10 @@ export class AuthService {
   }
 
   /**
-   * Get verification email token
+   * Store email verification token
    *
    * @param user
+   * @param token
    */
   async storeEmailVerificationToken(user: User, token: string): Promise<void> {
     const emailVerificationTokenHash = await argon.hash(token);
