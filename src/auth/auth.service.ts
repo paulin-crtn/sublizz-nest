@@ -44,7 +44,10 @@ export class AuthService {
    */
   async signUp(dto: SignUpDto): Promise<void> {
     // Validate email
-    this._validateEmail(dto.email);
+    const isEmailValid = this._isEmailValid(dto.email);
+    if (!isEmailValid) {
+      throw new BadRequestException('Email is not valid.');
+    }
     // Generate the password hash
     const passwordHash = await argon.hash(dto.password);
     try {
@@ -192,7 +195,10 @@ export class AuthService {
    */
   async issuePasswordResetToken(email: string): Promise<void> {
     // Validate email
-    this._validateEmail(email);
+    const isEmailValid = this._isEmailValid(email);
+    if (!isEmailValid) {
+      throw new BadRequestException('Email is not valid.');
+    }
     // Find the user by email
     const user = await this.userService.findUserByEmail(email);
     // Generate and store reset password token
@@ -348,7 +354,7 @@ export class AuthService {
    *
    * @param email
    */
-  private async _validateEmail(email: string) {
+  private async _isEmailValid(email: string): Promise<boolean> {
     const res = await validate({
       email,
       sender: email,
@@ -358,8 +364,6 @@ export class AuthService {
       validateDisposable: true,
       validateSMTP: false, // Timeout issue
     });
-    if (!res.valid) {
-      throw new BadRequestException('Email is not valid.');
-    }
+    return res.valid;
   }
 }
