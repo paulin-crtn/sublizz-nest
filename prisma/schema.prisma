@@ -81,10 +81,10 @@ model EmailVerification {
 }
 
 model PasswordReset {
-  user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user User @relation(fields: [userEmail], references: [email], onUpdate: Cascade, onDelete: Cascade)
   
   id Int @id @default(autoincrement())
-  userId Int
+  userEmail String
   tokenHash String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -17,6 +17,7 @@ import { PasswordResetDto, SignInDto, SignUpDto } from './dto';
 import validate from 'deep-email-validator';
 import * as argon from 'argon2';
 import * as randomToken from 'rand-token';
+import { UserService } from 'src/user/user.service';
 
 /* -------------------------------------------------------------------------- */
 /*                             AUTH SERVICE CLASS                             */
@@ -24,9 +25,10 @@ import * as randomToken from 'rand-token';
 @Injectable()
 export class AuthService {
   constructor(
+    private configService: ConfigService,
     private prismaService: PrismaService,
     private jwtService: JwtService,
-    private configService: ConfigService,
+    private userService: UserService,
     private mailService: MailService,
   ) {}
 
@@ -99,19 +101,7 @@ export class AuthService {
     refreshToken: string;
   }> {
     // Find the user by email
-    const user = await this.prismaService.user.findUnique({
-      where: {
-        email: dto.email,
-      },
-    });
-    // If user does not exist throw exception
-    if (!user) {
-      throw new UnauthorizedException('Email does not exist.');
-    }
-    // If user's email is not verified throw exception
-    if (!user.emailVerifiedAt) {
-      throw new UnauthorizedException('Email must be verified.');
-    }
+    const user = await this.userService.findUserByEmail(dto.email);
     // Compare password
     const isPasswordCorrect = await argon.verify(
       user.passwordHash,
@@ -228,22 +218,10 @@ export class AuthService {
       throw new BadRequestException('Email is not valid.');
     }
     // Find the user by email
-    const user = await this.prismaService.user.findUnique({
-      where: {
-        email,
-      },
-    });
-    // If user does not exist throw exception
-    if (!user) {
-      throw new UnauthorizedException('Email does not exist.');
-    }
-    // If user's email is not verified throw exception
-    if (!user.emailVerifiedAt) {
-      throw new UnauthorizedException('Email must be verified.');
-    }
+    const user = await this.userService.findUserByEmail(email);
     // Generate and store reset password token
     const token = randomToken.generate(16);
-    await this._storePasswordResetToken(user.id, token);
+    await this._storePasswordResetToken(user.email, token);
     // Send token to user's email
     await this.mailService.sendUserResetPasswordToken(user, token);
   }
@@ -336,18 +314,18 @@ export class AuthService {
   /**
    * Store password reset token
    *
-   * @param userId
+   * @param email
    * @param token
    * @returns
    */
   private async _storePasswordResetToken(
-    userId: number,
+    email: string,
     token: string,
   ): Promise<PasswordReset> {
     const passwordResetTokenHash = await argon.hash(token);
     return await this.prismaService.passwordReset.create({
       data: {
-        userId,
+        userEmail: email,
         tokenHash: passwordResetTokenHash,
       },
     });
