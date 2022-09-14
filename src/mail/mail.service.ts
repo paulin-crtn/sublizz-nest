@@ -1,10 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { User } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MailService {
-  constructor(private mailerService: MailerService) {}
+  private domain: string;
+
+  constructor(
+    private mailerService: MailerService,
+    private configService: ConfigService,
+  ) {
+    this.domain = this.configService.get('DOMAIN');
+  }
 
   /**
    * Send a confirmation email to the user
@@ -18,7 +26,7 @@ export class MailService {
     token: string,
     emailVerificationId: number,
   ) {
-    const url = `${process.env.DOMAIN}/auth/confirm-email?emailVerificationId=${emailVerificationId}&token=${token}`;
+    const url = `${this.domain}/auth/confirm-email?emailVerificationId=${emailVerificationId}&token=${token}`;
     await this.mailerService.sendMail({
       to: user.email,
       subject: 'Confirmez votre email pour valider votre inscription',
@@ -31,7 +39,7 @@ export class MailService {
   }
 
   async sendUserResetPasswordToken(user: User, token: string) {
-    const url = `${process.env.DOMAIN}/auth/reset-password?email=${user.email}&token=${token}`;
+    const url = `${this.domain}/auth/reset-password?email=${user.email}&token=${token}`;
     await this.mailerService.sendMail({
       to: user.email,
       subject: 'Demande de changement de mot de passe',
