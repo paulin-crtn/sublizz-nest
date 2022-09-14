@@ -208,7 +208,42 @@ export class AuthService {
    * @param dto
    */
   async resetUserPassword(dto: PasswordResetDto) {
-    console.log(dto);
+    // Find PasswordReset
+    const passwordReset = await this.prismaService.passwordReset.findFirst({
+      where: {
+        userEmail: dto.email,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    // If PasswordReset does not exist throw exception
+    if (!passwordReset) {
+      throw new UnauthorizedException('No password reset asked.');
+    }
+    // Compare token
+    const isTokenCorrect = await argon.verify(
+      passwordReset.tokenHash,
+      dto.token,
+    );
+    // If token incorrect throw exception
+    if (!isTokenCorrect) {
+      throw new UnauthorizedException('Incorrect token.');
+    }
+    // If token expired throw exception
+    const isExpired =
+      passwordReset.createdAt < new Date(Date.now() - 15 * 60 * 1000); // 15 min
+    if (isExpired) {
+      await this.prismaService.passwordReset.delete({
+        where: { id: passwordReset.id },
+      });
+      throw new UnauthorizedException('Token has expired.');
+    }
+    // Update user password
+    const passwordHash = await argon.hash(dto.password);
+    await this.userService.updateUserByEmail(dto.email, { passwordHash });
+    // Delete PasswordReset
+    await this.prismaService.passwordReset.delete({
+      where: { id: passwordReset.id },
+    });
   }
 
   /* -------------------------------------------------------------------------- */
