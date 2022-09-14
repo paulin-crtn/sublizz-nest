@@ -43,20 +43,8 @@ export class AuthService {
    * @returns
    */
   async signUp(dto: SignUpDto): Promise<void> {
-    // Validates email addresses based on regex, common typos,
-    // disposable email blacklists, DNS records and SMTP server response.
-    const res = await validate({
-      email: dto.email,
-      sender: dto.email,
-      validateRegex: true,
-      validateMx: true,
-      validateTypo: true,
-      validateDisposable: true,
-      validateSMTP: false, // Timeout issue
-    });
-    if (!res.valid) {
-      throw new BadRequestException('Email is not valid.');
-    }
+    // Validate email
+    this._validateEmail(dto.email);
     // Generate the password hash
     const passwordHash = await argon.hash(dto.password);
     try {
@@ -203,20 +191,8 @@ export class AuthService {
    * @param email
    */
   async issuePasswordResetToken(email: string): Promise<void> {
-    // Validates email addresses based on regex, common typos,
-    // disposable email blacklists, DNS records and SMTP server response.
-    const res = await validate({
-      email,
-      sender: email,
-      validateRegex: true,
-      validateMx: true,
-      validateTypo: true,
-      validateDisposable: true,
-      validateSMTP: false, // Timeout issue
-    });
-    if (!res.valid) {
-      throw new BadRequestException('Email is not valid.');
-    }
+    // Validate email
+    this._validateEmail(email);
     // Find the user by email
     const user = await this.userService.findUserByEmail(email);
     // Generate and store reset password token
@@ -329,5 +305,26 @@ export class AuthService {
         tokenHash: passwordResetTokenHash,
       },
     });
+  }
+
+  /**
+   * Validates email addresses based on regex, common typos,
+   * disposable email blacklists, DNS records and SMTP server response.
+   *
+   * @param email
+   */
+  private async _validateEmail(email: string) {
+    const res = await validate({
+      email,
+      sender: email,
+      validateRegex: true,
+      validateMx: true,
+      validateTypo: true,
+      validateDisposable: true,
+      validateSMTP: false, // Timeout issue
+    });
+    if (!res.valid) {
+      throw new BadRequestException('Email is not valid.');
+    }
   }
 }
