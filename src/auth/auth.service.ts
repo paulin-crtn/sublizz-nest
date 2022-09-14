@@ -1,3 +1,6 @@
+/* -------------------------------------------------------------------------- */
+/*                                   IMPORTS                                  */
+/* -------------------------------------------------------------------------- */
 import {
   BadRequestException,
   ConflictException,
@@ -5,16 +8,19 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EmailVerification, prisma, User } from '@prisma/client';
+import { EmailVerification, PasswordReset, prisma, User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MailService } from 'src/mail/mail.service';
-import { SignInDto, SignUpDto } from './dto';
+import { PasswordResetDto, SignInDto, SignUpDto } from './dto';
 import validate from 'deep-email-validator';
 import * as argon from 'argon2';
 import * as randomToken from 'rand-token';
 
+/* -------------------------------------------------------------------------- */
+/*                             AUTH SERVICE CLASS                             */
+/* -------------------------------------------------------------------------- */
 @Injectable()
 export class AuthService {
   constructor(
@@ -23,6 +29,10 @@ export class AuthService {
     private configService: ConfigService,
     private mailService: MailService,
   ) {}
+
+  /* -------------------------------------------------------------------------- */
+  /*                              PUBLIC FUNCTIONS                              */
+  /* -------------------------------------------------------------------------- */
 
   /**
    * Sign up new user
@@ -58,11 +68,11 @@ export class AuthService {
       });
       // Send a verification email to user
       const token = randomToken.generate(16);
-      const emailVerification = await this.storeEmailVerificationToken(
+      const emailVerification = await this._storeEmailVerificationToken(
         user,
         token,
       );
-      await this.mailService.sendUserConfirmation(
+      await this.mailService.sendUserEmailVerificationToken(
         user,
         token,
         emailVerification.id,
@@ -113,8 +123,8 @@ export class AuthService {
     }
     // Generate tokens
     const [accessToken, refreshToken] = await Promise.all([
-      this.issueAccessToken(user.id, user.email),
-      this.issueRefreshToken(user.id),
+      this._issueAccessToken(user.id, user.email),
+      this._issueRefreshToken(user.id),
     ]);
     // Return tokens
     return { accessToken, refreshToken };
@@ -131,61 +141,11 @@ export class AuthService {
   ): Promise<{ accessToken: string; newRefreshToken: string }> {
     // Generate new tokens
     const [accessToken, newRefreshToken] = await Promise.all([
-      this.issueAccessToken(user.id, user.email),
-      this.issueRefreshToken(user.id),
+      this._issueAccessToken(user.id, user.email),
+      this._issueRefreshToken(user.id),
     ]);
     // Return new tokens
     return { accessToken, newRefreshToken };
-  }
-
-  /**
-   * Issue an access token
-   *
-   * @param userId
-   * @param email
-   * @returns
-   */
-  async issueAccessToken(userId: number, email: string): Promise<string> {
-    // Payload
-    const payload = {
-      sub: userId,
-      email,
-    };
-    // JWT access token
-    return await this.jwtService.signAsync(payload, {
-      expiresIn: '15m',
-      secret: this.configService.get('ACCESS_JWT_SECRET'),
-    });
-  }
-
-  /**
-   * Issue a refresh token
-   *
-   * @param userId
-   */
-  async issueRefreshToken(userId: number): Promise<string> {
-    // Generate the refresh token
-    const refreshToken = randomToken.generate(32);
-    const refreshTokenHash = await argon.hash(refreshToken);
-    // Save the refresh token hash
-    await this.prismaService.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        refreshTokenHash,
-      },
-    });
-    // Payload
-    const payload = {
-      sub: userId,
-      refreshToken,
-    };
-    // JWT refresh token
-    return await this.jwtService.signAsync(payload, {
-      expiresIn: '1w',
-      secret: this.configService.get('REFRESH_JWT_SECRET'),
-    });
   }
 
   /**
@@ -200,26 +160,6 @@ export class AuthService {
       },
       data: {
         refreshTokenHash: null,
-      },
-    });
-  }
-
-  /**
-   * Store email verification token
-   *
-   * @param user
-   * @param token
-   */
-  async storeEmailVerificationToken(
-    user: User,
-    token: string,
-  ): Promise<EmailVerification> {
-    const emailVerificationTokenHash = await argon.hash(token);
-    return await this.prismaService.emailVerification.create({
-      data: {
-        userId: user.id,
-        email: user.email,
-        tokenHash: emailVerificationTokenHash,
       },
     });
   }
@@ -265,5 +205,151 @@ export class AuthService {
       },
     });
     return { userEmail: emailVerification.email };
+  }
+
+  /**
+   * Issue password reset token
+   *
+   * @param email
+   */
+  async issuePasswordResetToken(email: string): Promise<void> {
+    // Validates email addresses based on regex, common typos,
+    // disposable email blacklists, DNS records and SMTP server response.
+    const res = await validate({
+      email,
+      sender: email,
+      validateRegex: true,
+      validateMx: true,
+      validateTypo: true,
+      validateDisposable: true,
+      validateSMTP: false, // Timeout issue
+    });
+    if (!res.valid) {
+      throw new BadRequestException('Email is not valid.');
+    }
+    // Find the user by email
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email,
+      },
+    });
+    // If user does not exist throw exception
+    if (!user) {
+      throw new UnauthorizedException('Email does not exist.');
+    }
+    // If user's email is not verified throw exception
+    if (!user.emailVerifiedAt) {
+      throw new UnauthorizedException('Email must be verified.');
+    }
+    // Generate and store reset password token
+    const token = randomToken.generate(16);
+    await this._storePasswordResetToken(user.id, token);
+    // Send token to user's email
+    await this.mailService.sendUserResetPasswordToken(user, token);
+  }
+
+  /**
+   * Reset user password
+   *
+   * @param dto
+   */
+  async resetUserPassword(dto: PasswordResetDto) {
+    console.log(dto);
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                              PRIVATE FUNCTIONS                             */
+  /* -------------------------------------------------------------------------- */
+  /**
+   * Issue an access token
+   *
+   * @param userId
+   * @param email
+   * @returns
+   */
+  private async _issueAccessToken(
+    userId: number,
+    email: string,
+  ): Promise<string> {
+    // Payload
+    const payload = {
+      sub: userId,
+      email,
+    };
+    // JWT access token
+    return await this.jwtService.signAsync(payload, {
+      expiresIn: '15m',
+      secret: this.configService.get('ACCESS_JWT_SECRET'),
+    });
+  }
+
+  /**
+   * Issue a refresh token
+   *
+   * @param userId
+   */
+  private async _issueRefreshToken(userId: number): Promise<string> {
+    // Generate the refresh token
+    const refreshToken = randomToken.generate(32);
+    const refreshTokenHash = await argon.hash(refreshToken);
+    // Save the refresh token hash
+    await this.prismaService.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        refreshTokenHash,
+      },
+    });
+    // Payload
+    const payload = {
+      sub: userId,
+      refreshToken,
+    };
+    // JWT refresh token
+    return await this.jwtService.signAsync(payload, {
+      expiresIn: '1w',
+      secret: this.configService.get('REFRESH_JWT_SECRET'),
+    });
+  }
+
+  /**
+   * Store email verification token
+   *
+   * @param user
+   * @param token
+   */
+  private async _storeEmailVerificationToken(
+    user: User,
+    token: string,
+  ): Promise<EmailVerification> {
+    const emailVerificationTokenHash = await argon.hash(token);
+    return await this.prismaService.emailVerification.create({
+      data: {
+        userId: user.id,
+        email: user.email,
+        tokenHash: emailVerificationTokenHash,
+      },
+    });
+  }
+
+  /**
+   * Store password reset token
+   *
+   * @param userId
+   * @param token
+   * @returns
+   */
+  private async _storePasswordResetToken(
+    userId: number,
+    token: string,
+  ): Promise<PasswordReset> {
+    const passwordResetTokenHash = await argon.hash(token);
+    return await this.prismaService.passwordReset.create({
+      data: {
+        userId,
+        tokenHash: passwordResetTokenHash,
+      },
+    });
   }
 }

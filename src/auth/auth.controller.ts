@@ -16,7 +16,7 @@ import { User } from '@prisma/client';
 import { GetUser } from 'src/user/decorator';
 import { AuthService } from './auth.service';
 import { ResCookie } from './decorator';
-import { SignInDto, SignUpDto } from './dto';
+import { PasswordResetDto, SignInDto, SignUpDto } from './dto';
 import { AccessJwtGuard, RefreshJwtGuard } from './guard';
 
 /* -------------------------------------------------------------------------- */
@@ -70,11 +70,23 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('confirm-user-email')
+  @Get('confirm-email')
   async confirmUserEmail(
     @Query('emailVerificationId', ParseIntPipe) emailVerificationId: number,
     @Query('token') token: string,
   ) {
     return await this.authService.confirmUserEmail(emailVerificationId, token);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('reset-password')
+  async issuePasswordResetToken(@Query('email') email: string) {
+    return await this.authService.issuePasswordResetToken(email);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('reset-password')
+  async resetUserPassword(@Body() dto: PasswordResetDto) {
+    return await this.authService.resetUserPassword(dto);
   }
 }
