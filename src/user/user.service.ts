@@ -24,4 +24,15 @@ export class UserService {
     // Return user
     return user;
   }
+
+  async updateUserByEmail(email: string, data: Partial<User>) {
+    return await this.prismaService.user.update({
+      where: {
+        email,
+      },
+      data: {
+        ...data,
+      },
+    });
+  }
 }
