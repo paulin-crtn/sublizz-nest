@@ -8,16 +8,17 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EmailVerification, PasswordReset, prisma, User } from '@prisma/client';
+import { EmailVerification, PasswordReset, User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MailService } from 'src/mail/mail.service';
+import { UserService } from 'src/user/user.service';
 import { PasswordResetDto, SignInDto, SignUpDto } from './dto';
+import { isEmail } from 'class-validator';
 import validate from 'deep-email-validator';
 import * as argon from 'argon2';
 import * as randomToken from 'rand-token';
-import { UserService } from 'src/user/user.service';
 
 /* -------------------------------------------------------------------------- */
 /*                             AUTH SERVICE CLASS                             */
@@ -43,9 +44,8 @@ export class AuthService {
    * @returns
    */
   async signUp(dto: SignUpDto): Promise<void> {
-    // Validate email
-    const isEmailValid = this._isEmailValid(dto.email);
-    if (!isEmailValid) {
+    // Deep email validation
+    if (!this._isEmailValid(dto.email)) {
       throw new BadRequestException('Email is not valid.');
     }
     // Generate the password hash
@@ -195,8 +195,7 @@ export class AuthService {
    */
   async issuePasswordResetToken(email: string): Promise<void> {
     // Validate email
-    const isEmailValid = this._isEmailValid(email);
-    if (!isEmailValid) {
+    if (!isEmail(email)) {
       throw new BadRequestException('Email is not valid.');
     }
     // Find the user by email
@@ -255,6 +254,25 @@ export class AuthService {
   /* -------------------------------------------------------------------------- */
   /*                              PRIVATE FUNCTIONS                             */
   /* -------------------------------------------------------------------------- */
+  /**
+   * Validates email address based on regex, common typos,
+   * disposable email blacklists, DNS records and SMTP server response.
+   *
+   * @param email
+   */
+  private async _isEmailValid(email: string): Promise<boolean> {
+    const res = await validate({
+      email,
+      sender: email,
+      validateRegex: true,
+      validateMx: true,
+      validateTypo: true,
+      validateDisposable: true,
+      validateSMTP: false, // Timeout issue
+    });
+    return res.valid;
+  }
+
   /**
    * Issue an access token
    *
@@ -346,24 +364,5 @@ export class AuthService {
         tokenHash: passwordResetTokenHash,
       },
     });
-  }
-
-  /**
-   * Validates email addresses based on regex, common typos,
-   * disposable email blacklists, DNS records and SMTP server response.
-   *
-   * @param email
-   */
-  private async _isEmailValid(email: string): Promise<boolean> {
-    const res = await validate({
-      email,
-      sender: email,
-      validateRegex: true,
-      validateMx: true,
-      validateTypo: true,
-      validateDisposable: true,
-      validateSMTP: false, // Timeout issue
-    });
-    return res.valid;
   }
 }
