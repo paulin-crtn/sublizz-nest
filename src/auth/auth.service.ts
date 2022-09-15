@@ -5,6 +5,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -167,7 +168,7 @@ export class AuthService {
       });
     // If email verification does not exist throw exception
     if (!emailVerification) {
-      throw new UnauthorizedException('Email verification id does not exist.');
+      throw new NotFoundException('Email verification id does not exist.');
     }
     // Compare token
     const isTokenCorrect = await argon.verify(

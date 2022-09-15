@@ -68,7 +68,7 @@ export class UserService {
     // Data
     const { email, password, ...data } = dto;
 
-    if (email && email !== user.email) {
+    if (email !== user.email) {
       this.emailVerificationService.verifyUserEmail(user, email);
     }
 
