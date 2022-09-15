@@ -32,6 +32,12 @@ export class LeaseService {
       },
       include: {
         leaseImages: true,
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
       },
     });
   }
