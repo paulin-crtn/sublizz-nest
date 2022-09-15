@@ -70,7 +70,6 @@ export class LeaseController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   delete(@GetUser('id') userId: number, @Param('id', ParseIntPipe) id: number) {
-    console.log(id);
     return this.leaseService.delete(id, userId);
   }
 }
