@@ -1,11 +1,20 @@
+/* -------------------------------------------------------------------------- */
+/*                                   IMPORTS                                  */
+/* -------------------------------------------------------------------------- */
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LeaseDto } from './dto';
 
+/* -------------------------------------------------------------------------- */
+/*                             LEASE SERVICE CLASS                            */
+/* -------------------------------------------------------------------------- */
 @Injectable()
 export class LeaseService {
   constructor(private prismaService: PrismaService) {}
 
+  /* -------------------------------------------------------------------------- */
+  /*                              PUBLIC FUNCTIONS                              */
+  /* -------------------------------------------------------------------------- */
   async getLeases() {
     return await this.prismaService.lease.findMany({
       include: {

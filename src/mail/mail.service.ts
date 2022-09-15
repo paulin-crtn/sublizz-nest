@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { User } from '@prisma/client';
+import { EmailVerification, User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -24,11 +24,11 @@ export class MailService {
   async sendUserEmailVerificationToken(
     user: User,
     token: string,
-    emailVerificationId: number,
+    emailVerification: EmailVerification,
   ) {
-    const url = `${this.domain}/auth/confirm-email?emailVerificationId=${emailVerificationId}&token=${token}`;
+    const url = `${this.domain}/auth/confirm-email?emailVerificationId=${emailVerification.id}&token=${token}`;
     await this.mailerService.sendMail({
-      to: user.email,
+      to: emailVerification.email,
       subject: 'Confirmez votre email pour valider votre inscription',
       template: './email-verification-token',
       context: {
@@ -38,6 +38,12 @@ export class MailService {
     });
   }
 
+  /**
+   * Send a reset password token to the user
+   *
+   * @param user
+   * @param token
+   */
   async sendUserResetPasswordToken(user: User, token: string) {
     const url = `${this.domain}/auth/reset-password?email=${user.email}&token=${token}`;
     await this.mailerService.sendMail({

@@ -8,12 +8,13 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EmailVerification, PasswordReset, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MailService } from 'src/mail/mail.service';
 import { UserService } from 'src/user/user.service';
+import { EmailVerificationService } from 'src/email-verification/email-verification.service';
 import { PasswordResetDto, SignInDto, SignUpDto } from './dto';
 import { isEmail } from 'class-validator';
 import validate from 'deep-email-validator';
@@ -30,6 +31,7 @@ export class AuthService {
     private prismaService: PrismaService,
     private jwtService: JwtService,
     private userService: UserService,
+    private emailVerificationService: EmailVerificationService,
     private mailService: MailService,
   ) {}
 
@@ -44,8 +46,18 @@ export class AuthService {
    * @returns
    */
   async signUp(dto: SignUpDto): Promise<void> {
-    // Deep email validation
-    if (!this._isEmailValid(dto.email)) {
+    // Validates email address based on regex, common typos,
+    // disposable email blacklists, DNS records and SMTP server response.
+    const res = await validate({
+      email: dto.email,
+      sender: dto.email,
+      validateRegex: true,
+      validateMx: true,
+      validateTypo: true,
+      validateDisposable: true,
+      validateSMTP: false, // Timeout issue
+    });
+    if (!res.valid) {
       throw new BadRequestException('Email is not valid.');
     }
     // Generate the password hash
@@ -59,17 +71,8 @@ export class AuthService {
           passwordHash,
         },
       });
-      // Send a verification email to user
-      const token = randomToken.generate(16);
-      const emailVerification = await this._storeEmailVerificationToken(
-        user,
-        token,
-      );
-      await this.mailService.sendUserEmailVerificationToken(
-        user,
-        token,
-        emailVerification.id,
-      );
+      // Verify the provided email belongs to the user
+      this.emailVerificationService.verifyUserEmail(user, user.email);
     } catch (error) {
       // Catch unique constraint violation error
       if (error instanceof PrismaClientKnownRequestError) {
@@ -202,7 +205,13 @@ export class AuthService {
     const user = await this.userService.getUserByEmail(email);
     // Generate and store reset password token
     const token = randomToken.generate(16);
-    await this._storePasswordResetToken(user.email, token);
+    const tokenHash = await argon.hash(token);
+    await this.prismaService.passwordReset.create({
+      data: {
+        userEmail: email,
+        tokenHash,
+      },
+    });
     // Send token to user's email
     await this.mailService.sendUserResetPasswordToken(user, token);
   }
@@ -262,25 +271,6 @@ export class AuthService {
   /*                              PRIVATE FUNCTIONS                             */
   /* -------------------------------------------------------------------------- */
   /**
-   * Validates email address based on regex, common typos,
-   * disposable email blacklists, DNS records and SMTP server response.
-   *
-   * @param email
-   */
-  private async _isEmailValid(email: string): Promise<boolean> {
-    const res = await validate({
-      email,
-      sender: email,
-      validateRegex: true,
-      validateMx: true,
-      validateTypo: true,
-      validateDisposable: true,
-      validateSMTP: false, // Timeout issue
-    });
-    return res.valid;
-  }
-
-  /**
    * Issue an access token
    *
    * @param userId
@@ -330,46 +320,6 @@ export class AuthService {
     return await this.jwtService.signAsync(payload, {
       expiresIn: '1w',
       secret: this.configService.get('REFRESH_JWT_SECRET'),
-    });
-  }
-
-  /**
-   * Store email verification token
-   *
-   * @param user
-   * @param token
-   */
-  private async _storeEmailVerificationToken(
-    user: User,
-    token: string,
-  ): Promise<EmailVerification> {
-    const emailVerificationTokenHash = await argon.hash(token);
-    return await this.prismaService.emailVerification.create({
-      data: {
-        userId: user.id,
-        email: user.email,
-        tokenHash: emailVerificationTokenHash,
-      },
-    });
-  }
-
-  /**
-   * Store password reset token
-   *
-   * @param email
-   * @param token
-   * @returns
-   */
-  private async _storePasswordResetToken(
-    email: string,
-    token: string,
-  ): Promise<PasswordReset> {
-    const passwordResetTokenHash = await argon.hash(token);
-    return await this.prismaService.passwordReset.create({
-      data: {
-        userEmail: email,
-        tokenHash: passwordResetTokenHash,
-      },
     });
   }
 }

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { EmailVerificationModule } from 'src/email-verification/email-verification.module';
 import { MailModule } from 'src/mail/mail.module';
 import { UserModule } from 'src/user/user.module';
 import { AuthController } from './auth.controller';
@@ -10,7 +11,12 @@ import { AccessJwtStrategy, RefreshJwtStrategy } from './strategy';
 // Source : https://www.youtube.com/watch?v=uAKzFhE3rxU
 
 @Module({
-  imports: [JwtModule.register({}), UserModule, MailModule],
+  imports: [
+    JwtModule.register({}),
+    UserModule,
+    EmailVerificationModule,
+    MailModule,
+  ],
   controllers: [AuthController],
   providers: [AuthService, AccessJwtStrategy, RefreshJwtStrategy],
 })

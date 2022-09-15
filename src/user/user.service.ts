@@ -1,3 +1,6 @@
+/* -------------------------------------------------------------------------- */
+/*                                   IMPORTS                                  */
+/* -------------------------------------------------------------------------- */
 import {
   ForbiddenException,
   Injectable,
@@ -6,10 +9,22 @@ import {
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateUserDto } from './dto';
+import * as argon from 'argon2';
+import { EmailVerificationService } from 'src/email-verification/email-verification.service';
 
+/* -------------------------------------------------------------------------- */
+/*                             USER SERVICE CLASS                             */
+/* -------------------------------------------------------------------------- */
 @Injectable()
 export class UserService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private emailVerificationService: EmailVerificationService,
+  ) {}
+
+  /* -------------------------------------------------------------------------- */
+  /*                              PUBLIC FUNCTIONS                              */
+  /* -------------------------------------------------------------------------- */
   /**
    * Get user by its email
    *
@@ -40,6 +55,7 @@ export class UserService {
    * @returns
    */
   async update(id: number, userId: number, dto: UpdateUserDto): Promise<User> {
+    // Find user by id
     const user = await this.prismaService.user.findUnique({
       where: {
         id,
@@ -48,12 +64,26 @@ export class UserService {
     if (!user || user.id !== userId) {
       throw new ForbiddenException('Access to resource denied.');
     }
+
+    // Data
+    const { email, password, ...data } = dto;
+
+    if (email && email !== user.email) {
+      this.emailVerificationService.verifyUserEmail(user, email);
+    }
+
+    const passwordHash = password
+      ? await argon.hash(password)
+      : user.passwordHash;
+
+    // Update user
     return await this.prismaService.user.update({
       where: {
         id,
       },
       data: {
-        ...dto,
+        ...data,
+        passwordHash,
       },
     });
   }
