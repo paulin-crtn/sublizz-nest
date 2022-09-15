@@ -21,55 +21,58 @@ export class LeaseController {
   constructor(private leaseService: LeaseService) {}
   @HttpCode(HttpStatus.OK)
   @Get()
-  getLeases() {
-    return this.leaseService.getLeases();
+  async getLeases() {
+    return await this.leaseService.getLeases();
   }
 
   @UseGuards(AccessJwtGuard)
   @HttpCode(HttpStatus.OK)
   @Get('user')
-  getUserLeases(@GetUser('id') userId: number) {
-    return this.leaseService.getUserLeases(userId);
+  async getUserLeases(@GetUser('id') userId: number) {
+    return await this.leaseService.getUserLeases(userId);
   }
 
   @HttpCode(HttpStatus.OK)
   @Get(':id')
-  getLease(@Param('id', ParseIntPipe) id: number) {
-    return this.leaseService.getLease(id);
+  async getLease(@Param('id', ParseIntPipe) id: number) {
+    return await this.leaseService.getLease(id);
   }
 
   @UseGuards(AccessJwtGuard)
   @HttpCode(HttpStatus.OK)
   @Get('user/:id')
-  getUserLease(
+  async getUserLease(
     @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return this.leaseService.getUserLease(id, userId);
+    return await this.leaseService.getUserLease(id, userId);
   }
 
   @UseGuards(AccessJwtGuard)
   @HttpCode(HttpStatus.CREATED)
   @Post()
-  store(@GetUser('id') userId: number, @Body() dto: LeaseDto) {
-    return this.leaseService.store(userId, dto);
+  async store(@GetUser('id') userId: number, @Body() dto: LeaseDto) {
+    return await this.leaseService.store(userId, dto);
   }
 
   @UseGuards(AccessJwtGuard)
   @HttpCode(HttpStatus.OK)
   @Put(':id')
-  update(
+  async update(
     @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: LeaseDto,
   ) {
-    return this.leaseService.update(id, userId, dto);
+    return await this.leaseService.update(id, userId, dto);
   }
 
   @UseGuards(AccessJwtGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  delete(@GetUser('id') userId: number, @Param('id', ParseIntPipe) id: number) {
-    return this.leaseService.delete(id, userId);
+  async delete(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return await this.leaseService.delete(id, userId);
   }
 }
