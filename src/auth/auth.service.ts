@@ -92,7 +92,7 @@ export class AuthService {
     refreshToken: string;
   }> {
     // Find the user by email
-    const user = await this.userService.findUserByEmail(dto.email);
+    const user = await this.userService.getUserByEmail(dto.email);
     // Compare password
     const isPasswordCorrect = await argon.verify(
       user.passwordHash,
@@ -199,7 +199,7 @@ export class AuthService {
       throw new BadRequestException('Email is not valid.');
     }
     // Find the user by email
-    const user = await this.userService.findUserByEmail(email);
+    const user = await this.userService.getUserByEmail(email);
     // Generate and store reset password token
     const token = randomToken.generate(16);
     await this._storePasswordResetToken(user.email, token);
@@ -244,7 +244,14 @@ export class AuthService {
     }
     // Update user password
     const passwordHash = await argon.hash(dto.password);
-    await this.userService.updateUserByEmail(dto.email, { passwordHash });
+    await this.prismaService.user.update({
+      where: {
+        email: dto.email,
+      },
+      data: {
+        passwordHash,
+      },
+    });
     // Delete PasswordReset
     await this.prismaService.passwordReset.delete({
       where: { id: passwordReset.id },
