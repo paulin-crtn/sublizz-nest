@@ -30,8 +30,6 @@ export class AccessJwtStrategy extends PassportStrategy(
       throw new UnauthorizedException('User does not exist.');
     }
     // Return user
-    delete user.passwordHash;
-    delete user.refreshTokenHash;
     return user;
   }
 }

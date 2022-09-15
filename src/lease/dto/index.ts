@@ -1,1 +1,1 @@
-export * from './lease.dto';
+export * from './Lease.dto';

@@ -48,8 +48,6 @@ export class RefreshJwtStrategy extends PassportStrategy(
       throw new UnauthorizedException('Invalid refresh token.');
     }
     // Return user
-    delete user.passwordHash;
-    delete user.refreshTokenHash;
     return user;
   }
 }
