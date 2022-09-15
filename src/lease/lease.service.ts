@@ -117,6 +117,5 @@ export class LeaseService {
         id,
       },
     });
-    return true;
   }
 }

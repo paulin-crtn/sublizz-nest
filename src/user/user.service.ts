@@ -1,6 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UpdateUserDto } from './dto';
 
 @Injectable()
 export class UserService {
@@ -32,6 +37,41 @@ export class UserService {
       },
       data: {
         ...data,
+      },
+    });
+  }
+
+  async update(id: number, userId: number, dto: UpdateUserDto) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!user || user.id !== userId) {
+      throw new ForbiddenException('Access to resource denied.');
+    }
+    return await this.prismaService.user.update({
+      where: {
+        id,
+      },
+      data: {
+        ...dto,
+      },
+    });
+  }
+
+  async delete(id: number, userId: number) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!user || user.id !== userId) {
+      throw new ForbiddenException('Access to resource denied.');
+    }
+    await this.prismaService.user.delete({
+      where: {
+        id,
       },
     });
   }
