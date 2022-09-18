@@ -7,10 +7,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { UpdateUserDto } from './dto';
 import * as argon from 'argon2';
-import { EmailVerificationService } from 'src/email-verification/email-verification.service';
+import { UpdateUserDto } from './dto';
+import { PrismaService } from '../prisma/prisma.service';
+import { EmailVerificationService } from '../email-verification/email-verification.service';
 
 /* -------------------------------------------------------------------------- */
 /*                             USER SERVICE CLASS                             */

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { MailService } from 'src/mail/mail.service';
-import { PrismaService } from 'src/prisma/prisma.service';
 import * as argon from 'argon2';
 import * as randomToken from 'rand-token';
+import { MailService } from '../mail/mail.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class EmailVerificationService {

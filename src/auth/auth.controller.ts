@@ -13,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { GetUser } from 'src/user/decorator';
+import { GetUser } from '../user/decorator';
 import { AuthService } from './auth.service';
 import { ResCookie } from './decorator';
 import { PasswordResetDto, SignInDto, SignUpDto } from './dto';

@@ -12,15 +12,15 @@ import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { MailService } from 'src/mail/mail.service';
-import { UserService } from 'src/user/user.service';
-import { EmailVerificationService } from 'src/email-verification/email-verification.service';
-import { PasswordResetDto, SignInDto, SignUpDto } from './dto';
 import { isEmail } from 'class-validator';
 import validate from 'deep-email-validator';
 import * as argon from 'argon2';
 import * as randomToken from 'rand-token';
+import { EmailVerificationService } from '../email-verification/email-verification.service';
+import { MailService } from '../mail/mail.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { UserService } from '../user/user.service';
+import { PasswordResetDto, SignInDto, SignUpDto } from './dto';
 
 /* -------------------------------------------------------------------------- */
 /*                             AUTH SERVICE CLASS                             */

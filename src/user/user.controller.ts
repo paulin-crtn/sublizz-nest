@@ -14,7 +14,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { AccessJwtGuard } from 'src/auth/guard';
+import { AccessJwtGuard } from '../auth/guard';
 import { GetUser } from './decorator';
 import { UpdateUserDto } from './dto';
 import { UserEntity } from './entity';
