@@ -11,8 +11,8 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { AccessJwtGuard } from 'src/auth/guard';
-import { GetUser } from 'src/user/decorator';
+import { AccessJwtGuard } from '../auth/guard';
+import { GetUser } from '../user/decorator';
 import { LeaseDto } from './dto';
 import { LeaseService } from './lease.service';
 
