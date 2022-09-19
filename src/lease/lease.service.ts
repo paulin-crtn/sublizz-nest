@@ -17,6 +17,9 @@ export class LeaseService {
   /* -------------------------------------------------------------------------- */
   async getLeases() {
     return await this.prismaService.lease.findMany({
+      where: {
+        isPublished: 1,
+      },
       include: {
         leaseImages: true,
       },
@@ -126,5 +129,6 @@ export class LeaseService {
         id,
       },
     });
+    // TODO: delete file from storage
   }
 }
