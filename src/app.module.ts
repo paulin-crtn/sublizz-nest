@@ -7,9 +7,14 @@ import { LeaseModule } from './lease/lease.module';
 import { MailModule } from './mail/mail.module';
 import { EmailVerificationModule } from './email-verification/email-verification.module';
 
+const ENV = process.env.NODE_ENV;
+
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      envFilePath: !ENV ? '.env' : `.env.${ENV}`,
+      isGlobal: true,
+    }),
     PrismaModule,
     AuthModule,
     UserModule,
