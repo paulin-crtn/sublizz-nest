@@ -73,7 +73,7 @@ export class AuthService {
         },
       });
       // Verify the provided email belongs to the user
-      this.emailVerificationService.verifyUserEmail(user, user.email);
+      await this.emailVerificationService.verifyUserEmail(user, user.email);
     } catch (error) {
       // Catch unique constraint violation error
       if (error instanceof PrismaClientKnownRequestError) {

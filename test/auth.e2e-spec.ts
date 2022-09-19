@@ -20,9 +20,8 @@ describe('Authentication (e2e)', () => {
       email: 'email@mail.com',
       password: 'password',
     };
-    it('should signup a user', (done) => {
-      pactum.spec().post('/auth/signup').withBody(dto).expectStatus(201);
-      done();
+    it('should signup a user', () => {
+      return pactum.spec().post('/auth/signup').withBody(dto).expectStatus(201);
     });
   });
 
