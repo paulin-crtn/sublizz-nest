@@ -5,13 +5,16 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MailService {
-  private domain: string;
+  private baseUrl: string;
 
   constructor(
     private mailerService: MailerService,
     private configService: ConfigService,
   ) {
-    this.domain = this.configService.get('DOMAIN');
+    this.baseUrl =
+      this.configService.get('APP_DOMAIN') +
+      ':' +
+      this.configService.get('APP_PORT');
   }
 
   /**
@@ -19,23 +22,29 @@ export class MailService {
    *
    * @param user
    * @param token
-   * @param emailVerificationId
+   * @param emailVerification
    */
   async sendUserEmailVerificationToken(
     user: User,
     token: string,
     emailVerification: EmailVerification,
   ) {
-    const url = `${this.domain}/auth/confirm-email?emailVerificationId=${emailVerification.id}&token=${token}`;
-    await this.mailerService.sendMail({
-      to: emailVerification.email,
-      subject: 'Confirmez votre email pour valider votre inscription',
-      template: './email-verification-token',
-      context: {
-        firstName: user.firstName,
-        url,
-      },
-    });
+    const url = `${this.baseUrl}/auth/confirm-email?emailVerificationId=${emailVerification.id}&token=${token}`;
+    try {
+      await this.mailerService.sendMail({
+        to: emailVerification.email,
+        subject: 'Confirmez votre email pour valider votre inscription',
+        template: './email-verification-token',
+        context: {
+          firstName: user.firstName,
+          url,
+        },
+      });
+    } catch (e) {
+      throw new Error(
+        'An error occcured while sending user email verification token: ' + e,
+      );
+    }
   }
 
   /**
@@ -45,15 +54,21 @@ export class MailService {
    * @param token
    */
   async sendUserResetPasswordToken(user: User, token: string) {
-    const url = `${this.domain}/auth/reset-password?email=${user.email}&token=${token}`;
-    await this.mailerService.sendMail({
-      to: user.email,
-      subject: 'Demande de changement de mot de passe',
-      template: './password-reset-token',
-      context: {
-        firstName: user.firstName,
-        url,
-      },
-    });
+    const url = `${this.baseUrl}/auth/reset-password?email=${user.email}&token=${token}`;
+    try {
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Demande de changement de mot de passe',
+        template: './password-reset-token',
+        context: {
+          firstName: user.firstName,
+          url,
+        },
+      });
+    } catch (e) {
+      throw new Error(
+        'An error occcured while sending user reset password token: ' + e,
+      );
+    }
   }
 }
