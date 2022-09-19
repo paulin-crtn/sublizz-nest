@@ -5,15 +5,17 @@ import {
   IsNotEmpty,
   IsNumber,
   IsNumberString,
+  IsOptional,
   IsString,
+  IsUrl,
   Length,
   Max,
   Min,
 } from 'class-validator';
 
 export class LeaseDto {
-  @IsNotEmpty()
-  @IsNumberString()
+  @IsOptional()
+  @IsString()
   @Length(1, 7)
   houseNumber: string;
 
@@ -74,6 +76,14 @@ export class LeaseDto {
   @Max(2000)
   pricePerMonth: number;
 
+  @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  isPublished: number;
+
   @IsArray()
+  @IsUrl(undefined, { each: true })
   leaseImages: string[];
 }

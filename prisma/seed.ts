@@ -13,18 +13,19 @@ const prisma = new PrismaClient();
 /* -------------------------------------------------------------------------- */
 /*                             FAKE DATA FUNCTIONS                            */
 /* -------------------------------------------------------------------------- */
-const fakeUser = async (): Promise<any> => {
+const fakeUser = async () => {
   const passwordHash: string = await argon.hash('password');
   return {
     firstName: 'Firstname', // faker.name.firstName()
     lastName: 'Lastname', // faker.name.lastName()
     email: 'email@gmail.com', // faker.internet.email()
+    emailVerifiedAt: new Date(),
     passwordHash, // faker.internet.password()
     profilePictureUrl: faker.internet.avatar(),
   };
 };
 
-const fakeLease = (userId: number): any => ({
+const fakeLease = (userId: number) => ({
   userId,
   houseNumber: faker.address.buildingNumber(),
   street: faker.address.street(),
@@ -39,6 +40,7 @@ const fakeLease = (userId: number): any => ({
   endDate: faker.date.future(),
   isDateFlexible: faker.datatype.number({ min: 0, max: 1 }),
   pricePerMonth: faker.datatype.number({ min: 200, max: 2000 }),
+  isPublished: faker.datatype.number({ min: 0, max: 1 }),
 });
 
 const fakeLeaseImage = (leaseId: number) => ({
@@ -69,12 +71,11 @@ const main = async () => {
 };
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
+  .catch((e) => {
+    console.error('Error while seeding the database: ', e);
     process.exit(1);
   })
-  .finally(() => console.log('Database seeded'));
+  .finally(async () => {
+    await prisma.$disconnect();
+    console.log('Database seeded');
+  });

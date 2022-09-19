@@ -36,7 +36,7 @@ model Lease {
 
   id Int @id @default(autoincrement())
   userId Int
-  houseNumber String @db.VarChar(10)
+  houseNumber String? @db.VarChar(10)
   street String @db.VarChar(30)
   postCode String @db.VarChar(5)
   city String @db.VarChar(30)
@@ -49,6 +49,7 @@ model Lease {
   endDate DateTime
   isDateFlexible Int
   pricePerMonth Int
+  isPublished Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

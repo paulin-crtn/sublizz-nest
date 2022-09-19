@@ -65,7 +65,6 @@ export class LeaseService {
 
   async store(userId: number, dto: LeaseDto) {
     // TO DO : check start date is before end date
-    // TO DO : check leaseImages is array of string (url)
     const { leaseImages, ...lease } = dto;
     return await this.prismaService.lease.create({
       data: {
@@ -95,7 +94,6 @@ export class LeaseService {
       throw new ForbiddenException('Access to resource denied.');
     }
     // TO DO : check start date is before end date
-    // TO DO : check leaseImages is array of string (url)
     const { leaseImages, ...leaseDto } = dto;
     return await this.prismaService.lease.update({
       where: {
