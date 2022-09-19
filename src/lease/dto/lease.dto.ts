@@ -17,7 +17,7 @@ export class LeaseDto {
   @IsOptional()
   @IsString()
   @Length(1, 7)
-  houseNumber: string;
+  houseNumber?: string;
 
   @IsNotEmpty()
   @IsString()
@@ -33,6 +33,16 @@ export class LeaseDto {
   @IsString()
   @Length(3, 30)
   city: string;
+
+  @IsOptional()
+  @IsNumberString()
+  @Length(1, 15)
+  gpsLatitude?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  @Length(1, 15)
+  gpsLongitude?: string;
 
   @IsNotEmpty()
   @IsString()

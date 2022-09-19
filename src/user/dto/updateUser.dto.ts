@@ -8,7 +8,7 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   @Length(3, 30)
-  lastName: string;
+  lastName?: string;
 
   @IsEmail()
   email: string;
@@ -16,9 +16,9 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   @Length(8, 20)
-  password: string;
+  password?: string;
 
   @IsOptional()
   @IsString()
-  profilePictureUrl: string;
+  profilePictureUrl?: string;
 }
