@@ -4,6 +4,7 @@
 import {
   ForbiddenException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
@@ -38,7 +39,7 @@ export class UserService {
       },
     });
     if (!user) {
-      throw new UnauthorizedException('Email does not exist.');
+      throw new NotFoundException('User not found.');
     }
     if (!user.emailVerifiedAt) {
       throw new UnauthorizedException('Email must be verified.');
@@ -61,14 +62,17 @@ export class UserService {
         id,
       },
     });
-    if (!user || user.id !== userId) {
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+    if (user.id !== userId) {
       throw new ForbiddenException('Access to resource denied.');
     }
 
     // Data
     const { email, password, ...data } = dto;
 
-    if (email !== user.email) {
+    if (email && email !== user.email) {
       this.emailVerificationService.verifyUserEmail(user, email);
     }
 
@@ -100,7 +104,10 @@ export class UserService {
         id,
       },
     });
-    if (!user || user.id !== userId) {
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+    if (user.id !== userId) {
       throw new ForbiddenException('Access to resource denied.');
     }
     await this.prismaService.user.delete({

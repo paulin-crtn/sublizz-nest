@@ -12,7 +12,7 @@ import { PrismaService } from '../src/prisma/prisma.service';
 /* -------------------------------------------------------------------------- */
 /*                                  FUNCTIONS                                 */
 /* -------------------------------------------------------------------------- */
-export let app: INestApplication;
+let app: INestApplication;
 export let prismaService: PrismaService;
 export let jwtService: JwtService;
 export let configService: ConfigService;
@@ -31,8 +31,12 @@ export const beforeTests = async (): Promise<void> => {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   await app.init();
   await app.listen(process.env.APP_PORT); // Needed for pactum
-  jwtService = app.get(JwtService);
+
+  // Services
   configService = app.get(ConfigService);
+  prismaService = app.get(PrismaService);
+  jwtService = app.get(JwtService);
+
   // Pactum
   pactum.request.setBaseUrl(
     process.env.APP_DOMAIN + ':' + process.env.APP_PORT,
@@ -43,8 +47,6 @@ export const beforeTests = async (): Promise<void> => {
  * Function to call before each test
  */
 export const beforeTest = async (): Promise<void> => {
-  // Clean DB
-  prismaService = app.get(PrismaService);
   await prismaService.cleanDb();
 };
 

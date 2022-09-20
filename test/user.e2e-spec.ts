@@ -1,19 +1,18 @@
 /* -------------------------------------------------------------------------- */
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
-import * as request from 'supertest';
+import * as pactum from 'pactum';
 import {
   beforeTests,
   afterTests,
   beforeTest,
   prismaService,
-  app,
   jwtService,
   configService,
 } from './config';
 
 /* -------------------------------------------------------------------------- */
-/*                                SIGNUP TESTS                                */
+/*                        GET AUTHENTICATED USER TESTS                        */
 /* -------------------------------------------------------------------------- */
 describe('GET /users/me', () => {
   /* ------------------------------ CONFIGURATION ----------------------------- */
@@ -31,7 +30,6 @@ describe('GET /users/me', () => {
         emailVerifiedAt: new Date(),
       },
     });
-
     const token = await jwtService.signAsync(
       { sub: user.id, email: user.email },
       {
@@ -39,19 +37,18 @@ describe('GET /users/me', () => {
         secret: configService.get('ACCESS_JWT_SECRET'),
       },
     );
-
-    const response = await request(app.getHttpServer())
+    return pactum
+      .spec()
       .get('/users/me')
-      .set('Authorization', `Bearer ${token}`);
-
-    expect(response.status).toBe(200);
-    expect(response.body).toMatchObject({
-      id: user.id,
-      firstName: user.firstName,
-      lastName: null,
-      email: user.email,
-      profilePictureUrl: null,
-    });
+      .withHeaders({ Authorization: `Bearer ${token}` })
+      .expectStatus(200)
+      .expectJsonMatch({
+        id: user.id,
+        firstName: 'firstname',
+        lastName: null,
+        email: 'email@mail.com',
+        profilePictureUrl: null,
+      });
   });
 
   it('should return status 401 when the provided token is invalid', async () => {
@@ -62,12 +59,11 @@ describe('GET /users/me', () => {
         secret: 'Gh7iU', // Different key
       },
     );
-
-    const response = await request(app.getHttpServer())
+    return pactum
+      .spec()
       .get('/users/me')
-      .set('Authorization', `Bearer ${token}`);
-
-    expect(response.status).toBe(401);
+      .withHeaders({ Authorization: `Bearer ${token}` })
+      .expectStatus(401);
   });
 
   it('should return status 401 when the provided token is expired', async () => {
@@ -78,16 +74,112 @@ describe('GET /users/me', () => {
         secret: configService.get('ACCESS_JWT_SECRET'),
       },
     );
-
-    const response = await request(app.getHttpServer())
+    return pactum
+      .spec()
       .get('/users/me')
-      .set('Authorization', `Bearer ${token}`);
-
-    expect(response.status).toBe(401);
+      .withHeaders({ Authorization: `Bearer ${token}` })
+      .expectStatus(401);
   });
 
   it('should return status 401 when no token is provided', async () => {
-    const response = await request(app.getHttpServer()).get('/users/me');
-    expect(response.status).toBe(401);
+    return pactum.spec().get('/users/me').expectStatus(401);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/*                              UPDATE USER TESTS                             */
+/* -------------------------------------------------------------------------- */
+describe('PUT /users/:id', () => {
+  /* ------------------------------ CONFIGURATION ----------------------------- */
+  beforeAll(async () => beforeTests());
+  beforeEach(async () => beforeTest());
+  afterAll(async () => afterTests());
+
+  /* ---------------------------------- TESTS --------------------------------- */
+  it('should return the updated user when provided attributes and token are valid', async () => {
+    const user = await prismaService.user.create({
+      data: {
+        firstName: 'firstname',
+        email: 'firstname@mail.com',
+        passwordHash: 'password',
+        emailVerifiedAt: new Date(),
+      },
+    });
+    const token = await jwtService.signAsync(
+      { sub: user.id, email: user.email },
+      {
+        expiresIn: '15m',
+        secret: configService.get('ACCESS_JWT_SECRET'),
+      },
+    );
+    return pactum
+      .spec()
+      .put(`/users/${user.id}`)
+      .withHeaders({ Authorization: `Bearer ${token}` })
+      .withBody({ lastName: 'lastname' })
+      .expectStatus(200)
+      .expectJsonMatch({
+        id: user.id,
+        firstName: 'firstname',
+        lastName: 'lastname',
+        email: 'firstname@mail.com',
+        profilePictureUrl: null,
+      });
+  });
+
+  it('should return status 404 when user does not exist', async () => {
+    const user = await prismaService.user.create({
+      data: {
+        firstName: 'firstname',
+        email: 'firstname@mail.com',
+        passwordHash: 'password',
+        emailVerifiedAt: new Date(),
+      },
+    });
+    const token = await jwtService.signAsync(
+      { sub: user.id, email: user.email },
+      {
+        expiresIn: '15m',
+        secret: configService.get('ACCESS_JWT_SECRET'),
+      },
+    );
+    return pactum
+      .spec()
+      .put('/users/999999999')
+      .withHeaders({ Authorization: `Bearer ${token}` })
+      .withBody({ lastName: 'lastname' })
+      .expectStatus(404);
+  });
+
+  it('should return status 400 when provided attributes are invalid', async () => {
+    const user = await prismaService.user.create({
+      data: {
+        firstName: 'firstname',
+        email: 'firstname@mail.com',
+        passwordHash: 'password',
+        emailVerifiedAt: new Date(),
+      },
+    });
+    const token = await jwtService.signAsync(
+      { sub: user.id, email: user.email },
+      {
+        expiresIn: '15m',
+        secret: configService.get('ACCESS_JWT_SECRET'),
+      },
+    );
+    return pactum
+      .spec()
+      .put(`/users/user.id`)
+      .withHeaders({ Authorization: `Bearer ${token}` })
+      .withBody({ email: 'email' })
+      .expectStatus(400);
+  });
+
+  it('should return status 401 when no token is provided', async () => {
+    return pactum
+      .spec()
+      .put('/users/1')
+      .withBody({ lastName: 'lastname' })
+      .expectStatus(401);
   });
 });

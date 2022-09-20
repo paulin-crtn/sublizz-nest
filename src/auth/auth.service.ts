@@ -99,6 +99,9 @@ export class AuthService {
   }> {
     // Find the user by email
     const user = await this.userService.getUserByEmail(dto.email);
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
     // Compare password
     const isPasswordCorrect = await argon.verify(
       user.passwordHash,
