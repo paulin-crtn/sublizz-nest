@@ -73,7 +73,9 @@ export class AuthService {
         },
       });
       // Verify the provided email belongs to the user
-      await this.emailVerificationService.verifyUserEmail(user, user.email);
+      if (this.configService.get('NODE_ENV') !== 'test') {
+        await this.emailVerificationService.verifyUserEmail(user, user.email);
+      }
     } catch (error) {
       // Catch unique constraint violation error
       if (error instanceof PrismaClientKnownRequestError) {
@@ -116,7 +118,7 @@ export class AuthService {
   }
 
   /**
-   * Check the refresh token and issue new tokens
+   * Issue new tokens
    *
    * @param user
    * @returns
@@ -214,7 +216,9 @@ export class AuthService {
       },
     });
     // Send token to user's email
-    await this.mailService.sendUserResetPasswordToken(user, token);
+    if (this.configService.get('NODE_ENV') !== 'test') {
+      await this.mailService.sendUserResetPasswordToken(user, token);
+    }
   }
 
   /**
