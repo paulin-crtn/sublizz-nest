@@ -348,7 +348,6 @@ describe('POST /auth/refresh', () => {
         secret: configService.get('REFRESH_JWT_SECRET'),
       },
     );
-
     return pactum
       .spec()
       .post('/auth/refresh')
@@ -364,7 +363,6 @@ describe('POST /auth/refresh', () => {
         secret: 'secret',
       },
     );
-
     return pactum
       .spec()
       .post('/auth/refresh')
@@ -382,5 +380,105 @@ describe('POST /auth/refresh', () => {
 
   it('should return status 401 when no refresh_token is provided', () => {
     return pactum.spec().post('/auth/refresh').expectStatus(401);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/*                                CONFIRM EMAIL                               */
+/* -------------------------------------------------------------------------- */
+describe('GET /auth/confirm-email', () => {
+  /* ------------------------------ CONFIGURATION ----------------------------- */
+  beforeAll(async () => beforeTests());
+  beforeEach(async () => beforeTest());
+  afterAll(async () => afterTests());
+
+  /* ---------------------------------- TESTS --------------------------------- */
+  it('should confirm email when all query parameters are valid', async () => {
+    // Create user
+    let user = await prismaService.user.create({
+      data: {
+        firstName: 'firstname',
+        email: 'firstname@mail.com',
+        passwordHash: '',
+        emailVerifiedAt: new Date(),
+      },
+    });
+    // Generate the token
+    const token = randomToken.generate(32);
+    const tokenHash = await argon.hash(token);
+    // Create emailVerification
+    const emailVerification = await prismaService.emailVerification.create({
+      data: {
+        userId: user.id,
+        email: 'new@mail.com',
+        tokenHash,
+      },
+    });
+    // Assert
+    await pactum
+      .spec()
+      .get('/auth/confirm-email')
+      .withQueryParams('emailVerificationId', emailVerification.id)
+      .withQueryParams('token', token)
+      .expectStatus(200)
+      .expectJsonMatch({ userEmail: 'new@mail.com' });
+    user = await prismaService.user.findUnique({ where: { id: user.id } });
+    expect(user.email).toBe('new@mail.com');
+    expect(user.emailVerifiedAt).toBeDefined();
+  });
+
+  it('should return status 404 when emailVerificationId is incorrect', async () => {
+    await pactum
+      .spec()
+      .get('/auth/confirm-email')
+      .withQueryParams('emailVerificationId', 9999999999)
+      .withQueryParams('token', 'token')
+      .expectStatus(404);
+  });
+
+  it('should return status 401 when token is incorrect', async () => {
+    // Create user
+    const user = await prismaService.user.create({
+      data: {
+        firstName: 'firstname',
+        email: 'firstname@mail.com',
+        passwordHash: '',
+        emailVerifiedAt: new Date(),
+      },
+    });
+    // Generate the token
+    const token = randomToken.generate(32);
+    const tokenHash = await argon.hash(token);
+    // Create emailVerification
+    const emailVerification = await prismaService.emailVerification.create({
+      data: {
+        userId: user.id,
+        email: 'new@mail.com',
+        tokenHash,
+      },
+    });
+    // Assert
+    await pactum
+      .spec()
+      .get('/auth/confirm-email')
+      .withQueryParams('emailVerificationId', emailVerification.id)
+      .withQueryParams('token', 'token')
+      .expectStatus(401);
+  });
+
+  it('should return status 400 when emailVerificationId is not provided', async () => {
+    await pactum
+      .spec()
+      .get('/auth/confirm-email')
+      .withQueryParams('token', 'token')
+      .expectStatus(400);
+  });
+
+  it('should return status 400 when token is not provided', async () => {
+    await pactum
+      .spec()
+      .get('/auth/confirm-email')
+      .withQueryParams('emailVerificationId', 1)
+      .expectStatus(400);
   });
 });

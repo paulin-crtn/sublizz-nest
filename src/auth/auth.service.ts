@@ -164,6 +164,10 @@ export class AuthService {
     emailVerificationId: number,
     token: string,
   ): Promise<{ userEmail: string }> {
+    // Check query params
+    if (!emailVerificationId || !token) {
+      throw new BadRequestException('Query parameters missing');
+    }
     // Find email verification
     const emailVerification =
       await this.prismaService.emailVerification.findUnique({
@@ -185,7 +189,7 @@ export class AuthService {
       throw new UnauthorizedException('Incorrect token.');
     }
     // Update user
-    await this.prismaService.user.update({
+    const user = await this.prismaService.user.update({
       where: {
         id: emailVerification.userId,
       },
@@ -194,7 +198,7 @@ export class AuthService {
         emailVerifiedAt: new Date(Date.now()),
       },
     });
-    return { userEmail: emailVerification.email };
+    return { userEmail: user.email };
   }
 
   /**
