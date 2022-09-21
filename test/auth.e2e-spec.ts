@@ -339,4 +339,48 @@ describe('POST /auth/refresh', () => {
     );
     expect(isTokenValid).toBe(true);
   });
+
+  it('should return status 401 when refresh_token is expired', async () => {
+    const jwt = await jwtService.signAsync(
+      {},
+      {
+        expiresIn: '0s',
+        secret: configService.get('REFRESH_JWT_SECRET'),
+      },
+    );
+
+    return pactum
+      .spec()
+      .post('/auth/refresh')
+      .withCookies({ refresh_token: jwt })
+      .expectStatus(401);
+  });
+
+  it('should return status 401 when refresh_token is signed with a different key', async () => {
+    const jwt = await jwtService.signAsync(
+      {},
+      {
+        expiresIn: '1w',
+        secret: 'secret',
+      },
+    );
+
+    return pactum
+      .spec()
+      .post('/auth/refresh')
+      .withCookies({ refresh_token: jwt })
+      .expectStatus(401);
+  });
+
+  it('should return status 401 when refresh_token is invalid', () => {
+    return pactum
+      .spec()
+      .post('/auth/refresh')
+      .withCookies({ refresh_token: 'token' })
+      .expectStatus(401);
+  });
+
+  it('should return status 401 when no refresh_token is provided', () => {
+    return pactum.spec().post('/auth/refresh').expectStatus(401);
+  });
 });
