@@ -5,6 +5,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TestingModule, Test } from '@nestjs/testing';
+import * as cookieParser from 'cookie-parser';
 import * as pactum from 'pactum';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
@@ -29,6 +30,7 @@ export const beforeTests = async (): Promise<void> => {
   // Create App
   app = moduleRef.createNestApplication();
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.use(cookieParser());
   await app.init();
   await app.listen(process.env.APP_PORT); // Needed for pactum
 

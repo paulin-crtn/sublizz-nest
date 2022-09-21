@@ -3,6 +3,7 @@
 /* -------------------------------------------------------------------------- */
 import * as argon from 'argon2';
 import * as pactum from 'pactum';
+import * as randomToken from 'rand-token';
 import { string } from 'pactum-matchers';
 import {
   beforeTests,
@@ -265,5 +266,77 @@ describe('POST /auth/logout', () => {
 
   it('should return status 401 when no access_token is provided', async () => {
     return pactum.spec().post('/auth/logout').expectStatus(401);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/*                            REFRESH TOKENS TESTS                            */
+/* -------------------------------------------------------------------------- */
+describe('POST /auth/refresh', () => {
+  /* ------------------------------ CONFIGURATION ----------------------------- */
+  beforeAll(async () => beforeTests());
+  beforeEach(async () => beforeTest());
+  afterAll(async () => afterTests());
+
+  /* ---------------------------------- TESTS --------------------------------- */
+  it('should refresh tokens when the provided refresh_token is valid', async () => {
+    // Create user
+    const passwordHash = await argon.hash('password');
+    let user = await prismaService.user.create({
+      data: {
+        firstName: 'firstname',
+        email: 'firstname@mail.com',
+        passwordHash,
+        emailVerifiedAt: new Date(),
+      },
+    });
+
+    // Generate the refresh token
+    const refreshToken = randomToken.generate(32);
+    const refreshTokenHash = await argon.hash(refreshToken);
+
+    // Update user with the refresh token hash
+    await prismaService.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        refreshTokenHash,
+      },
+    });
+
+    // Payload
+    const payload = {
+      sub: user.id,
+      refreshToken,
+    };
+
+    // JWT refresh token
+    const jwt = await jwtService.signAsync(payload, {
+      expiresIn: '1w',
+      secret: configService.get('REFRESH_JWT_SECRET'),
+    });
+
+    // Expect
+    const response = await pactum
+      .spec()
+      .post('/auth/refresh')
+      .withCookies({ refresh_token: jwt })
+      .expectStatus(200)
+      .expectJsonMatch({ access_token: string() })
+      .returns('res.headers');
+
+    user = await prismaService.user.findUnique({
+      where: { email: 'firstname@mail.com' },
+    });
+    const cookieJwt = response['set-cookie'][0].split(';')[0].split('=')[1];
+    const jwtPayload = JSON.parse(
+      Buffer.from(cookieJwt.split('.')[1], 'base64').toString(),
+    );
+    const isTokenValid = await argon.verify(
+      user.refreshTokenHash,
+      jwtPayload.refreshToken,
+    );
+    expect(isTokenValid).toBe(true);
   });
 });
