@@ -52,7 +52,7 @@ describe('POST /auth/signup', () => {
       .spec()
       .post('/auth/signup')
       .withBody({
-        firstName: 'firstName',
+        firstName: 'firstname',
         email: 'firstname@mail.com',
         password: 'password',
       })
@@ -149,7 +149,7 @@ describe('POST /auth/signin', () => {
         emailVerifiedAt: new Date(),
       },
     });
-    return pactum
+    const response = await pactum
       .spec()
       .post('/auth/signin')
       .withBody({
@@ -158,7 +158,20 @@ describe('POST /auth/signin', () => {
       })
       .expectStatus(200)
       .expectJsonMatch({ access_token: string() })
-      .withCookies('refresh_token', string());
+      .returns('res.headers');
+
+    const user = await prismaService.user.findUnique({
+      where: { email: 'firstname@mail.com' },
+    });
+    const cookieJwt = response['set-cookie'][0].split(';')[0].split('=')[1];
+    const jwtPayload = JSON.parse(
+      Buffer.from(cookieJwt.split('.')[1], 'base64').toString(),
+    );
+    const isTokenValid = await argon.verify(
+      user.refreshTokenHash,
+      jwtPayload.refreshToken,
+    );
+    expect(isTokenValid).toBe(true);
   });
 
   it('should return status 401 when credentials are valid but email is not verified', async () => {
