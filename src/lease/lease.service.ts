@@ -1,7 +1,11 @@
 /* -------------------------------------------------------------------------- */
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { LeaseDto } from './dto';
 
@@ -38,7 +42,7 @@ export class LeaseService {
   }
 
   async getLease(id: number) {
-    return await this.prismaService.lease.findUnique({
+    const lease = await this.prismaService.lease.findUnique({
       where: {
         id,
       },
@@ -52,6 +56,10 @@ export class LeaseService {
         },
       },
     });
+    if (!lease) {
+      throw new NotFoundException('Lease does not exist.');
+    }
+    return lease;
   }
 
   async getUserLease(id: number, userId: number) {
