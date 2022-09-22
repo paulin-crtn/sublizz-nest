@@ -14,28 +14,35 @@ import {
 } from './config';
 
 /* -------------------------------------------------------------------------- */
-/*                            MANDATORY ATTRIBUTES                            */
+/*                                REQUEST DATA                                */
 /* -------------------------------------------------------------------------- */
-const mandatoryRequestAttributes: string[] = [
-  'street',
-  'postCode',
-  'city',
-  'description',
-  'surface',
-  'room',
-  'startDate',
-  'endDate',
-  'isDateFlexible',
-  'pricePerMonth',
-  'isPublished',
+const mandatoryRequestData: { key: string; invalidValues: any[] }[] = [
+  { key: 'street', invalidValues: ['a'] },
+  { key: 'postCode', invalidValues: ['a', 123456] },
+  { key: 'city', invalidValues: ['a'] },
+  { key: 'description', invalidValues: [] },
+  { key: 'surface', invalidValues: ['a', 0, 10000] },
+  { key: 'room', invalidValues: ['a', 0, 10000] },
+  { key: 'startDate', invalidValues: ['a'] },
+  { key: 'endDate', invalidValues: ['a'] },
+  { key: 'isDateFlexible', invalidValues: ['a', 2] },
+  { key: 'pricePerMonth', invalidValues: ['a', 0, 100000] },
+  { key: 'isPublished', invalidValues: ['a', 2] },
 ];
 
-const responseAttribute: string[] = [
-  ...mandatoryRequestAttributes,
-  'id',
-  'userId',
-  'createdAt',
-  'updatedAt',
+const optionalRequestData: { key: string; invalidValues: any[] }[] = [
+  { key: 'houseNumber', invalidValues: ['abcdefghijklm'] },
+  { key: 'gpsLatitude', invalidValues: ['abc', 9] },
+  { key: 'gpsLongitude', invalidValues: ['abc', 9] },
+  {
+    key: 'leaseImages',
+    invalidValues: [
+      'abc',
+      'http://google.com',
+      ['abc'],
+      ['abc', 'http://google.com'],
+    ],
+  },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -51,20 +58,27 @@ type LeaseResponse = Partial<
 /*                                   HELPER                                   */
 /* -------------------------------------------------------------------------- */
 /**
- * Check that all response attributes are defined
+ * Check that all response attributes are defined or not null
  *
  * @param response
  */
 function checkResponse(response: LeaseResponse) {
-  responseAttribute.forEach((attribute: string) =>
-    expect(response[attribute]).toBeDefined(),
+  optionalRequestData.forEach((attribute) =>
+    expect(response[attribute.key]).toBeDefined(),
   );
-  expect(response.leaseImages).toBeDefined();
+  mandatoryRequestData.forEach((attribute) =>
+    expect(response[attribute.key]).not.toBe(null),
+  );
+  expect(response.id).not.toBe(null);
+  expect(response.userId).not.toBe(null);
+  expect(response.createdAt).not.toBe(null);
+  expect(response.updatedAt).not.toBe(null);
+  expect(response.leaseImages).not.toBe(null);
   expect(response.leaseImages.length).toBe(4);
-  expect(response.leaseImages[0].url).toBeDefined();
-  expect(response.leaseImages[1].url).toBeDefined();
-  expect(response.leaseImages[2].url).toBeDefined();
-  expect(response.leaseImages[3].url).toBeDefined();
+  expect(response.leaseImages[0].url).not.toBe(null);
+  expect(response.leaseImages[1].url).not.toBe(null);
+  expect(response.leaseImages[2].url).not.toBe(null);
+  expect(response.leaseImages[3].url).not.toBe(null);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -269,7 +283,7 @@ describe('POST /leases', () => {
     checkResponse(response);
   });
 
-  it('should return status 400 when an attribute is missing', async () => {
+  it('should return status 400 when a mandatory attribute is missing', async () => {
     // Create 1 fake user
     const user = await prismaService.user.create({ data: await fakeUser() });
     // Create 1 lease
@@ -293,9 +307,9 @@ describe('POST /leases', () => {
     });
 
     // Assert
-    for (const attribute of mandatoryRequestAttributes) {
+    for (const attribute of mandatoryRequestData) {
       const data = { ...lease };
-      delete data[attribute];
+      delete data[attribute.key];
 
       await pactum
         .spec()
@@ -303,6 +317,41 @@ describe('POST /leases', () => {
         .withHeaders('Authorization', `Bearer ${jwt}`)
         .withBody({ ...data, leaseImages })
         .expectStatus(400);
+    }
+  });
+
+  it('should return status 400 when any attribute is invalid', async () => {
+    // Create 1 fake user
+    const user = await prismaService.user.create({ data: await fakeUser() });
+    // Create 1 lease
+    const lease = fakeLease(user.id);
+
+    // Payload
+    const payload = {
+      sub: user.id,
+      email: user.email,
+    };
+
+    // JWT refresh token
+    const jwt = await jwtService.signAsync(payload, {
+      expiresIn: '15m',
+      secret: configService.get('ACCESS_JWT_SECRET'),
+    });
+
+    // Assert
+    const requestData = [...mandatoryRequestData, ...optionalRequestData];
+    for (const attribute of requestData) {
+      for (const invalidValue of attribute.invalidValues) {
+        const data = { ...lease };
+        data[attribute.key] = invalidValue;
+
+        await pactum
+          .spec()
+          .post('/leases')
+          .withHeaders('Authorization', `Bearer ${jwt}`)
+          .withBody({ ...data })
+          .expectStatus(400);
+      }
     }
   });
 

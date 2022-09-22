@@ -29,7 +29,7 @@ const main = async () => {
         ...lease,
         leaseImages: {
           createMany: {
-            data: leaseImages,
+            data: leaseImages.map((url) => ({ url })),
           },
         },
       },

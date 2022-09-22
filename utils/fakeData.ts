@@ -12,7 +12,7 @@ export const fakeUser = async () => {
   return {
     firstName: 'firstname', // faker.name.firstName()
     lastName: 'lastname', // faker.name.lastName()
-    email: 'firsntame@mail.com', // faker.internet.email()
+    email: 'firstname@mail.com', // faker.internet.email()
     emailVerifiedAt: new Date(),
     passwordHash, // faker.internet.password()
     profilePictureUrl: faker.internet.avatar(),
