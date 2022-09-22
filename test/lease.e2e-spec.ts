@@ -1,6 +1,7 @@
 /* -------------------------------------------------------------------------- */
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
+import { Lease, LeaseImage } from '@prisma/client';
 import pactum from 'pactum';
 import { fakeLease, fakeLeaseImage, fakeUser } from '../utils/fakeData';
 import {
@@ -11,6 +12,42 @@ import {
   configService,
   jwtService,
 } from './config';
+
+/* -------------------------------------------------------------------------- */
+/*                                    TYPE                                    */
+/* -------------------------------------------------------------------------- */
+type LeaseResponse = Partial<
+  Lease & {
+    leaseImages: LeaseImage[];
+  }
+>;
+
+/* -------------------------------------------------------------------------- */
+/*                                   HELPER                                   */
+/* -------------------------------------------------------------------------- */
+function checkResponse(response: LeaseResponse) {
+  expect(response.id).toBeDefined();
+  expect(response.userId).toBeDefined();
+  expect(response.street).toBeDefined();
+  expect(response.postCode).toBeDefined();
+  expect(response.city).toBeDefined();
+  expect(response.description).toBeDefined();
+  expect(response.surface).toBeDefined();
+  expect(response.room).toBeDefined();
+  expect(response.startDate).toBeDefined();
+  expect(response.endDate).toBeDefined();
+  expect(response.isDateFlexible).toBeDefined();
+  expect(response.pricePerMonth).toBeDefined();
+  expect(response.isPublished).toBeDefined();
+  expect(response.createdAt).toBeDefined();
+  expect(response.updatedAt).toBeDefined();
+  expect(response.leaseImages).toBeDefined();
+  expect(response.leaseImages.length).toBe(4);
+  expect(response.leaseImages[0].url).toBeDefined();
+  expect(response.leaseImages[1].url).toBeDefined();
+  expect(response.leaseImages[2].url).toBeDefined();
+  expect(response.leaseImages[3].url).toBeDefined();
+}
 
 /* -------------------------------------------------------------------------- */
 /*                                 GET LEASES                                 */
@@ -51,27 +88,7 @@ describe('GET /leases', () => {
       .expectJsonLength(2)
       .returns('res.body');
 
-    expect(response[0].id).toBeDefined();
-    expect(response[0].userId).toBeDefined();
-    expect(response[0].street).toBeDefined();
-    expect(response[0].postCode).toBeDefined();
-    expect(response[0].city).toBeDefined();
-    expect(response[0].description).toBeDefined();
-    expect(response[0].surface).toBeDefined();
-    expect(response[0].room).toBeDefined();
-    expect(response[0].startDate).toBeDefined();
-    expect(response[0].endDate).toBeDefined();
-    expect(response[0].isDateFlexible).toBeDefined();
-    expect(response[0].pricePerMonth).toBeDefined();
-    expect(response[0].isPublished).toBeDefined();
-    expect(response[0].createdAt).toBeDefined();
-    expect(response[0].updatedAt).toBeDefined();
-    expect(response[0].leaseImages).toBeDefined();
-    expect(response[0].leaseImages.length).toBe(4);
-    expect(response[0].leaseImages[0].url).toBeDefined();
-    expect(response[0].leaseImages[1].url).toBeDefined();
-    expect(response[0].leaseImages[2].url).toBeDefined();
-    expect(response[0].leaseImages[3].url).toBeDefined();
+    response.forEach((lease: LeaseResponse) => checkResponse(lease));
   });
 });
 
@@ -111,27 +128,7 @@ describe('GET /leases/:id', () => {
       .expectStatus(200)
       .returns('res.body');
 
-    expect(response.id).toBeDefined();
-    expect(response.userId).toBeDefined();
-    expect(response.street).toBeDefined();
-    expect(response.postCode).toBeDefined();
-    expect(response.city).toBeDefined();
-    expect(response.description).toBeDefined();
-    expect(response.surface).toBeDefined();
-    expect(response.room).toBeDefined();
-    expect(response.startDate).toBeDefined();
-    expect(response.endDate).toBeDefined();
-    expect(response.isDateFlexible).toBeDefined();
-    expect(response.pricePerMonth).toBeDefined();
-    expect(response.isPublished).toBeDefined();
-    expect(response.createdAt).toBeDefined();
-    expect(response.updatedAt).toBeDefined();
-    expect(response.leaseImages).toBeDefined();
-    expect(response.leaseImages.length).toBe(4);
-    expect(response.leaseImages[0].url).toBeDefined();
-    expect(response.leaseImages[1].url).toBeDefined();
-    expect(response.leaseImages[2].url).toBeDefined();
-    expect(response.leaseImages[3].url).toBeDefined();
+    checkResponse(response);
   });
 
   it('should return status 404 when lease does not exist', async () => {
@@ -193,27 +190,7 @@ describe('GET /leases/user', () => {
       .expectJsonLength(1)
       .returns('res.body');
 
-    expect(response[0].id).toBeDefined();
-    expect(response[0].userId).toBeDefined();
-    expect(response[0].street).toBeDefined();
-    expect(response[0].postCode).toBeDefined();
-    expect(response[0].city).toBeDefined();
-    expect(response[0].description).toBeDefined();
-    expect(response[0].surface).toBeDefined();
-    expect(response[0].room).toBeDefined();
-    expect(response[0].startDate).toBeDefined();
-    expect(response[0].endDate).toBeDefined();
-    expect(response[0].isDateFlexible).toBeDefined();
-    expect(response[0].pricePerMonth).toBeDefined();
-    expect(response[0].isPublished).toBeDefined();
-    expect(response[0].createdAt).toBeDefined();
-    expect(response[0].updatedAt).toBeDefined();
-    expect(response[0].leaseImages).toBeDefined();
-    expect(response[0].leaseImages.length).toBe(4);
-    expect(response[0].leaseImages[0].url).toBeDefined();
-    expect(response[0].leaseImages[1].url).toBeDefined();
-    expect(response[0].leaseImages[2].url).toBeDefined();
-    expect(response[0].leaseImages[3].url).toBeDefined();
+    response.forEach((lease: LeaseResponse) => checkResponse(lease));
   });
 
   it('should return status 401 when access_token is invalid', async () => {
@@ -227,4 +204,17 @@ describe('GET /leases/user', () => {
   it('should return status 401 when access_token is not provided', async () => {
     return pactum.spec().get('/leases/user').expectStatus(401);
   });
+});
+
+/* -------------------------------------------------------------------------- */
+/*                                 POST LEASE                                 */
+/* -------------------------------------------------------------------------- */
+describe('POST /leases', () => {
+  /* ------------------------------ CONFIGURATION ----------------------------- */
+  beforeAll(async () => beforeTests());
+  beforeEach(async () => beforeTest());
+  afterAll(async () => afterTests());
+
+  /* ---------------------------------- TESTS --------------------------------- */
+  it('should store a lease when access_token and all attributes are valid', () => {});
 });
