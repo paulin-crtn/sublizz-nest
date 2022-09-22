@@ -62,18 +62,6 @@ export class LeaseService {
     return lease;
   }
 
-  async getUserLease(id: number, userId: number) {
-    return await this.prismaService.lease.findFirst({
-      where: {
-        id,
-        userId,
-      },
-      include: {
-        leaseImages: true,
-      },
-    });
-  }
-
   async store(userId: number, dto: LeaseDto) {
     // TO DO : check start date is before end date
     const { leaseImages, ...lease } = dto;
@@ -99,7 +87,10 @@ export class LeaseService {
         id,
       },
     });
-    if (!lease || lease.userId !== userId) {
+    if (!lease) {
+      throw new NotFoundException('Lease does not exist.');
+    }
+    if (lease.userId !== userId) {
       throw new ForbiddenException('Access to resource denied.');
     }
     // TO DO : check start date is before end date
@@ -129,7 +120,10 @@ export class LeaseService {
         id,
       },
     });
-    if (!lease || lease.userId !== userId) {
+    if (!lease) {
+      throw new NotFoundException('Lease does not exist.');
+    }
+    if (lease.userId !== userId) {
       throw new ForbiddenException('Access to resource denied.');
     }
     await this.prismaService.lease.delete({

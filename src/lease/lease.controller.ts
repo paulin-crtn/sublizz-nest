@@ -39,16 +39,6 @@ export class LeaseController {
   }
 
   @UseGuards(AccessJwtGuard)
-  @HttpCode(HttpStatus.OK)
-  @Get('user/:id')
-  async getUserLease(
-    @GetUser('id') userId: number,
-    @Param('id', ParseIntPipe) id: number,
-  ) {
-    return await this.leaseService.getUserLease(id, userId);
-  }
-
-  @UseGuards(AccessJwtGuard)
   @HttpCode(HttpStatus.CREATED)
   @Post()
   async store(@GetUser('id') userId: number, @Body() dto: LeaseDto) {
