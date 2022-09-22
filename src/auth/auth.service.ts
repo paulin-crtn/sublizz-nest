@@ -205,6 +205,9 @@ export class AuthService {
   async issuePasswordResetToken(email: string): Promise<void> {
     // Find the user by email
     const user = await this.userService.getUserByEmail(email);
+    if (!user) {
+      throw new NotFoundException('User does not exist.');
+    }
     // Generate and store reset password token
     const token = randomToken.generate(16);
     const tokenHash = await argon.hash(token);

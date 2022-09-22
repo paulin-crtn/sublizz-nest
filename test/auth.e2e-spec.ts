@@ -13,6 +13,7 @@ import {
   configService,
   jwtService,
 } from './config';
+import { assert } from 'console';
 
 /* -------------------------------------------------------------------------- */
 /*                                SIGNUP TESTS                                */
@@ -480,5 +481,61 @@ describe('GET /auth/confirm-email', () => {
       .get('/auth/confirm-email')
       .withQueryParams('emailVerificationId', 1)
       .expectStatus(400);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/*                            RESET PASSWORD (GET)                            */
+/* -------------------------------------------------------------------------- */
+describe('GET /auth/reset-password', () => {
+  /* ------------------------------ CONFIGURATION ----------------------------- */
+  beforeAll(async () => beforeTests());
+  beforeEach(async () => beforeTest());
+  afterAll(async () => afterTests());
+
+  /* ---------------------------------- TESTS --------------------------------- */
+  it('should store a reset password token in the DB when user exists', async () => {
+    // Create user
+    const user = await prismaService.user.create({
+      data: {
+        firstName: 'firstname',
+        email: 'firstname@mail.com',
+        passwordHash: 'password',
+        emailVerifiedAt: new Date(),
+      },
+    });
+
+    // Assert
+    await pactum
+      .spec()
+      .get('/auth/reset-password')
+      .withQueryParams('email', user.email)
+      .expectStatus(200);
+
+    const passwordReset = await prismaService.passwordReset.findFirst({
+      where: { userEmail: user.email },
+    });
+
+    expect(passwordReset).toBeDefined();
+  });
+
+  it('should return status 400 when the email is not provided', () => {
+    return pactum.spec().get('/auth/reset-password').expectStatus(400);
+  });
+
+  it('should return status 400 when the email is invalid', () => {
+    return pactum
+      .spec()
+      .get('/auth/reset-password')
+      .withQueryParams('email', 'email')
+      .expectStatus(400);
+  });
+
+  it('should return status 404 when the user does not exists', () => {
+    return pactum
+      .spec()
+      .get('/auth/reset-password')
+      .withQueryParams('email', 'email@mail.com')
+      .expectStatus(404);
   });
 });

@@ -14,7 +14,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { isEmail, isString } from 'class-validator';
+import { isEmail } from 'class-validator';
 import striptags from 'striptags';
 import { GetUser } from '../user/decorator';
 import { AuthService } from './auth.service';
