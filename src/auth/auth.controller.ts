@@ -2,6 +2,7 @@
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -13,6 +14,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
+import { isEmail, isString } from 'class-validator';
+import striptags from 'striptags';
 import { GetUser } from '../user/decorator';
 import { AuthService } from './auth.service';
 import { ResCookie } from './decorator';
@@ -75,12 +78,22 @@ export class AuthController {
     @Query('emailVerificationId', ParseIntPipe) emailVerificationId: number,
     @Query('token') token: string,
   ) {
-    return await this.authService.confirmUserEmail(emailVerificationId, token);
+    const tokenSanitized = striptags(token);
+    if (!tokenSanitized) {
+      throw new BadRequestException('Token is missing');
+    }
+    return await this.authService.confirmUserEmail(
+      emailVerificationId,
+      tokenSanitized,
+    );
   }
 
   @HttpCode(HttpStatus.OK)
   @Get('reset-password')
   async issuePasswordResetToken(@Query('email') email: string) {
+    if (!isEmail(email)) {
+      throw new BadRequestException('Email is not valid.');
+    }
     return await this.authService.issuePasswordResetToken(email);
   }
 

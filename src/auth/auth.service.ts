@@ -14,8 +14,8 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
 import { isEmail } from 'class-validator';
 import validate from 'deep-email-validator';
-import * as argon from 'argon2';
-import * as randomToken from 'rand-token';
+import argon from 'argon2';
+import randomToken from 'rand-token';
 import { EmailVerificationService } from '../email-verification/email-verification.service';
 import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -164,10 +164,6 @@ export class AuthService {
     emailVerificationId: number,
     token: string,
   ): Promise<{ userEmail: string }> {
-    // Check query params
-    if (!emailVerificationId || !token) {
-      throw new BadRequestException('Query parameters missing');
-    }
     // Find email verification
     const emailVerification =
       await this.prismaService.emailVerification.findUnique({
@@ -207,10 +203,6 @@ export class AuthService {
    * @param email
    */
   async issuePasswordResetToken(email: string): Promise<void> {
-    // Validate email
-    if (!isEmail(email)) {
-      throw new BadRequestException('Email is not valid.');
-    }
     // Find the user by email
     const user = await this.userService.getUserByEmail(email);
     // Generate and store reset password token
