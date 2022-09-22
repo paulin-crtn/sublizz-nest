@@ -238,7 +238,7 @@ export class AuthService {
     });
     // If PasswordReset does not exist throw exception
     if (!passwordReset) {
-      throw new UnauthorizedException('No password reset asked.');
+      throw new NotFoundException('No password reset found.');
     }
     // Compare token
     const isTokenCorrect = await argon.verify(

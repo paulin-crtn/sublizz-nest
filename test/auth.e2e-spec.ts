@@ -13,7 +13,6 @@ import {
   configService,
   jwtService,
 } from './config';
-import { assert } from 'console';
 
 /* -------------------------------------------------------------------------- */
 /*                                SIGNUP TESTS                                */
@@ -428,7 +427,7 @@ describe('GET /auth/confirm-email', () => {
     expect(user.emailVerifiedAt).toBeDefined();
   });
 
-  it('should return status 404 when emailVerificationId is incorrect', async () => {
+  it('should return status 404 when emailVerificationId is invalid', async () => {
     await pactum
       .spec()
       .get('/auth/confirm-email')
@@ -437,7 +436,7 @@ describe('GET /auth/confirm-email', () => {
       .expectStatus(404);
   });
 
-  it('should return status 401 when token is incorrect', async () => {
+  it('should return status 401 when token is invalid', async () => {
     // Create user
     const user = await prismaService.user.create({
       data: {
@@ -537,5 +536,174 @@ describe('GET /auth/reset-password', () => {
       .get('/auth/reset-password')
       .withQueryParams('email', 'email@mail.com')
       .expectStatus(404);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/*                            RESET PASSWORD (POST)                           */
+/* -------------------------------------------------------------------------- */
+describe('POST /auth/reset-password', () => {
+  /* ------------------------------ CONFIGURATION ----------------------------- */
+  beforeAll(async () => beforeTests());
+  beforeEach(async () => beforeTest());
+  afterAll(async () => afterTests());
+
+  /* ---------------------------------- TESTS --------------------------------- */
+  it('should reset user password when all attributes are valid', async () => {
+    // Create user
+    const user = await prismaService.user.create({
+      data: {
+        firstName: 'firstname',
+        email: 'firstname@mail.com',
+        passwordHash: 'password',
+        emailVerifiedAt: new Date(),
+      },
+    });
+
+    // Generate the token
+    const token = randomToken.generate(32);
+    const tokenHash = await argon.hash(token);
+
+    // Create passwordReset
+    await prismaService.passwordReset.create({
+      data: {
+        userEmail: user.email,
+        tokenHash,
+      },
+    });
+
+    // Assert
+    await pactum
+      .spec()
+      .post('/auth/reset-password')
+      .withBody({
+        email: user.email,
+        password: 'password',
+        token,
+      })
+      .expectStatus(200);
+
+    const updatedUser = await prismaService.user.findUnique({
+      where: { id: user.id },
+    });
+
+    expect(updatedUser.passwordHash).toBeDefined();
+    expect(user.passwordHash !== updatedUser.passwordHash).toBeTruthy();
+  });
+
+  it('should return status 400 when email is missing', () => {
+    return pactum
+      .spec()
+      .post('/auth/reset-password')
+      .withBody({
+        password: 'password',
+        token: 'token',
+      })
+      .expectStatus(400);
+  });
+
+  it('should return status 404 when password reset does not exist', () => {
+    return pactum
+      .spec()
+      .post('/auth/reset-password')
+      .withBody({
+        email: 'email@mail.com',
+        password: 'password',
+        token: 'token',
+      })
+      .expectStatus(404);
+  });
+
+  it('should return status 400 when password is missing', () => {
+    return pactum
+      .spec()
+      .post('/auth/reset-password')
+      .withBody({
+        email: 'email@mail.com',
+        token: 'token',
+      })
+      .expectStatus(400);
+  });
+
+  it('should return status 400 when token is missing', () => {
+    return pactum
+      .spec()
+      .post('/auth/reset-password')
+      .withBody({
+        email: 'email@mail.com',
+        password: 'password',
+      })
+      .expectStatus(400);
+  });
+
+  it('should return status 401 when token is invalid', async () => {
+    // Create user
+    const user = await prismaService.user.create({
+      data: {
+        firstName: 'firstname',
+        email: 'firstname@mail.com',
+        passwordHash: 'password',
+        emailVerifiedAt: new Date(),
+      },
+    });
+
+    // Generate the token
+    const token = randomToken.generate(32);
+    const tokenHash = await argon.hash(token);
+
+    // Create passwordReset
+    await prismaService.passwordReset.create({
+      data: {
+        userEmail: user.email,
+        tokenHash,
+      },
+    });
+
+    // Assert
+    return pactum
+      .spec()
+      .post('/auth/reset-password')
+      .withBody({
+        email: user.email,
+        password: 'password',
+        token: 'token',
+      })
+      .expectStatus(401);
+  });
+
+  it('should return status 401 when token has expired', async () => {
+    // Create user
+    const user = await prismaService.user.create({
+      data: {
+        firstName: 'firstname',
+        email: 'firstname@mail.com',
+        passwordHash: 'password',
+        emailVerifiedAt: new Date(),
+      },
+    });
+
+    // Generate the token
+    const token = randomToken.generate(32);
+    const tokenHash = await argon.hash(token);
+
+    // Create passwordReset
+    await prismaService.passwordReset.create({
+      data: {
+        userEmail: user.email,
+        tokenHash,
+        createdAt: new Date(0), // Jan 01 1970
+      },
+    });
+
+    // Assert
+    return pactum
+      .spec()
+      .post('/auth/reset-password')
+      .withBody({
+        email: user.email,
+        password: 'password',
+        token,
+      })
+      .expectStatus(401);
   });
 });
