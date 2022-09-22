@@ -1,9 +1,9 @@
 /* -------------------------------------------------------------------------- */
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
-import * as argon from 'argon2';
-import * as pactum from 'pactum';
-import * as randomToken from 'rand-token';
+import argon from 'argon2';
+import pactum from 'pactum';
+import randomToken from 'rand-token';
 import { string } from 'pactum-matchers';
 import {
   beforeTests,

@@ -1,7 +1,7 @@
 /* -------------------------------------------------------------------------- */
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
-import * as pactum from 'pactum';
+import pactum from 'pactum';
 import {
   beforeTests,
   afterTests,

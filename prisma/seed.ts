@@ -3,7 +3,7 @@
 /* -------------------------------------------------------------------------- */
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import * as argon from 'argon2';
+import argon from 'argon2';
 
 /* -------------------------------------------------------------------------- */
 /*                               INITIALIZATION                               */

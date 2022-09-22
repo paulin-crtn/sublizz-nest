@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
-import * as argon from 'argon2';
-import * as randomToken from 'rand-token';
+import argon from 'argon2';
+import randomToken from 'rand-token';
 import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 

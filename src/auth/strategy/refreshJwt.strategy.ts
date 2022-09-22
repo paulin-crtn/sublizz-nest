@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from '../../prisma/prisma.service';
-import * as argon from 'argon2';
+import argon from 'argon2';
 
 @Injectable()
 export class RefreshJwtStrategy extends PassportStrategy(

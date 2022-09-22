@@ -5,8 +5,8 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TestingModule, Test } from '@nestjs/testing';
-import * as cookieParser from 'cookie-parser';
-import * as pactum from 'pactum';
+import cookieParser from 'cookie-parser';
+import pactum from 'pactum';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 

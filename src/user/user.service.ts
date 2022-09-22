@@ -8,7 +8,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
-import * as argon from 'argon2';
+import argon from 'argon2';
 import { UpdateUserDto } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailVerificationService } from '../email-verification/email-verification.service';
