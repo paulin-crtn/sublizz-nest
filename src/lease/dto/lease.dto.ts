@@ -93,6 +93,7 @@ export class LeaseDto {
   @Max(1)
   isPublished: number;
 
+  @IsOptional()
   @IsArray()
   @IsUrl(undefined, { each: true })
   leaseImages: string[];

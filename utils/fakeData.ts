@@ -37,6 +37,4 @@ export const fakeLease = (userId: number) => ({
   isPublished: faker.datatype.number({ min: 0, max: 1 }),
 });
 
-export const fakeLeaseImage = () => ({
-  url: faker.image.imageUrl(),
-});
+export const fakeLeaseImage = () => faker.image.imageUrl();

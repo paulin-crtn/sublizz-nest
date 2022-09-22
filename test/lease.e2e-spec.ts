@@ -14,6 +14,31 @@ import {
 } from './config';
 
 /* -------------------------------------------------------------------------- */
+/*                            MANDATORY ATTRIBUTES                            */
+/* -------------------------------------------------------------------------- */
+const mandatoryRequestAttributes: string[] = [
+  'street',
+  'postCode',
+  'city',
+  'description',
+  'surface',
+  'room',
+  'startDate',
+  'endDate',
+  'isDateFlexible',
+  'pricePerMonth',
+  'isPublished',
+];
+
+const responseAttribute: string[] = [
+  ...mandatoryRequestAttributes,
+  'id',
+  'userId',
+  'createdAt',
+  'updatedAt',
+];
+
+/* -------------------------------------------------------------------------- */
 /*                                    TYPE                                    */
 /* -------------------------------------------------------------------------- */
 type LeaseResponse = Partial<
@@ -25,22 +50,15 @@ type LeaseResponse = Partial<
 /* -------------------------------------------------------------------------- */
 /*                                   HELPER                                   */
 /* -------------------------------------------------------------------------- */
+/**
+ * Check that all response attributes are defined
+ *
+ * @param response
+ */
 function checkResponse(response: LeaseResponse) {
-  expect(response.id).toBeDefined();
-  expect(response.userId).toBeDefined();
-  expect(response.street).toBeDefined();
-  expect(response.postCode).toBeDefined();
-  expect(response.city).toBeDefined();
-  expect(response.description).toBeDefined();
-  expect(response.surface).toBeDefined();
-  expect(response.room).toBeDefined();
-  expect(response.startDate).toBeDefined();
-  expect(response.endDate).toBeDefined();
-  expect(response.isDateFlexible).toBeDefined();
-  expect(response.pricePerMonth).toBeDefined();
-  expect(response.isPublished).toBeDefined();
-  expect(response.createdAt).toBeDefined();
-  expect(response.updatedAt).toBeDefined();
+  responseAttribute.forEach((attribute: string) =>
+    expect(response[attribute]).toBeDefined(),
+  );
   expect(response.leaseImages).toBeDefined();
   expect(response.leaseImages.length).toBe(4);
   expect(response.leaseImages[0].url).toBeDefined();
@@ -74,7 +92,7 @@ describe('GET /leases', () => {
           isPublished: index % 2 === 0 ? 1 : 0, // Overide fake lease value
           leaseImages: {
             createMany: {
-              data: leaseImages,
+              data: leaseImages.map((url) => ({ url })),
             },
           },
         },
@@ -115,7 +133,7 @@ describe('GET /leases/:id', () => {
         ...fakeLease(user.id),
         leaseImages: {
           createMany: {
-            data: leaseImages,
+            data: leaseImages.map((url) => ({ url })),
           },
         },
       },
@@ -163,7 +181,7 @@ describe('GET /leases/user', () => {
         ...fakeLease(user.id),
         leaseImages: {
           createMany: {
-            data: leaseImages,
+            data: leaseImages.map((url) => ({ url })),
           },
         },
       },
@@ -216,5 +234,87 @@ describe('POST /leases', () => {
   afterAll(async () => afterTests());
 
   /* ---------------------------------- TESTS --------------------------------- */
-  it('should store a lease when access_token and all attributes are valid', () => {});
+  it('should store a lease when access_token and all attributes are valid', async () => {
+    // Create 1 fake user
+    const user = await prismaService.user.create({ data: await fakeUser() });
+    // Create 1 lease
+    const lease = fakeLease(user.id);
+    // Create 4 fake leaseImage
+    const leaseImages = [];
+    for (let index = 0; index < 4; index++) {
+      leaseImages.push(fakeLeaseImage());
+    }
+
+    // Payload
+    const payload = {
+      sub: user.id,
+      email: user.email,
+    };
+
+    // JWT refresh token
+    const jwt = await jwtService.signAsync(payload, {
+      expiresIn: '15m',
+      secret: configService.get('ACCESS_JWT_SECRET'),
+    });
+
+    // Assert
+    const response = await pactum
+      .spec()
+      .post('/leases')
+      .withHeaders('Authorization', `Bearer ${jwt}`)
+      .withBody({ ...lease, leaseImages })
+      .expectStatus(201)
+      .returns('res.body');
+
+    checkResponse(response);
+  });
+
+  it('should return status 400 when an attribute is missing', async () => {
+    // Create 1 fake user
+    const user = await prismaService.user.create({ data: await fakeUser() });
+    // Create 1 lease
+    const lease = fakeLease(user.id);
+    // Create 4 fake leaseImage
+    const leaseImages = [];
+    for (let index = 0; index < 4; index++) {
+      leaseImages.push(fakeLeaseImage());
+    }
+
+    // Payload
+    const payload = {
+      sub: user.id,
+      email: user.email,
+    };
+
+    // JWT refresh token
+    const jwt = await jwtService.signAsync(payload, {
+      expiresIn: '15m',
+      secret: configService.get('ACCESS_JWT_SECRET'),
+    });
+
+    // Assert
+    for (const attribute of mandatoryRequestAttributes) {
+      const data = { ...lease };
+      delete data[attribute];
+
+      await pactum
+        .spec()
+        .post('/leases')
+        .withHeaders('Authorization', `Bearer ${jwt}`)
+        .withBody({ ...data, leaseImages })
+        .expectStatus(400);
+    }
+  });
+
+  it('should return status 401 when access_token is invalid', async () => {
+    return pactum
+      .spec()
+      .post('/leases')
+      .withHeaders('Authorization', `Bearer token`)
+      .expectStatus(401);
+  });
+
+  it('should return status 401 when access_token is not provided', async () => {
+    return pactum.spec().post('/leases').expectStatus(401);
+  });
 });
