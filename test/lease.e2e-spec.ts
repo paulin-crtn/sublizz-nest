@@ -323,19 +323,16 @@ describe('POST /leases', () => {
     const user = await prismaService.user.create({ data: await fakeUser() });
     // Create 1 lease
     const lease = fakeLease(user.id);
-
     // Payload
     const payload = {
       sub: user.id,
       email: user.email,
     };
-
     // JWT refresh token
     const jwt = await jwtService.signAsync(payload, {
       expiresIn: '15m',
       secret: configService.get('ACCESS_JWT_SECRET'),
     });
-
     // Assert
     const requestData = [...mandatoryRequestData, ...optionalRequestData];
     for (const attribute of requestData) {
@@ -394,19 +391,16 @@ describe('PUT /leases/:id', () => {
         },
       },
     });
-
     // Payload
     const payload = {
       sub: user.id,
       email: user.email,
     };
-
     // JWT refresh token
     const jwt = await jwtService.signAsync(payload, {
       expiresIn: '15m',
       secret: configService.get('ACCESS_JWT_SECRET'),
     });
-
     // Assert
     const response = await pactum
       .spec()
@@ -424,19 +418,16 @@ describe('PUT /leases/:id', () => {
     const user = await prismaService.user.create({ data: await fakeUser() });
     // Create 1 lease
     const lease = fakeLease(user.id);
-
     // Payload
     const payload = {
       sub: user.id,
       email: user.email,
     };
-
     // JWT refresh token
     const jwt = await jwtService.signAsync(payload, {
       expiresIn: '15m',
       secret: configService.get('ACCESS_JWT_SECRET'),
     });
-
     // Assert
     for (const attribute of mandatoryRequestData) {
       const data = { ...lease };
@@ -455,19 +446,16 @@ describe('PUT /leases/:id', () => {
     const user = await prismaService.user.create({ data: await fakeUser() });
     // Create 1 lease
     const lease = fakeLease(user.id);
-
     // Payload
     const payload = {
       sub: user.id,
       email: user.email,
     };
-
     // JWT refresh token
     const jwt = await jwtService.signAsync(payload, {
       expiresIn: '15m',
       secret: configService.get('ACCESS_JWT_SECRET'),
     });
-
     // Assert
     const requestData = [...mandatoryRequestData, ...optionalRequestData];
     for (const attribute of requestData) {
@@ -494,5 +482,130 @@ describe('PUT /leases/:id', () => {
 
   it('should return status 401 when access_token is not provided', async () => {
     return pactum.spec().post('/leases').expectStatus(401);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/*                                DELETE LEASE                                */
+/* -------------------------------------------------------------------------- */
+describe('DELETE /leases/:id', () => {
+  /* ------------------------------ CONFIGURATION ----------------------------- */
+  beforeAll(async () => beforeTests());
+  beforeEach(async () => beforeTest());
+  afterAll(async () => afterTests());
+
+  /* ---------------------------------- TESTS --------------------------------- */
+  it('should delete a lease when access_token is valid', async () => {
+    // Create 1 fake user
+    const user = await prismaService.user.create({ data: await fakeUser() });
+    // Create 1 fake lease with 4 leaseImage
+    const leaseImages = [];
+    for (let index = 0; index < 4; index++) {
+      leaseImages.push(fakeLeaseImage());
+    }
+    const lease = await prismaService.lease.create({
+      data: {
+        ...fakeLease(user.id),
+        leaseImages: {
+          createMany: {
+            data: leaseImages.map((url) => ({ url })),
+          },
+        },
+      },
+    });
+    // Payload
+    const payload = {
+      sub: user.id,
+      email: user.email,
+    };
+    // JWT refresh token
+    const jwt = await jwtService.signAsync(payload, {
+      expiresIn: '15m',
+      secret: configService.get('ACCESS_JWT_SECRET'),
+    });
+    // Assert
+    await pactum
+      .spec()
+      .delete(`/leases/${lease.id}`)
+      .withHeaders('Authorization', `Bearer ${jwt}`)
+      .expectStatus(204);
+  });
+
+  it('should return status 404 when lease does not exist', async () => {
+    // Create 1 fake user
+    const user = await prismaService.user.create({ data: await fakeUser() });
+    // Payload
+    const payload = {
+      sub: user.id,
+      email: user.email,
+    };
+    // JWT refresh token
+    const jwt = await jwtService.signAsync(payload, {
+      expiresIn: '15m',
+      secret: configService.get('ACCESS_JWT_SECRET'),
+    });
+    // Assert
+    await pactum
+      .spec()
+      .delete('/leases/9999999')
+      .withHeaders('Authorization', `Bearer ${jwt}`)
+      .expectStatus(404);
+  });
+
+  it('should return status 401 when lease does not belong to user', async () => {
+    // Create 2 fakes user
+    const userAuthenticated = await prismaService.user.create({
+      data: await fakeUser(),
+    });
+    const userWithLease = await prismaService.user.create({
+      data: {
+        firstName: 'first',
+        passwordHash: 'password',
+        email: 'second@mail.com',
+      },
+    });
+    // Create 1 fake lease with 4 leaseImage
+    const leaseImages = [];
+    for (let index = 0; index < 4; index++) {
+      leaseImages.push(fakeLeaseImage());
+    }
+    const lease = await prismaService.lease.create({
+      data: {
+        ...fakeLease(userWithLease.id),
+        leaseImages: {
+          createMany: {
+            data: leaseImages.map((url) => ({ url })),
+          },
+        },
+      },
+    });
+    // Payload
+    const payload = {
+      sub: userAuthenticated.id,
+      email: userAuthenticated.email,
+    };
+    // JWT refresh token
+    const jwt = await jwtService.signAsync(payload, {
+      expiresIn: '15m',
+      secret: configService.get('ACCESS_JWT_SECRET'),
+    });
+    // Assert
+    await pactum
+      .spec()
+      .delete(`/leases/${lease.id}`)
+      .withHeaders('Authorization', `Bearer ${jwt}`)
+      .expectStatus(403);
+  });
+
+  it('should return status 401 when access_token is invalid', async () => {
+    return pactum
+      .spec()
+      .delete('/leases/1')
+      .withHeaders('Authorization', `Bearer token`)
+      .expectStatus(401);
+  });
+
+  it('should return status 401 when access_token is missing', async () => {
+    return pactum.spec().delete('/leases/1').expectStatus(401);
   });
 });

@@ -290,11 +290,9 @@ describe('POST /auth/refresh', () => {
         emailVerifiedAt: new Date(),
       },
     });
-
     // Generate the refresh token
     const refreshToken = randomToken.generate(32);
     const refreshTokenHash = await argon.hash(refreshToken);
-
     // Update user with the refresh token hash
     await prismaService.user.update({
       where: {
@@ -304,19 +302,16 @@ describe('POST /auth/refresh', () => {
         refreshTokenHash,
       },
     });
-
     // Payload
     const payload = {
       sub: user.id,
       refreshToken,
     };
-
     // JWT refresh token
     const jwt = await jwtService.signAsync(payload, {
       expiresIn: '1w',
       secret: configService.get('REFRESH_JWT_SECRET'),
     });
-
     // Expect
     const response = await pactum
       .spec()
@@ -559,11 +554,9 @@ describe('POST /auth/reset-password', () => {
         emailVerifiedAt: new Date(),
       },
     });
-
     // Generate the token
     const token = randomToken.generate(32);
     const tokenHash = await argon.hash(token);
-
     // Create passwordReset
     await prismaService.passwordReset.create({
       data: {
@@ -571,7 +564,6 @@ describe('POST /auth/reset-password', () => {
         tokenHash,
       },
     });
-
     // Assert
     await pactum
       .spec()
@@ -646,11 +638,9 @@ describe('POST /auth/reset-password', () => {
         emailVerifiedAt: new Date(),
       },
     });
-
     // Generate the token
     const token = randomToken.generate(32);
     const tokenHash = await argon.hash(token);
-
     // Create passwordReset
     await prismaService.passwordReset.create({
       data: {
@@ -658,7 +648,6 @@ describe('POST /auth/reset-password', () => {
         tokenHash,
       },
     });
-
     // Assert
     return pactum
       .spec()
@@ -681,11 +670,9 @@ describe('POST /auth/reset-password', () => {
         emailVerifiedAt: new Date(),
       },
     });
-
     // Generate the token
     const token = randomToken.generate(32);
     const tokenHash = await argon.hash(token);
-
     // Create passwordReset
     await prismaService.passwordReset.create({
       data: {
@@ -694,7 +681,6 @@ describe('POST /auth/reset-password', () => {
         createdAt: new Date(0), // Jan 01 1970
       },
     });
-
     // Assert
     return pactum
       .spec()
