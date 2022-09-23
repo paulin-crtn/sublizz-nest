@@ -12,6 +12,20 @@ import {
 } from './config';
 
 /* -------------------------------------------------------------------------- */
+/*                                REQUEST DATA                                */
+/* -------------------------------------------------------------------------- */
+const mandatoryRequestData: { key: string; invalidValues: any[] }[] = [
+  { key: 'firstName', invalidValues: [null, '', 'a', true, 9999] },
+  { key: 'email', invalidValues: [null, '', 'a', true, 9999] },
+];
+
+const optionalRequestData: { key: string; invalidValues: any[] }[] = [
+  { key: 'lastName', invalidValues: ['', 'a', true, 9999] },
+  { key: 'password', invalidValues: ['', 'abc', true, 9999] },
+  { key: 'profilePictureUrl', invalidValues: ['', 'abc', true, 9999] },
+];
+
+/* -------------------------------------------------------------------------- */
 /*                        GET AUTHENTICATED USER TESTS                        */
 /* -------------------------------------------------------------------------- */
 describe('GET /users/me', () => {
@@ -105,6 +119,7 @@ describe('PUT /users/:id', () => {
         emailVerifiedAt: new Date(),
       },
     });
+
     const token = await jwtService.signAsync(
       { sub: user.id, email: user.email },
       {
@@ -112,17 +127,22 @@ describe('PUT /users/:id', () => {
         secret: configService.get('ACCESS_JWT_SECRET'),
       },
     );
+
     return pactum
       .spec()
       .put(`/users/${user.id}`)
       .withHeaders({ Authorization: `Bearer ${token}` })
-      .withBody({ lastName: 'lastname' })
+      .withBody({
+        firstName: 'new',
+        lastName: 'lastname',
+        email: 'new@mail.com',
+      })
       .expectStatus(200)
       .expectJsonMatch({
         id: user.id,
-        firstName: 'firstname',
+        firstName: 'new',
         lastName: 'lastname',
-        email: 'firstname@mail.com',
+        email: 'firstname@mail.com', // Because user need to validate new email
         profilePictureUrl: null,
       });
   });
@@ -136,6 +156,7 @@ describe('PUT /users/:id', () => {
         emailVerifiedAt: new Date(),
       },
     });
+
     const token = await jwtService.signAsync(
       { sub: user.id, email: user.email },
       {
@@ -143,15 +164,20 @@ describe('PUT /users/:id', () => {
         secret: configService.get('ACCESS_JWT_SECRET'),
       },
     );
+
     return pactum
       .spec()
       .put('/users/999999999')
       .withHeaders({ Authorization: `Bearer ${token}` })
-      .withBody({ lastName: 'lastname' })
+      .withBody({
+        firstName: 'new',
+        lastName: 'lastname',
+        email: 'new@mail.com',
+      })
       .expectStatus(404);
   });
 
-  it('should return status 400 when provided attributes are invalid', async () => {
+  it('should return status 400 when a mandatory attribute is missing', async () => {
     const user = await prismaService.user.create({
       data: {
         firstName: 'firstname',
@@ -160,6 +186,7 @@ describe('PUT /users/:id', () => {
         emailVerifiedAt: new Date(),
       },
     });
+
     const token = await jwtService.signAsync(
       { sub: user.id, email: user.email },
       {
@@ -167,12 +194,63 @@ describe('PUT /users/:id', () => {
         secret: configService.get('ACCESS_JWT_SECRET'),
       },
     );
-    return pactum
-      .spec()
-      .put(`/users/user.id`)
-      .withHeaders({ Authorization: `Bearer ${token}` })
-      .withBody({ email: 'email' })
-      .expectStatus(400);
+
+    for (const attribute of mandatoryRequestData) {
+      const data = { ...user };
+      delete data[attribute.key];
+      await pactum
+        .spec()
+        .put(`/users/${user.id}`)
+        .withHeaders({ Authorization: `Bearer ${token}` })
+        .withBody({ ...data })
+        .expectStatus(400);
+    }
+  });
+
+  it('should return status 400 when any attribute is invalid', async () => {
+    const user = await prismaService.user.create({
+      data: {
+        firstName: 'firstname',
+        email: 'firstname@mail.com',
+        passwordHash: 'password',
+        emailVerifiedAt: new Date(),
+      },
+    });
+
+    const token = await jwtService.signAsync(
+      { sub: user.id, email: user.email },
+      {
+        expiresIn: '15m',
+        secret: configService.get('ACCESS_JWT_SECRET'),
+      },
+    );
+
+    // Payload
+    const payload = {
+      sub: user.id,
+      email: user.email,
+    };
+
+    // JWT refresh token
+    const jwt = await jwtService.signAsync(payload, {
+      expiresIn: '15m',
+      secret: configService.get('ACCESS_JWT_SECRET'),
+    });
+
+    // Assert
+    const requestData = [...mandatoryRequestData, ...optionalRequestData];
+    for (const attribute of requestData) {
+      for (const invalidValue of attribute.invalidValues) {
+        const data = { ...user };
+        data[attribute.key] = invalidValue;
+        await pactum
+          .spec()
+          .post('/leases')
+          .withHeaders('Authorization', `Bearer ${jwt}`)
+          .withBody({ ...data })
+          .expectStatus(400);
+      }
+    }
   });
 
   it('should return status 401 when no token is provided', async () => {
