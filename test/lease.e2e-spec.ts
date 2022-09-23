@@ -17,23 +17,26 @@ import {
 /*                                REQUEST DATA                                */
 /* -------------------------------------------------------------------------- */
 const mandatoryRequestData: { key: string; invalidValues: any[] }[] = [
-  { key: 'street', invalidValues: ['a'] },
-  { key: 'postCode', invalidValues: ['a', 123456] },
-  { key: 'city', invalidValues: ['a'] },
-  { key: 'description', invalidValues: [] },
-  { key: 'surface', invalidValues: ['a', 0, 10000] },
-  { key: 'room', invalidValues: ['a', 0, 10000] },
-  { key: 'startDate', invalidValues: ['a'] },
-  { key: 'endDate', invalidValues: ['a'] },
-  { key: 'isDateFlexible', invalidValues: ['a', 2] },
-  { key: 'pricePerMonth', invalidValues: ['a', 0, 100000] },
-  { key: 'isPublished', invalidValues: ['a', 2] },
+  { key: 'street', invalidValues: [null, '', 'a'] },
+  { key: 'postCode', invalidValues: [null, '', 'a', 123456] },
+  { key: 'city', invalidValues: [null, '', 'a'] },
+  { key: 'surface', invalidValues: [null, '', 'a', 0, 10000] },
+  { key: 'room', invalidValues: [null, '', 'a', 0, 10000] },
+  { key: 'startDate', invalidValues: [null, '', 'a'] },
+  { key: 'endDate', invalidValues: [null, '', 'a'] },
+  { key: 'isDateFlexible', invalidValues: [null, 'a', '2', 2] },
+  {
+    key: 'pricePerMonth',
+    invalidValues: [null, '', 'a', 0, 3000],
+  },
+  { key: 'isPublished', invalidValues: [null, 'a', 2] },
 ];
 
 const optionalRequestData: { key: string; invalidValues: any[] }[] = [
-  { key: 'houseNumber', invalidValues: ['abcdefghijklm'] },
-  { key: 'gpsLatitude', invalidValues: ['abc', 9] },
-  { key: 'gpsLongitude', invalidValues: ['abc', 9] },
+  { key: 'houseNumber', invalidValues: ['', 'abcdefghijklm'] },
+  { key: 'description', invalidValues: [true, 0] },
+  { key: 'gpsLatitude', invalidValues: ['', 'abc', 9] },
+  { key: 'gpsLongitude', invalidValues: ['', 'abc', 9] },
   {
     key: 'leaseImages',
     invalidValues: [
@@ -288,11 +291,6 @@ describe('POST /leases', () => {
     const user = await prismaService.user.create({ data: await fakeUser() });
     // Create 1 lease
     const lease = fakeLease(user.id);
-    // Create 4 fake leaseImage
-    const leaseImages = [];
-    for (let index = 0; index < 4; index++) {
-      leaseImages.push(fakeLeaseImage());
-    }
 
     // Payload
     const payload = {
@@ -315,7 +313,7 @@ describe('POST /leases', () => {
         .spec()
         .post('/leases')
         .withHeaders('Authorization', `Bearer ${jwt}`)
-        .withBody({ ...data, leaseImages })
+        .withBody({ ...data })
         .expectStatus(400);
     }
   });

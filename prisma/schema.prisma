@@ -42,7 +42,7 @@ model Lease {
   city String @db.VarChar(30)
   gpsLatitude String? @db.VarChar(15)
   gpsLongitude String? @db.VarChar(15)
-  description String
+  description String?
   surface Int
   room Int
   startDate DateTime
