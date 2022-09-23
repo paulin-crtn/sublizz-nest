@@ -71,7 +71,9 @@ export class LeaseService {
         ...lease,
         leaseImages: {
           createMany: {
-            data: leaseImages.map((url: string) => ({ url })),
+            data: leaseImages
+              ? leaseImages.map((url: string) => ({ url }))
+              : [],
           },
         },
       },
@@ -104,7 +106,9 @@ export class LeaseService {
         leaseImages: {
           deleteMany: {},
           createMany: {
-            data: leaseImages.map((url: string) => ({ url })),
+            data: leaseImages
+              ? leaseImages.map((url: string) => ({ url }))
+              : [],
           },
         },
       },
