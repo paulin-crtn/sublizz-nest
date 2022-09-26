@@ -2,9 +2,7 @@
 
 ## Description
 
-An API to Create, Read, Update and Delete sublease offers.
-
-_Note: Users must sign up or sign in to perform certain operations._
+An API to publish sublease offers.
 
 ## Installation
 
