@@ -19,9 +19,9 @@ import {
 /* -------------------------------------------------------------------------- */
 describe('POST /auth/signup', () => {
   /* ------------------------------ CONFIGURATION ----------------------------- */
-  beforeAll(async () => beforeTests());
-  beforeEach(async () => beforeTest());
-  afterAll(async () => afterTests());
+  beforeAll(async () => await beforeTests());
+  beforeEach(async () => await beforeTest());
+  afterAll(async () => await afterTests());
 
   /* ---------------------------------- TESTS --------------------------------- */
   it('should create a user when all attributes are provided and valid', async () => {

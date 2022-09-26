@@ -89,9 +89,9 @@ function checkResponse(response: LeaseResponse) {
 /* -------------------------------------------------------------------------- */
 describe('GET /leases', () => {
   /* ------------------------------ CONFIGURATION ----------------------------- */
-  beforeAll(async () => beforeTests());
-  beforeEach(async () => beforeTest());
-  afterAll(async () => afterTests());
+  beforeAll(async () => await beforeTests());
+  beforeEach(async () => await beforeTest());
+  afterAll(async () => await afterTests());
 
   /* ---------------------------------- TESTS --------------------------------- */
   it('should return all published leases', async () => {

@@ -31,9 +31,9 @@ const optionalRequestData: { key: string; invalidValues: any[] }[] = [
 /* -------------------------------------------------------------------------- */
 describe('GET /users/me', () => {
   /* ------------------------------ CONFIGURATION ----------------------------- */
-  beforeAll(async () => beforeTests());
-  beforeEach(async () => beforeTest());
-  afterAll(async () => afterTests());
+  beforeAll(async () => await beforeTests());
+  beforeEach(async () => await beforeTest());
+  afterAll(async () => await afterTests());
 
   /* ---------------------------------- TESTS --------------------------------- */
   it('should return the authenticated user when a valid token is provided', async () => {
@@ -151,14 +151,7 @@ describe('PUT /users/:id', () => {
 
   it('should return status 404 when user does not exist', async () => {
     // Create user
-    const user = await prismaService.user.create({
-      data: {
-        firstName: 'firstname',
-        email: 'firstname@mail.com',
-        passwordHash: 'password',
-        emailVerifiedAt: new Date(),
-      },
-    });
+    const user = await prismaService.user.create({ data: await fakeUser() });
     // Create token
     const token = await jwtService.signAsync(
       { sub: user.id, email: user.email },
@@ -174,7 +167,6 @@ describe('PUT /users/:id', () => {
       .withHeaders({ Authorization: `Bearer ${token}` })
       .withBody({
         firstName: 'new',
-        lastName: 'lastname',
         email: 'new@mail.com',
       })
       .expectStatus(404);
