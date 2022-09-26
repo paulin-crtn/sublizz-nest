@@ -9,9 +9,10 @@ import {
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 import argon from 'argon2';
+import randomToken from 'rand-token';
 import { UpdateUserDto } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { EmailVerificationService } from '../email-verification/email-verification.service';
+import { MailService } from '../mail/mail.service';
 
 /* -------------------------------------------------------------------------- */
 /*                             USER SERVICE CLASS                             */
@@ -20,7 +21,7 @@ import { EmailVerificationService } from '../email-verification/email-verificati
 export class UserService {
   constructor(
     private prismaService: PrismaService,
-    private emailVerificationService: EmailVerificationService,
+    private mailService: MailService,
   ) {}
 
   /* -------------------------------------------------------------------------- */
@@ -73,7 +74,7 @@ export class UserService {
     const { email, password, ...data } = dto;
 
     if (email && email !== user.email) {
-      this.emailVerificationService.verifyUserEmail(user, email);
+      this.verifyUserEmail(user, email);
     }
 
     const passwordHash = password
@@ -115,5 +116,31 @@ export class UserService {
         id,
       },
     });
+  }
+
+  /**
+   * Generate and save a token (hashed) in DB
+   * then send the token to the user by email
+   *
+   * @param user
+   * @param email The email to verify
+   */
+  async verifyUserEmail(user: User, email: string) {
+    const token = randomToken.generate(16);
+    const tokenHash = await argon.hash(token);
+    const emailVerification = await this.prismaService.emailVerification.create(
+      {
+        data: {
+          userId: user.id,
+          email,
+          tokenHash,
+        },
+      },
+    );
+    await this.mailService.sendUserEmailVerificationToken(
+      user,
+      token,
+      emailVerification,
+    );
   }
 }

@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
-import { EmailVerificationModule } from '../email-verification/email-verification.module';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
-  imports: [EmailVerificationModule],
+  imports: [MailModule],
   providers: [UserService],
   controllers: [UserController],
   exports: [UserService],

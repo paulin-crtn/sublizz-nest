@@ -12,11 +12,9 @@ import { ConfigService } from '@nestjs/config';
 import { User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
-import { isEmail } from 'class-validator';
 import validate from 'deep-email-validator';
 import argon from 'argon2';
 import randomToken from 'rand-token';
-import { EmailVerificationService } from '../email-verification/email-verification.service';
 import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
@@ -32,7 +30,6 @@ export class AuthService {
     private prismaService: PrismaService,
     private jwtService: JwtService,
     private userService: UserService,
-    private emailVerificationService: EmailVerificationService,
     private mailService: MailService,
   ) {}
 
@@ -73,9 +70,7 @@ export class AuthService {
         },
       });
       // Verify the provided email belongs to the user
-      if (this.configService.get('NODE_ENV') !== 'test') {
-        await this.emailVerificationService.verifyUserEmail(user, user.email);
-      }
+      await this.userService.verifyUserEmail(user, user.email);
     } catch (error) {
       // Catch unique constraint violation error
       if (error instanceof PrismaClientKnownRequestError) {
@@ -218,9 +213,7 @@ export class AuthService {
       },
     });
     // Send token to user's email
-    if (this.configService.get('NODE_ENV') !== 'test') {
-      await this.mailService.sendUserResetPasswordToken(user, token);
-    }
+    await this.mailService.sendUserResetPasswordToken(user, token);
   }
 
   /**

@@ -11,6 +11,14 @@ export class MailService {
     private mailerService: MailerService,
     private configService: ConfigService,
   ) {
+    // DO NOT SEND EMAIL WHEN RUNNING TEST
+    if (this.configService.get('NODE_ENV') === 'test') {
+      // Overide sendMail function
+      mailerService.sendMail = ({}) => {
+        return null;
+      };
+    }
+    // SET BASE URL
     this.baseUrl =
       this.configService.get('APP_DOMAIN') +
       ':' +
