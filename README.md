@@ -2,7 +2,7 @@
 
 ## Description
 
-An API to publish sublease offers.
+An API to publish sublease offers (CRUD) with complete user authentication (signup, signin, email confirmation, password reset, etc).
 
 ## Installation
 
