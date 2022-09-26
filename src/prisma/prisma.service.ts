@@ -14,13 +14,17 @@ export class PrismaService extends PrismaClient {
     });
   }
 
-  cleanDb() {
-    return this.$transaction([
-      this.passwordReset.deleteMany(),
-      this.emailVerification.deleteMany(),
-      this.leaseImage.deleteMany(),
-      this.lease.deleteMany(),
-      this.user.deleteMany(),
-    ]);
+  async cleanDb() {
+    try {
+      return await this.$transaction([
+        this.passwordReset.deleteMany(),
+        this.emailVerification.deleteMany(),
+        this.leaseImage.deleteMany(),
+        this.lease.deleteMany(),
+        this.user.deleteMany(),
+      ]);
+    } catch (e) {
+      throw new Error('An error occured while cleaning the DB: ' + e);
+    }
   }
 }
