@@ -1,7 +1,6 @@
 # Environment
 .env
 .env.dev
-.env.test
 
 # compiled output
 /dist
