@@ -73,5 +73,9 @@ export class LeaseEntity {
   updatedAt: Date;
 
   @Type(() => LeaseImageEntity)
+  @Expose({ groups: [ONE_LEASE, MANY_LEASES] })
   leaseImages: LeaseImageEntity[];
+
+  @Expose({ groups: [ONE_LEASE] })
+  user: { firstName: string; lastName: string };
 }
