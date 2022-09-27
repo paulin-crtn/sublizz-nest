@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { LeaseImageEntity } from '.';
+import { LeaseImageEntity } from './index';
 
 export class LeaseEntity {
   constructor(partial: Partial<LeaseEntity>) {
