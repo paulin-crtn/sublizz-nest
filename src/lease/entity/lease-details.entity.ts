@@ -19,45 +19,32 @@ import { LeaseImageEntity } from './index';
  *
  * But it doesn't work well with Swagger.
  */
-export class LeaseEntity {
-  constructor(partial: Partial<LeaseEntity>) {
+export class LeaseDetailsEntity {
+  constructor(partial: Partial<LeaseDetailsEntity>) {
     Object.assign(this, partial);
   }
 
   id: number;
   userId: number;
-
-  @Exclude()
-  @ApiHideProperty()
   houseNumber: string;
-
-  @Exclude()
-  @ApiHideProperty()
   street: string;
-
   postCode: string;
   city: string;
   gpsLatitude: string;
   gpsLongitude: string;
-
-  @Exclude()
-  @ApiHideProperty()
   description: string;
-
   surface: number;
   room: number;
   startDate: Date;
   endDate: Date;
   isDateFlexible: number;
   pricePerMonth: number;
-
-  @Exclude()
-  @ApiHideProperty()
   isPublished: number;
-
   createdAt: Date;
   updatedAt: Date;
 
   @Type(() => LeaseImageEntity)
   leaseImages: LeaseImageEntity[];
+
+  user: { firstName: string; lastName: string };
 }
