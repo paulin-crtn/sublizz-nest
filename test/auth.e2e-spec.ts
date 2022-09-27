@@ -209,7 +209,7 @@ describe('POST /auth/signin', () => {
       .post('/auth/signin')
       .withBody({
         email: 'firstname@mail.com',
-        password: 'passss',
+        password: 'passssss',
       })
       .expectStatus(401);
   });
