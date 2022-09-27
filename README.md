@@ -8,9 +8,10 @@ An API to publish sublease offers (CRUD) with complete user authentication (sign
 
 The application is made with [Nest](https://github.com/nestjs/nest) and uses a **PostgreSQL** database.
 
-1. Rename the `.env.example` file to `.env` and complete the key/value pairs
-2. Run `npm install` to install dependencies.
-3. Run `npm run start:dev` for development or `npm run start:prod` for production.
+1. Rename the `.env.example` file to `.env.dev` and complete the key/value pairs
+2. Run `npm run prisma:migrate:dev` to migrate the schema and seed the database.
+3. Run `npm install` to install dependencies.
+4. Run `npm run start:dev` for a development server.
 
 ## E2E Tests
 
