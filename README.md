@@ -31,7 +31,9 @@ npm run test:e2e
 
 ## Documentation
 
-API documentation is being written.
+API documentation is accessible by navigating to `/api` from your browser (server must be started).
+
+![Screenshot](/screenshot_doc.png)
 
 ## License
 
