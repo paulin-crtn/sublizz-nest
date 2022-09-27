@@ -13,6 +13,13 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiCookieAuth,
+  ApiOkResponse,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { isEmail } from 'class-validator';
 import striptags from 'striptags';
@@ -21,6 +28,7 @@ import { AuthService } from './auth.service';
 import { ResCookie } from './decorator';
 import { PasswordResetDto, SignInDto, SignUpDto } from './dto';
 import { AccessJwtGuard, RefreshJwtGuard } from './guard';
+import { accessTokenResponse, userEmailResponse } from './swagger';
 
 /* -------------------------------------------------------------------------- */
 /*                                  CONSTANT                                  */
@@ -37,6 +45,7 @@ const COOKIE_OPTIONS = {
 /* -------------------------------------------------------------------------- */
 /*                                 CONTROLLER                                 */
 /* -------------------------------------------------------------------------- */
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -48,6 +57,7 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse(accessTokenResponse)
   @Post('signin')
   async signIn(@Body() dto: SignInDto, @ResCookie() response: any) {
     const { accessToken, refreshToken } = await this.authService.signIn(dto);
@@ -56,7 +66,9 @@ export class AuthController {
   }
 
   @UseGuards(RefreshJwtGuard)
+  @ApiCookieAuth()
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse(accessTokenResponse)
   @Post('refresh')
   async refresh(@GetUser() user: User, @ResCookie() response: any) {
     const { accessToken, newRefreshToken } =
@@ -66,6 +78,7 @@ export class AuthController {
   }
 
   @UseGuards(AccessJwtGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('logout')
   async logout(@GetUser('id') userId: number) {
@@ -73,6 +86,7 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse(userEmailResponse)
   @Get('confirm-email')
   async confirmUserEmail(
     @Query('emailVerificationId', ParseIntPipe) emailVerificationId: number,
