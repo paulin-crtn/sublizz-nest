@@ -14,7 +14,7 @@ import {
 } from './config';
 
 /* -------------------------------------------------------------------------- */
-/*                                REQUEST DATA                                */
+/*                             REQUEST ATTRIBUTES                             */
 /* -------------------------------------------------------------------------- */
 const mandatoryRequestData: { key: string; invalidValues: any[] }[] = [
   { key: 'street', invalidValues: [null, '', 'a'] },
@@ -49,7 +49,7 @@ const optionalRequestData: { key: string; invalidValues: any[] }[] = [
 ];
 
 /* -------------------------------------------------------------------------- */
-/*                                   HELPER                                   */
+/*                                  RESPONSE                                  */
 /* -------------------------------------------------------------------------- */
 function isResponseOK(response: LeaseEntity) {
   expect(response.id).not.toBe(null);
