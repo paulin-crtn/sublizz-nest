@@ -2,12 +2,11 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "main", "dev" ]
+    branches: ['main', 'dev']
   pull_request:
-    branches: [ "main" ]
+    branches: ['main']
 
 jobs:
-
   # label of the container job
   sublizz-test:
     name: Run tests
@@ -56,7 +55,5 @@ jobs:
         run: npm ci
       - name: Run Prisma migrations
         run: npx prisma migrate deploy
-        # npm run prisma:migrate:test
       - name: Run e2e tests
-        run: npm jest --runInBand --verbose --config ./test/jest-e2e.json
-        # npm run test:e2e
+        run: npm run jest --runInBand --verbose --config ./test/jest-e2e.json
