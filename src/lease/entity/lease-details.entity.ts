@@ -1,8 +1,7 @@
 /* -------------------------------------------------------------------------- */
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
-import { ApiHideProperty } from '@nestjs/swagger';
-import { Exclude, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import { LeaseImageEntity } from './index';
 
 /* -------------------------------------------------------------------------- */
@@ -26,13 +25,13 @@ export class LeaseDetailsEntity {
 
   id: number;
   userId: number;
-  houseNumber: string;
+  houseNumber?: string;
   street: string;
   postCode: string;
   city: string;
-  gpsLatitude: string;
-  gpsLongitude: string;
-  description: string;
+  gpsLatitude?: string;
+  gpsLongitude?: string;
+  description?: string;
   surface: number;
   room: number;
   startDate: Date;

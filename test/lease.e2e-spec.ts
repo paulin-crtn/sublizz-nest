@@ -1,8 +1,8 @@
 /* -------------------------------------------------------------------------- */
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
-import { Lease, LeaseImage } from '@prisma/client';
 import pactum from 'pactum';
+import { LeaseDetailsEntity, LeaseEntity } from '../src/lease/entity';
 import { fakeLease, fakeLeaseImage, fakeUser } from '../utils/fakeData';
 import {
   beforeTests,
@@ -49,31 +49,42 @@ const optionalRequestData: { key: string; invalidValues: any[] }[] = [
 ];
 
 /* -------------------------------------------------------------------------- */
-/*                                    TYPE                                    */
-/* -------------------------------------------------------------------------- */
-type LeaseResponse = Partial<
-  Lease & {
-    leaseImages: LeaseImage[];
-  }
->;
-
-/* -------------------------------------------------------------------------- */
 /*                                   HELPER                                   */
 /* -------------------------------------------------------------------------- */
-/**
- * Check that all response attributes are defined or not null
- *
- * @param response
- */
-function checkResponse(response: LeaseResponse) {
-  optionalRequestData.forEach((attribute) =>
-    expect(response[attribute.key]).toBeDefined(),
-  );
-  mandatoryRequestData.forEach((attribute) =>
-    expect(response[attribute.key]).not.toBe(null),
-  );
+function isResponseOK(response: LeaseEntity) {
   expect(response.id).not.toBe(null);
   expect(response.userId).not.toBe(null);
+  expect(response.postCode).not.toBe(null);
+  expect(response.city).not.toBe(null);
+  expect(response.surface).not.toBe(null);
+  expect(response.room).not.toBe(null);
+  expect(response.startDate).not.toBe(null);
+  expect(response.endDate).not.toBe(null);
+  expect(response.isDateFlexible).not.toBe(null);
+  expect(response.pricePerMonth).not.toBe(null);
+  expect(response.createdAt).not.toBe(null);
+  expect(response.updatedAt).not.toBe(null);
+  expect(response.leaseImages).not.toBe(null);
+  expect(response.leaseImages.length).toBe(4);
+  expect(response.leaseImages[0].url).not.toBe(null);
+  expect(response.leaseImages[1].url).not.toBe(null);
+  expect(response.leaseImages[2].url).not.toBe(null);
+  expect(response.leaseImages[3].url).not.toBe(null);
+}
+
+function isResponseDetailsOK(response: LeaseDetailsEntity) {
+  expect(response.id).not.toBe(null);
+  expect(response.userId).not.toBe(null);
+  expect(response.street).not.toBe(null);
+  expect(response.postCode).not.toBe(null);
+  expect(response.city).not.toBe(null);
+  expect(response.surface).not.toBe(null);
+  expect(response.room).not.toBe(null);
+  expect(response.startDate).not.toBe(null);
+  expect(response.endDate).not.toBe(null);
+  expect(response.isDateFlexible).not.toBe(null);
+  expect(response.pricePerMonth).not.toBe(null);
+  expect(response.isPublished).not.toBe(null);
   expect(response.createdAt).not.toBe(null);
   expect(response.updatedAt).not.toBe(null);
   expect(response.leaseImages).not.toBe(null);
@@ -123,7 +134,7 @@ describe('GET /leases', () => {
       .expectJsonLength(2)
       .returns('res.body');
 
-    response.forEach((lease: LeaseResponse) => checkResponse(lease));
+    response.forEach((lease: LeaseEntity) => isResponseOK(lease));
   });
 });
 
@@ -163,7 +174,7 @@ describe('GET /leases/:id', () => {
       .expectStatus(200)
       .returns('res.body');
 
-    checkResponse(response);
+    isResponseDetailsOK(response);
   });
 
   it('should return status 404 when lease does not exist', async () => {
@@ -225,7 +236,7 @@ describe('GET /leases/user', () => {
       .expectJsonLength(1)
       .returns('res.body');
 
-    response.forEach((lease: LeaseResponse) => checkResponse(lease));
+    response.forEach((lease: LeaseEntity) => isResponseOK(lease));
   });
 
   it('should return status 401 when access_token is invalid', async () => {
@@ -283,7 +294,7 @@ describe('POST /leases', () => {
       .expectStatus(201)
       .returns('res.body');
 
-    checkResponse(response);
+    isResponseDetailsOK(response);
   });
 
   it('should return status 400 when a mandatory attribute is missing', async () => {
@@ -410,7 +421,7 @@ describe('PUT /leases/:id', () => {
       .expectStatus(200)
       .returns('res.body');
 
-    checkResponse(response);
+    isResponseDetailsOK(response);
   });
 
   it('should return status 400 when a mandatory attribute is missing', async () => {

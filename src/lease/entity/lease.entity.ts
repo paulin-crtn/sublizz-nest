@@ -29,7 +29,7 @@ export class LeaseEntity {
 
   @Exclude()
   @ApiHideProperty()
-  houseNumber: string;
+  houseNumber?: string;
 
   @Exclude()
   @ApiHideProperty()
@@ -37,12 +37,12 @@ export class LeaseEntity {
 
   postCode: string;
   city: string;
-  gpsLatitude: string;
-  gpsLongitude: string;
+  gpsLatitude?: string;
+  gpsLongitude?: string;
 
   @Exclude()
   @ApiHideProperty()
-  description: string;
+  description?: string;
 
   surface: number;
   room: number;
