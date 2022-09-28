@@ -74,7 +74,7 @@ export class UserService {
     const { email, password, ...data } = dto;
 
     if (email && email !== user.email) {
-      this.verifyUserEmail(user, email);
+      await this.verifyUserEmail(user, email);
     }
 
     const passwordHash = password
