@@ -56,4 +56,4 @@ jobs:
       - name: Run Prisma migrations
         run: npx prisma migrate deploy
       - name: Run e2e tests
-        run: jest --runInBand --verbose --config ./test/jest-e2e.json
+        run: npm run test:e2e
