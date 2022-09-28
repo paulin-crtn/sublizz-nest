@@ -41,8 +41,7 @@ jobs:
           POSTGRES_PASSWORD: password
           POSTGRES_BD: sublizz-test
         ports:
-          # maps tcp port 5432 on service container to the host
-          - 5432:5432
+          - 5434:5432
         # set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
