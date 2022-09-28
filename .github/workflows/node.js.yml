@@ -44,6 +44,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run Prisma migrations
-        run: npm run prisma:migrate:test
+        run: dotenv -e .env.test -- npx prisma migrate deploy
+        # npm run prisma:migrate:test
       - name: Run e2e tests
-        run: npm run test:e2e
+        run: dotenv -e .env.test -- jest --runInBand --verbose --config ./test/jest-e2e.json
+        # npm run test:e2e
