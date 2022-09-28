@@ -1,15 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PrismaService extends PrismaClient {
-  constructor() {
+  constructor(configService: ConfigService) {
     super({
       datasources: {
         db: {
-          url: 'postgresql://postgres:eefVK@B7GKyC8BD@db.unnpkjktcopeemblwjer.supabase.co:5432/postgres',
+          url: configService.get('DATABASE_URL'),
         },
       },
     });
+  }
+
+  async cleanDb() {
+    try {
+      return await this.$transaction([
+        this.passwordReset.deleteMany(),
+        this.emailVerification.deleteMany(),
+        this.leaseImage.deleteMany(),
+        this.lease.deleteMany(),
+        this.user.deleteMany(),
+      ]);
+    } catch (e) {
+      throw new Error('An error occured while cleaning the DB: ' + e);
+    }
   }
 }

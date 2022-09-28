@@ -1,3 +1,7 @@
+# Environment
+.env
+.env.dev
+
 # compiled output
 /dist
 /node_modules

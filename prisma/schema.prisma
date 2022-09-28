@@ -7,13 +7,88 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = env("DATABASE_URL")
 }
 
-model Property {
+model User {
+  leases Lease[]
+  emailVerification EmailVerification[]
+  passwordReset PasswordReset[]
+
   id Int @id @default(autoincrement())
-  city String
+  firstName String @db.VarChar(20)
+  lastName String? @db.VarChar(20)
+  email String @db.VarChar(30) @unique
+  emailVerifiedAt DateTime?
+  passwordHash String
+  refreshTokenHash String?
+  profilePictureUrl String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map(name: "user")
+}
+
+model Lease {
+  leaseImages LeaseImage[]
+
+  user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  id Int @id @default(autoincrement())
   userId Int
+  houseNumber String? @db.VarChar(10)
+  street String @db.VarChar(30)
+  postCode String @db.VarChar(5)
+  city String @db.VarChar(30)
+  gpsLatitude String? @db.VarChar(15)
+  gpsLongitude String? @db.VarChar(15)
+  description String?
+  surface Int
+  room Int
+  startDate DateTime
+  endDate DateTime
+  isDateFlexible Int
+  pricePerMonth Int
+  isPublished Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map(name: "lease")
+}
+
+model LeaseImage {
+  lease Lease @relation(fields: [leaseId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  
+  id Int @id @default(autoincrement())
+  leaseId Int
+  url String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map(name: "lease_img")
+}
+
+model EmailVerification {
+  user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  
+  id Int @id @default(autoincrement())
+  userId Int
+  email String
+  tokenHash String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map(name: "email_verification")
+}
+
+model PasswordReset {
+  user User @relation(fields: [userEmail], references: [email], onUpdate: Cascade, onDelete: Cascade)
+  
+  id Int @id @default(autoincrement())
+  userEmail String
+  tokenHash String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map(name: "password_reset")
 }

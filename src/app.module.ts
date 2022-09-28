@@ -1,9 +1,22 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
-import { PropertyModule } from './property/property.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { LeaseModule } from './lease/lease.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
-  imports: [PrismaModule, PropertyModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    PrismaModule,
+    AuthModule,
+    UserModule,
+    LeaseModule,
+    MailModule,
+  ],
   controllers: [],
   providers: [],
 })
