@@ -58,5 +58,5 @@ jobs:
         run: npx prisma migrate deploy
         # npm run prisma:migrate:test
       - name: Run e2e tests
-        run: jest --runInBand --verbose --config ./test/jest-e2e.json
+        run: npm jest --runInBand --verbose --config ./test/jest-e2e.json
         # npm run test:e2e
