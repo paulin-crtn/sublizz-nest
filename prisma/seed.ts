@@ -2,6 +2,7 @@
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
 import { PrismaClient } from '@prisma/client';
+import { LeaseTypeEnum } from '../src/lease/enum';
 import { fakeUser, fakeLease, fakeLeaseImage } from '../utils/fakeData';
 
 /* -------------------------------------------------------------------------- */
@@ -15,6 +16,22 @@ const prisma = new PrismaClient();
 const main = async () => {
   // Initialization
   console.log('Seeding database...');
+
+  // Create lease type
+  await prisma.leaseType.createMany({
+    data: [
+      { type: LeaseTypeEnum.MOBILITY },
+      { type: LeaseTypeEnum.SHARE },
+      { type: LeaseTypeEnum.STUDENT },
+      { type: LeaseTypeEnum.SUBLEASE },
+    ],
+  });
+
+  // Stop seeding
+  if (process.env.NODE_ENV !== 'dev') {
+    return;
+  }
+
   // Create 1 fake user
   const user = await prisma.user.create({ data: await fakeUser() });
   // Create 3 fake lease with 4 leaseImage each

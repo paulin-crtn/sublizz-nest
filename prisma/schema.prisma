@@ -23,6 +23,7 @@ model User {
   passwordHash String
   refreshTokenHash String?
   profilePictureUrl String?
+  standardMessage String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -33,9 +34,11 @@ model Lease {
   leaseImages LeaseImage[]
 
   user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  leaseType LeaseType @relation(fields: [type], references: [type], onUpdate: NoAction, onDelete: NoAction)
 
   id Int @id @default(autoincrement())
   userId Int
+  type String @db.VarChar(10)
   houseNumber String? @db.VarChar(10)
   street String @db.VarChar(30)
   postCode String @db.VarChar(5)
@@ -66,6 +69,14 @@ model LeaseImage {
   updatedAt DateTime @updatedAt
 
   @@map(name: "lease_img")
+}
+
+model LeaseType {
+  leases Lease[]
+  
+  id Int @id @default(autoincrement())
+  type String @db.VarChar(10) @unique
+  @@map(name: "lease_type")
 }
 
 model EmailVerification {

@@ -3,6 +3,7 @@
 /* -------------------------------------------------------------------------- */
 import { faker } from '@faker-js/faker';
 import argon from 'argon2';
+import { LeaseTypeEnum } from '../src/lease/enum';
 
 /* -------------------------------------------------------------------------- */
 /*                                  FUNCTIONS                                 */
@@ -16,11 +17,18 @@ export const fakeUser = async () => {
     emailVerifiedAt: new Date(),
     passwordHash, // faker.internet.password()
     profilePictureUrl: faker.internet.avatar(),
+    standardMessage: faker.lorem.lines(3),
   };
 };
 
 export const fakeLease = (userId: number) => ({
   userId,
+  type: faker.helpers.arrayElement([
+    LeaseTypeEnum.MOBILITY,
+    LeaseTypeEnum.SHARE,
+    LeaseTypeEnum.STUDENT,
+    LeaseTypeEnum.SUBLEASE,
+  ]),
   houseNumber: faker.address.buildingNumber(),
   street: faker.address.street(),
   postCode: faker.address.zipCode('#####'),

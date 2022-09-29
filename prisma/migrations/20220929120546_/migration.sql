@@ -8,6 +8,7 @@ CREATE TABLE "user" (
     "passwordHash" TEXT NOT NULL,
     "refreshTokenHash" TEXT,
     "profilePictureUrl" TEXT,
+    "standardMessage" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -18,6 +19,7 @@ CREATE TABLE "user" (
 CREATE TABLE "lease" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
+    "type" VARCHAR(10) NOT NULL,
     "houseNumber" VARCHAR(10),
     "street" VARCHAR(30) NOT NULL,
     "postCode" VARCHAR(5) NOT NULL,
@@ -50,6 +52,14 @@ CREATE TABLE "lease_img" (
 );
 
 -- CreateTable
+CREATE TABLE "lease_type" (
+    "id" SERIAL NOT NULL,
+    "type" VARCHAR(10) NOT NULL,
+
+    CONSTRAINT "lease_type_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "email_verification" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
@@ -75,8 +85,14 @@ CREATE TABLE "password_reset" (
 -- CreateIndex
 CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "lease_type_type_key" ON "lease_type"("type");
+
 -- AddForeignKey
 ALTER TABLE "lease" ADD CONSTRAINT "lease_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "lease" ADD CONSTRAINT "lease_type_fkey" FOREIGN KEY ("type") REFERENCES "lease_type"("type") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "lease_img" ADD CONSTRAINT "lease_img_leaseId_fkey" FOREIGN KEY ("leaseId") REFERENCES "lease"("id") ON DELETE CASCADE ON UPDATE CASCADE;

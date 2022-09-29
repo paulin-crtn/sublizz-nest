@@ -21,4 +21,9 @@ export class UpdateUserDto {
   @IsOptional()
   @IsUrl()
   profilePictureUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 2000)
+  standardMessage?: string;
 }

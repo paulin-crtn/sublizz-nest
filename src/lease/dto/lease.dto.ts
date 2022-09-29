@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsDate,
+  IsEnum,
   IsNumber,
   IsNumberString,
   IsOptional,
@@ -11,8 +12,12 @@ import {
   Max,
   Min,
 } from 'class-validator';
+import { LeaseTypeEnum } from '../enum';
 
 export class LeaseDto {
+  @IsEnum(LeaseTypeEnum)
+  type: string;
+
   @IsOptional()
   @IsString()
   @Length(1, 7)
