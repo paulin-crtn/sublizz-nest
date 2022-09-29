@@ -26,6 +26,7 @@
     "prisma:migrate:dev": "dotenv -e .env.dev -- npx prisma migrate dev",
     "prisma:studio:dev": "dotenv -e .env.dev -- npx prisma studio",
     "prisma:migrate:test": "dotenv -e .env.test -- npx prisma migrate deploy",
+    "prisma:seed:test": "dotenv -e .env.test -- npx prisma db seed",
     "prisma:migrate:prod": "dotenv -e .env -- npx prisma migrate deploy"
   },
   "dependencies": {
