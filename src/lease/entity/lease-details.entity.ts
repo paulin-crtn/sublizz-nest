@@ -2,6 +2,7 @@
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
 import { Type } from 'class-transformer';
+import { LeaseTypeEnum } from '../enum';
 import { LeaseImageEntity } from './index';
 
 /* -------------------------------------------------------------------------- */
@@ -25,6 +26,7 @@ export class LeaseDetailsEntity {
 
   id: number;
   userId: number;
+  type: LeaseTypeEnum;
   houseNumber?: string;
   street: string;
   postCode: string;

@@ -17,6 +17,7 @@ import {
 /*                             REQUEST ATTRIBUTES                             */
 /* -------------------------------------------------------------------------- */
 const mandatoryRequestData: { key: string; invalidValues: any[] }[] = [
+  { key: 'type', invalidValues: [null, '', 'a', 123456] },
   { key: 'street', invalidValues: [null, '', 'a'] },
   { key: 'postCode', invalidValues: [null, '', 'a', 123456] },
   { key: 'city', invalidValues: [null, '', 'a'] },
@@ -54,6 +55,7 @@ const optionalRequestData: { key: string; invalidValues: any[] }[] = [
 function isResponseOK(response: LeaseEntity) {
   expect(response.id).not.toBe(null);
   expect(response.userId).not.toBe(null);
+  expect(response.type).not.toBe(null);
   expect(response.postCode).not.toBe(null);
   expect(response.city).not.toBe(null);
   expect(response.surface).not.toBe(null);
@@ -75,6 +77,7 @@ function isResponseOK(response: LeaseEntity) {
 function isResponseDetailsOK(response: LeaseDetailsEntity) {
   expect(response.id).not.toBe(null);
   expect(response.userId).not.toBe(null);
+  expect(response.type).not.toBe(null);
   expect(response.street).not.toBe(null);
   expect(response.postCode).not.toBe(null);
   expect(response.city).not.toBe(null);

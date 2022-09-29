@@ -19,7 +19,7 @@ CREATE TABLE "user" (
 CREATE TABLE "lease" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
-    "type" VARCHAR(10) NOT NULL,
+    "type" VARCHAR(15) NOT NULL,
     "houseNumber" VARCHAR(10),
     "street" VARCHAR(30) NOT NULL,
     "postCode" VARCHAR(5) NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE "lease_img" (
 -- CreateTable
 CREATE TABLE "lease_type" (
     "id" SERIAL NOT NULL,
-    "type" VARCHAR(10) NOT NULL,
+    "type" VARCHAR(15) NOT NULL,
 
     CONSTRAINT "lease_type_pkey" PRIMARY KEY ("id")
 );
