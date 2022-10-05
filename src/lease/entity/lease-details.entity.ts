@@ -1,7 +1,8 @@
 /* -------------------------------------------------------------------------- */
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
-import { Type } from 'class-transformer';
+import { ApiHideProperty } from '@nestjs/swagger';
+import { Exclude, Type } from 'class-transformer';
 import { LeaseTypeEnum } from '../enum';
 import { LeaseImageEntity } from './index';
 
@@ -25,7 +26,11 @@ export class LeaseDetailsEntity {
   }
 
   id: number;
+
+  @Exclude()
+  @ApiHideProperty()
   userId: number;
+
   type: LeaseTypeEnum;
   houseNumber?: string;
   street: string;
@@ -47,5 +52,5 @@ export class LeaseDetailsEntity {
   @Type(() => LeaseImageEntity)
   leaseImages: LeaseImageEntity[];
 
-  user: { firstName: string; lastName: string };
+  user: { id: number; firstName: string; lastName: string };
 }

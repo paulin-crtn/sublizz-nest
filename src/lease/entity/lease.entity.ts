@@ -26,7 +26,11 @@ export class LeaseEntity {
   }
 
   id: number;
+
+  @Exclude()
+  @ApiHideProperty()
   userId: number;
+
   type: LeaseTypeEnum;
 
   @Exclude()

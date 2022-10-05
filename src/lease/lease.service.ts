@@ -59,6 +59,7 @@ export class LeaseService {
         leaseImages: true,
         user: {
           select: {
+            id: true,
             firstName: true,
             lastName: true,
           },
@@ -88,6 +89,13 @@ export class LeaseService {
       },
       include: {
         leaseImages: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
       },
     });
     return { ...lease, type: lease.type as LeaseTypeEnum };
@@ -124,6 +132,13 @@ export class LeaseService {
       },
       include: {
         leaseImages: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
       },
     });
     return { ...lease, type: lease.type as LeaseTypeEnum };
