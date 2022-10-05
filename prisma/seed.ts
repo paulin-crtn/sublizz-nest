@@ -34,8 +34,8 @@ const main = async () => {
 
   // Create 1 fake user
   const user = await prisma.user.create({ data: await fakeUser() });
-  // Create 3 fake lease with 4 leaseImage each
-  for (let index = 0; index < 3; index++) {
+  // Create 12 fake lease with 4 leaseImage each
+  for (let index = 0; index < 12; index++) {
     const leaseImages = [];
     for (let index = 0; index < 4; index++) {
       leaseImages.push(fakeLeaseImage());
