@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { LeaseDto } from './dto';
+import { LeaseTypeEnum } from './enum';
 
 /* -------------------------------------------------------------------------- */
 /*                             LEASE SERVICE CLASS                            */
@@ -20,7 +21,7 @@ export class LeaseService {
   /*                              PUBLIC FUNCTIONS                              */
   /* -------------------------------------------------------------------------- */
   async getLeases() {
-    return await this.prismaService.lease.findMany({
+    const leases = await this.prismaService.lease.findMany({
       where: {
         isPublished: 1,
       },
@@ -28,10 +29,14 @@ export class LeaseService {
         leaseImages: true,
       },
     });
+    return leases.map((lease) => ({
+      ...lease,
+      type: lease.type as LeaseTypeEnum,
+    }));
   }
 
   async getUserLeases(userId: number) {
-    return await this.prismaService.lease.findMany({
+    const leases = await this.prismaService.lease.findMany({
       where: {
         userId,
       },
@@ -39,6 +44,10 @@ export class LeaseService {
         leaseImages: true,
       },
     });
+    return leases.map((lease) => ({
+      ...lease,
+      type: lease.type as LeaseTypeEnum,
+    }));
   }
 
   async getLease(id: number) {
@@ -59,16 +68,16 @@ export class LeaseService {
     if (!lease) {
       throw new NotFoundException('Lease does not exist.');
     }
-    return lease;
+    return { ...lease, type: lease.type as LeaseTypeEnum };
   }
 
   async store(userId: number, dto: LeaseDto) {
     // TO DO : check start date is before end date
-    const { leaseImages, ...lease } = dto;
-    return await this.prismaService.lease.create({
+    const { leaseImages, ...leaseDto } = dto;
+    const lease = await this.prismaService.lease.create({
       data: {
         userId,
-        ...lease,
+        ...leaseDto,
         leaseImages: {
           createMany: {
             data: leaseImages
@@ -81,23 +90,24 @@ export class LeaseService {
         leaseImages: true,
       },
     });
+    return { ...lease, type: lease.type as LeaseTypeEnum };
   }
 
   async update(id: number, userId: number, dto: LeaseDto) {
-    const lease = await this.prismaService.lease.findUnique({
+    const leaseDb = await this.prismaService.lease.findUnique({
       where: {
         id,
       },
     });
-    if (!lease) {
+    if (!leaseDb) {
       throw new NotFoundException('Lease does not exist.');
     }
-    if (lease.userId !== userId) {
+    if (leaseDb.userId !== userId) {
       throw new ForbiddenException('Access to resource denied.');
     }
     // TO DO : check start date is before end date
     const { leaseImages, ...leaseDto } = dto;
-    return await this.prismaService.lease.update({
+    const lease = await this.prismaService.lease.update({
       where: {
         id,
       },
@@ -116,6 +126,7 @@ export class LeaseService {
         leaseImages: true,
       },
     });
+    return { ...lease, type: lease.type as LeaseTypeEnum };
   }
 
   async delete(id: number, userId: number) {

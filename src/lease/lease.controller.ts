@@ -50,7 +50,8 @@ export class LeaseController {
   @HttpCode(HttpStatus.OK)
   @Get(':id')
   async getLease(@Param('id', ParseIntPipe) id: number) {
-    return new LeaseDetailsEntity(await this.leaseService.getLease(id));
+    const lease = await this.leaseService.getLease(id);
+    return new LeaseDetailsEntity(lease);
   }
 
   @UseGuards(AccessJwtGuard)
@@ -58,7 +59,8 @@ export class LeaseController {
   @HttpCode(HttpStatus.CREATED)
   @Post()
   async store(@GetUser('id') userId: number, @Body() dto: LeaseDto) {
-    return new LeaseDetailsEntity(await this.leaseService.store(userId, dto));
+    const lease = await this.leaseService.store(userId, dto);
+    return new LeaseDetailsEntity(lease);
   }
 
   @UseGuards(AccessJwtGuard)
@@ -70,9 +72,8 @@ export class LeaseController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: LeaseDto,
   ) {
-    return new LeaseDetailsEntity(
-      await this.leaseService.update(id, userId, dto),
-    );
+    const lease = await this.leaseService.update(id, userId, dto);
+    return new LeaseDetailsEntity(lease);
   }
 
   @UseGuards(AccessJwtGuard)
