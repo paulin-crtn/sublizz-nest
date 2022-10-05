@@ -53,49 +53,47 @@ const optionalRequestData: { key: string; invalidValues: any[] }[] = [
 /*                                  RESPONSE                                  */
 /* -------------------------------------------------------------------------- */
 function isResponseOK(response: LeaseEntity) {
-  expect(response.id).not.toBe(null);
-  expect(response.userId).not.toBe(null);
-  expect(response.type).not.toBe(null);
-  expect(response.postCode).not.toBe(null);
-  expect(response.city).not.toBe(null);
-  expect(response.surface).not.toBe(null);
-  expect(response.room).not.toBe(null);
-  expect(response.startDate).not.toBe(null);
-  expect(response.endDate).not.toBe(null);
-  expect(response.isDateFlexible).not.toBe(null);
-  expect(response.pricePerMonth).not.toBe(null);
-  expect(response.createdAt).not.toBe(null);
-  expect(response.updatedAt).not.toBe(null);
-  expect(response.leaseImages).not.toBe(null);
+  expect(response.id).toBeDefined();
+  expect(response.type).toBeDefined();
+  expect(response.postCode).toBeDefined();
+  expect(response.city).toBeDefined();
+  expect(response.surface).toBeDefined();
+  expect(response.room).toBeDefined();
+  expect(response.startDate).toBeDefined();
+  expect(response.endDate).toBeDefined();
+  expect(response.isDateFlexible).toBeDefined();
+  expect(response.pricePerMonth).toBeDefined();
+  expect(response.createdAt).toBeDefined();
+  expect(response.updatedAt).toBeDefined();
+  expect(response.leaseImages).toBeDefined();
   expect(response.leaseImages.length).toBe(4);
-  expect(response.leaseImages[0].url).not.toBe(null);
-  expect(response.leaseImages[1].url).not.toBe(null);
-  expect(response.leaseImages[2].url).not.toBe(null);
-  expect(response.leaseImages[3].url).not.toBe(null);
+  expect(response.leaseImages[0].url).toBeDefined();
+  expect(response.leaseImages[1].url).toBeDefined();
+  expect(response.leaseImages[2].url).toBeDefined();
+  expect(response.leaseImages[3].url).toBeDefined();
 }
 
 function isResponseDetailsOK(response: LeaseDetailsEntity) {
-  expect(response.id).not.toBe(null);
-  expect(response.userId).not.toBe(null);
-  expect(response.type).not.toBe(null);
-  expect(response.street).not.toBe(null);
-  expect(response.postCode).not.toBe(null);
-  expect(response.city).not.toBe(null);
-  expect(response.surface).not.toBe(null);
-  expect(response.room).not.toBe(null);
-  expect(response.startDate).not.toBe(null);
-  expect(response.endDate).not.toBe(null);
-  expect(response.isDateFlexible).not.toBe(null);
-  expect(response.pricePerMonth).not.toBe(null);
-  expect(response.isPublished).not.toBe(null);
-  expect(response.createdAt).not.toBe(null);
-  expect(response.updatedAt).not.toBe(null);
-  expect(response.leaseImages).not.toBe(null);
+  expect(response.id).toBeDefined();
+  expect(response.type).toBeDefined();
+  expect(response.street).toBeDefined();
+  expect(response.postCode).toBeDefined();
+  expect(response.city).toBeDefined();
+  expect(response.surface).toBeDefined();
+  expect(response.room).toBeDefined();
+  expect(response.startDate).toBeDefined();
+  expect(response.endDate).toBeDefined();
+  expect(response.isDateFlexible).toBeDefined();
+  expect(response.pricePerMonth).toBeDefined();
+  expect(response.isPublished).toBeDefined();
+  expect(response.createdAt).toBeDefined();
+  expect(response.updatedAt).toBeDefined();
+  expect(response.leaseImages).toBeDefined();
   expect(response.leaseImages.length).toBe(4);
-  expect(response.leaseImages[0].url).not.toBe(null);
-  expect(response.leaseImages[1].url).not.toBe(null);
-  expect(response.leaseImages[2].url).not.toBe(null);
-  expect(response.leaseImages[3].url).not.toBe(null);
+  expect(response.leaseImages[0].url).toBeDefined();
+  expect(response.leaseImages[1].url).toBeDefined();
+  expect(response.leaseImages[2].url).toBeDefined();
+  expect(response.leaseImages[3].url).toBeDefined();
 }
 
 /* -------------------------------------------------------------------------- */
