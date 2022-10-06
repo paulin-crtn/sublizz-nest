@@ -94,6 +94,10 @@ function isResponseDetailsOK(response: LeaseDetailsEntity) {
   expect(response.leaseImages[1].url).toBeDefined();
   expect(response.leaseImages[2].url).toBeDefined();
   expect(response.leaseImages[3].url).toBeDefined();
+  expect(response.user.id).toBeDefined();
+  expect(response.user.firstName).toBeDefined();
+  expect(response.user.lastName).toBeDefined();
+  expect(response.user.profilePictureUrl).toBeDefined();
 }
 
 /* -------------------------------------------------------------------------- */

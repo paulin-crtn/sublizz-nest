@@ -52,5 +52,10 @@ export class LeaseDetailsEntity {
   @Type(() => LeaseImageEntity)
   leaseImages: LeaseImageEntity[];
 
-  user: { id: number; firstName: string; lastName: string };
+  user: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    profilePictureUrl: string;
+  };
 }
