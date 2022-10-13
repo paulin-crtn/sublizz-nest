@@ -86,15 +86,16 @@ export class MailService {
    * @param leaseId
    * @param userId
    */
-  async sendAdminLeaseReport(leaseId: number, userId: number) {
+  async sendAdminLeaseReport(leaseId: number, userId: number, reason: string) {
     try {
       await this.mailerService.sendMail({
         to: 'contact@haftwald.com',
         subject: "Signalement d'une annonce",
         template: './lease-report',
         context: {
-          leaseId,
           userId,
+          leaseId,
+          reason,
         },
       });
     } catch (e) {

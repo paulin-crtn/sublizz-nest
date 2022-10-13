@@ -283,7 +283,7 @@ export class AuthService {
     };
     // JWT access token
     return await this.jwtService.signAsync(payload, {
-      expiresIn: '1m',
+      expiresIn: '15m',
       secret: this.configService.get('ACCESS_JWT_SECRET'),
     });
   }

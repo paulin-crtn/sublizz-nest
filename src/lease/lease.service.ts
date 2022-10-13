@@ -171,7 +171,7 @@ export class LeaseService {
     // TODO: delete file from storage
   }
 
-  async report(leaseId: number, userId: number) {
-    await this.mailService.sendAdminLeaseReport(userId, leaseId);
+  async report(userId: number, leaseId: number, reason: string) {
+    await this.mailService.sendAdminLeaseReport(userId, leaseId, reason);
   }
 }

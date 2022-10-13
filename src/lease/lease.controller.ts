@@ -19,7 +19,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccessJwtGuard } from '../auth/guard';
 import { GetUser } from '../user/decorator';
-import { LeaseDto } from './dto';
+import { LeaseDto, LeaseReportDto } from './dto';
 import { LeaseEntity, LeaseDetailsEntity } from './entity';
 import { LeaseService } from './lease.service';
 
@@ -90,11 +90,9 @@ export class LeaseController {
   @UseGuards(AccessJwtGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Post('report/:leaseId')
-  async report(
-    @GetUser('id') userId: number,
-    @Param('leaseId', ParseIntPipe) leaseId: number,
-  ) {
-    return await this.leaseService.report(leaseId, userId);
+  @Post('report')
+  async report(@GetUser('id') userId: number, @Body() dto: LeaseReportDto) {
+    const { leaseId, reason } = dto;
+    return await this.leaseService.report(userId, leaseId, reason);
   }
 }
