@@ -9,10 +9,10 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.use(cookieParser());
-
-  if (process.env.NODE_ENV === 'dev') {
-    app.enableCors();
-  }
+  app.enableCors({
+    origin: process.env.FRONT_DOMAIN,
+    credentials: true,
+  });
 
   // Documentation
   const config = new DocumentBuilder()

@@ -108,7 +108,7 @@ export class AuthService {
     }
     // Generate tokens
     const [accessToken, refreshToken] = await Promise.all([
-      this._issueAccessToken(user.id, user.email),
+      this._issueAccessToken(user.id),
       this._issueRefreshToken(user.id),
     ]);
     // Return tokens
@@ -126,7 +126,7 @@ export class AuthService {
   ): Promise<{ accessToken: string; newRefreshToken: string }> {
     // Generate new tokens
     const [accessToken, newRefreshToken] = await Promise.all([
-      this._issueAccessToken(user.id, user.email),
+      this._issueAccessToken(user.id),
       this._issueRefreshToken(user.id),
     ]);
     // Return new tokens
@@ -274,21 +274,16 @@ export class AuthService {
    * Issue an access token
    *
    * @param userId
-   * @param email
    * @returns
    */
-  private async _issueAccessToken(
-    userId: number,
-    email: string,
-  ): Promise<string> {
+  private async _issueAccessToken(userId: number): Promise<string> {
     // Payload
     const payload = {
       sub: userId,
-      email,
     };
     // JWT access token
     return await this.jwtService.signAsync(payload, {
-      expiresIn: '15m',
+      expiresIn: '1m',
       secret: this.configService.get('ACCESS_JWT_SECRET'),
     });
   }
