@@ -89,10 +89,11 @@ export class LeaseController {
 
   @UseGuards(AccessJwtGuard)
   @ApiBearerAuth()
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @Post('report')
   async report(@GetUser('id') userId: number, @Body() dto: LeaseReportDto) {
     const { leaseId, reason } = dto;
-    return await this.leaseService.report(userId, leaseId, reason);
+    await this.leaseService.report(userId, leaseId, reason);
+    return { statusCode: 200, message: 'Lease report sent' };
   }
 }
