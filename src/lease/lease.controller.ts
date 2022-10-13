@@ -86,4 +86,15 @@ export class LeaseController {
   ) {
     return await this.leaseService.delete(id, userId);
   }
+
+  @UseGuards(AccessJwtGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('report/:leaseId')
+  async report(
+    @GetUser('id') userId: number,
+    @Param('leaseId', ParseIntPipe) leaseId: number,
+  ) {
+    return await this.leaseService.report(leaseId, userId);
+  }
 }

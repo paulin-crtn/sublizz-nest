@@ -79,4 +79,28 @@ export class MailService {
       );
     }
   }
+
+  /**
+   * Send a lease report to the admin
+   *
+   * @param leaseId
+   * @param userId
+   */
+  async sendAdminLeaseReport(leaseId: number, userId: number) {
+    try {
+      await this.mailerService.sendMail({
+        to: 'contact@haftwald.com',
+        subject: "Signalement d'une annonce",
+        template: './lease-report',
+        context: {
+          leaseId,
+          userId,
+        },
+      });
+    } catch (e) {
+      throw new Error(
+        'An error occcured while sending admin lease report: ' + e,
+      );
+    }
+  }
 }

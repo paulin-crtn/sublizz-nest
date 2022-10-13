@@ -6,6 +6,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { LeaseDto } from './dto';
 import { LeaseTypeEnum } from './enum';
@@ -15,7 +16,10 @@ import { LeaseTypeEnum } from './enum';
 /* -------------------------------------------------------------------------- */
 @Injectable()
 export class LeaseService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private mailService: MailService,
+  ) {}
 
   /* -------------------------------------------------------------------------- */
   /*                              PUBLIC FUNCTIONS                              */
@@ -165,5 +169,9 @@ export class LeaseService {
       },
     });
     // TODO: delete file from storage
+  }
+
+  async report(leaseId: number, userId: number) {
+    await this.mailService.sendAdminLeaseReport(userId, leaseId);
   }
 }
