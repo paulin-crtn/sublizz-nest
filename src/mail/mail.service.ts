@@ -86,7 +86,7 @@ export class MailService {
    * @param leaseId
    * @param userId
    */
-  async sendAdminLeaseReport(leaseId: number, userId: number, reason: string) {
+  async sendAdminLeaseReport(userId: number, leaseId: number, reason: string) {
     try {
       await this.mailerService.sendMail({
         to: 'contact@haftwald.com',
