@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
 
-export class LeaseReportDto {
+export class LeaseMessageDto {
   @Type(() => Number)
   @IsNumber()
   leaseId: number;
@@ -9,5 +9,5 @@ export class LeaseReportDto {
   @IsOptional()
   @IsString()
   @MaxLength(2000)
-  reason?: string;
+  message?: string;
 }

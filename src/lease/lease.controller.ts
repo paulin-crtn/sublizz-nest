@@ -17,9 +17,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { User } from '@prisma/client';
 import { AccessJwtGuard } from '../auth/guard';
 import { GetUser } from '../user/decorator';
-import { LeaseDto, LeaseReportDto } from './dto';
+import { LeaseDto, LeaseMessageDto, LeaseReportDto } from './dto';
 import { LeaseEntity, LeaseDetailsEntity } from './entity';
 import { LeaseService } from './lease.service';
 
@@ -90,10 +91,18 @@ export class LeaseController {
   @UseGuards(AccessJwtGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
+  @Post('message')
+  async message(@GetUser() fromUser: User, @Body() dto: LeaseMessageDto) {
+    await this.leaseService.message(fromUser, dto);
+    return { statusCode: 200, message: 'Lease message sent' };
+  }
+
+  @UseGuards(AccessJwtGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
   @Post('report')
   async report(@GetUser('id') userId: number, @Body() dto: LeaseReportDto) {
-    const { leaseId, reason } = dto;
-    await this.leaseService.report(userId, leaseId, reason);
+    await this.leaseService.report(userId, dto);
     return { statusCode: 200, message: 'Lease report sent' };
   }
 }

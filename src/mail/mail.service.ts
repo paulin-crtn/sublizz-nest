@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { EmailVerification, User } from '@prisma/client';
+import { EmailVerification, Lease, User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -76,6 +76,32 @@ export class MailService {
     } catch (e) {
       throw new Error(
         'An error occcured while sending user reset password token: ' + e,
+      );
+    }
+  }
+
+  async sendUserLeaseMessage(
+    fromUser: User,
+    lease: Lease & {
+      user: User;
+    },
+    message: string,
+  ) {
+    try {
+      await this.mailerService.sendMail({
+        to: lease.user.email,
+        subject: `Nouveau message de ${fromUser.firstName}`,
+        template: './lease-message',
+        context: {
+          fromUser,
+          mailto: 'mailto:' + fromUser.email,
+          message,
+          lease,
+        },
+      });
+    } catch (e) {
+      throw new Error(
+        'An error occcured while sending user lease message: ' + e,
       );
     }
   }
