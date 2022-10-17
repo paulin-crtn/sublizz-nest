@@ -17,10 +17,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { User } from '@prisma/client';
 import { AccessJwtGuard } from '../auth/guard';
 import { GetUser } from '../user/decorator';
-import { LeaseDto, LeaseMessageDto, LeaseReportDto } from './dto';
+import { LeaseDto } from './dto';
 import { LeaseEntity, LeaseDetailsEntity } from './entity';
 import { LeaseService } from './lease.service';
 
@@ -32,6 +31,7 @@ import { LeaseService } from './lease.service';
 @UseInterceptors(ClassSerializerInterceptor)
 export class LeaseController {
   constructor(private leaseService: LeaseService) {}
+
   @HttpCode(HttpStatus.OK)
   @Get()
   async getLeases() {
@@ -86,23 +86,5 @@ export class LeaseController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     return await this.leaseService.delete(id, userId);
-  }
-
-  @UseGuards(AccessJwtGuard)
-  @ApiBearerAuth()
-  @HttpCode(HttpStatus.OK)
-  @Post('message')
-  async message(@GetUser() fromUser: User, @Body() dto: LeaseMessageDto) {
-    await this.leaseService.message(fromUser, dto);
-    return { statusCode: 200, message: 'Lease message sent' };
-  }
-
-  @UseGuards(AccessJwtGuard)
-  @ApiBearerAuth()
-  @HttpCode(HttpStatus.OK)
-  @Post('report')
-  async report(@GetUser('id') userId: number, @Body() dto: LeaseReportDto) {
-    await this.leaseService.report(userId, dto);
-    return { statusCode: 200, message: 'Lease report sent' };
   }
 }

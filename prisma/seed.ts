@@ -3,7 +3,12 @@
 /* -------------------------------------------------------------------------- */
 import { PrismaClient } from '@prisma/client';
 import { LeaseTypeEnum } from '../src/lease/enum';
-import { fakeUser, fakeLease, fakeLeaseImage } from '../utils/fakeData';
+import {
+  fakeUser,
+  fakeLease,
+  fakeLeaseImage,
+  fakeLeaseMessage,
+} from '../utils/fakeData';
 
 /* -------------------------------------------------------------------------- */
 /*                               INITIALIZATION                               */
@@ -32,16 +37,23 @@ const main = async () => {
     return;
   }
 
-  // Create 1 fake user
-  const user = await prisma.user.create({ data: await fakeUser() });
-  // Create 12 fake lease with 4 leaseImage each
-  for (let index = 0; index < 12; index++) {
+  // Create 2 fake users
+  const mario = await prisma.user.create({
+    data: await fakeUser('mario', 'mario@mail.com'),
+  });
+  const luigi = await prisma.user.create({
+    data: await fakeUser('luigi', 'luigi@mail.com'),
+  });
+
+  // Create 6 fake leases with 3 leaseImage each
+  const leaseIds = [];
+  for (let index = 0; index < 6; index++) {
     const leaseImages = [];
-    for (let index = 0; index < 4; index++) {
+    for (let index = 0; index < 3; index++) {
       leaseImages.push(fakeLeaseImage());
     }
-    const lease = fakeLease(user.id);
-    await prisma.lease.create({
+    const lease = fakeLease(mario.id);
+    const leaseDb = await prisma.lease.create({
       data: {
         ...lease,
         leaseImages: {
@@ -51,7 +63,16 @@ const main = async () => {
         },
       },
     });
+    leaseIds.push(leaseDb.id);
   }
+
+  // Create 1 fake lease messages
+  const leaseMessage = fakeLeaseMessage(leaseIds[0], luigi.id);
+  await prisma.leaseMessage.create({
+    data: {
+      ...leaseMessage,
+    },
+  });
 };
 
 main()

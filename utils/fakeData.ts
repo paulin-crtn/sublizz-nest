@@ -8,12 +8,12 @@ import { LeaseTypeEnum } from '../src/lease/enum';
 /* -------------------------------------------------------------------------- */
 /*                                  FUNCTIONS                                 */
 /* -------------------------------------------------------------------------- */
-export const fakeUser = async () => {
+export const fakeUser = async (firstName?: string, email?: string) => {
   const passwordHash: string = await argon.hash('password');
   return {
-    firstName: 'firstname', // faker.name.firstName()
-    lastName: 'lastname', // faker.name.lastName()
-    email: 'firstname@mail.com', // faker.internet.email()
+    firstName: firstName ?? faker.name.firstName(),
+    lastName: faker.name.lastName(),
+    email: email ?? faker.internet.email(),
     emailVerifiedAt: new Date(),
     passwordHash, // faker.internet.password()
     profilePictureUrl: faker.internet.avatar(),
@@ -46,3 +46,9 @@ export const fakeLease = (userId: number) => ({
 });
 
 export const fakeLeaseImage = () => faker.image.imageUrl();
+
+export const fakeLeaseMessage = (leaseId: number, fromUserId: number) => ({
+  leaseId,
+  fromUserId,
+  content: faker.lorem.lines(3),
+});

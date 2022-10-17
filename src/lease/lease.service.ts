@@ -6,21 +6,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
-import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { LeaseDto, LeaseMessageDto, LeaseReportDto } from './dto';
+import { LeaseDto } from './dto';
 import { LeaseTypeEnum } from './enum';
 
 /* -------------------------------------------------------------------------- */
-/*                             LEASE SERVICE CLASS                            */
+/*                                LEASE SERVICE                               */
 /* -------------------------------------------------------------------------- */
 @Injectable()
 export class LeaseService {
-  constructor(
-    private prismaService: PrismaService,
-    private mailService: MailService,
-  ) {}
+  constructor(private prismaService: PrismaService) {}
 
   /* -------------------------------------------------------------------------- */
   /*                              PUBLIC FUNCTIONS                              */
@@ -170,35 +165,5 @@ export class LeaseService {
       },
     });
     // TODO: delete file from storage
-  }
-
-  async message(fromUser: User, dto: LeaseMessageDto) {
-    const lease = await this.prismaService.lease.findUnique({
-      where: {
-        id: dto.leaseId,
-      },
-      include: {
-        user: true,
-      },
-    });
-    if (!lease) {
-      throw new NotFoundException('Lease does not exist.');
-    }
-    await this.prismaService.leaseMessage.create({
-      data: {
-        leaseId: lease.id,
-        fromUserId: fromUser.id,
-        content: dto.message,
-      },
-    });
-    await this.mailService.sendUserLeaseMessage(fromUser, lease, dto.message);
-  }
-
-  async report(userId: number, dto: LeaseReportDto) {
-    await this.mailService.sendAdminLeaseReport(
-      userId,
-      dto.leaseId,
-      dto.reason,
-    );
   }
 }

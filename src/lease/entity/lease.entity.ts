@@ -3,6 +3,7 @@
 /* -------------------------------------------------------------------------- */
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Exclude, Type } from 'class-transformer';
+import { LeaseMessageEntity } from '../../lease-message/entity';
 import { LeaseTypeEnum } from '../enum';
 import { LeaseImageEntity } from './index';
 
@@ -66,4 +67,7 @@ export class LeaseEntity {
 
   @Type(() => LeaseImageEntity)
   leaseImages: LeaseImageEntity[];
+
+  @Type(() => LeaseMessageEntity)
+  leaseMessages: LeaseMessageEntity[];
 }

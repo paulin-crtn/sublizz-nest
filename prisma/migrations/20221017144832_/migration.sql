@@ -64,7 +64,7 @@ CREATE TABLE "lease_message" (
     "id" SERIAL NOT NULL,
     "leaseId" INTEGER NOT NULL,
     "fromUserId" INTEGER NOT NULL,
-    "content" TEXT NOT NULL,
+    "content" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "lease_message_pkey" PRIMARY KEY ("id")
