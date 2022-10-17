@@ -184,6 +184,13 @@ export class LeaseService {
     if (!lease) {
       throw new NotFoundException('Lease does not exist.');
     }
+    await this.prismaService.leaseMessage.create({
+      data: {
+        leaseId: lease.id,
+        fromUserId: fromUser.id,
+        content: dto.message,
+      },
+    });
     await this.mailService.sendUserLeaseMessage(fromUser, lease, dto.message);
   }
 

@@ -60,6 +60,17 @@ CREATE TABLE "lease_type" (
 );
 
 -- CreateTable
+CREATE TABLE "lease_message" (
+    "id" SERIAL NOT NULL,
+    "leaseId" INTEGER NOT NULL,
+    "fromUserId" INTEGER NOT NULL,
+    "content" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "lease_message_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "email_verification" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
@@ -96,6 +107,12 @@ ALTER TABLE "lease" ADD CONSTRAINT "lease_type_fkey" FOREIGN KEY ("type") REFERE
 
 -- AddForeignKey
 ALTER TABLE "lease_img" ADD CONSTRAINT "lease_img_leaseId_fkey" FOREIGN KEY ("leaseId") REFERENCES "lease"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "lease_message" ADD CONSTRAINT "lease_message_leaseId_fkey" FOREIGN KEY ("leaseId") REFERENCES "lease"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "lease_message" ADD CONSTRAINT "lease_message_fromUserId_fkey" FOREIGN KEY ("fromUserId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "email_verification" ADD CONSTRAINT "email_verification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
