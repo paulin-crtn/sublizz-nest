@@ -25,6 +25,9 @@ export class LeaseMessageService {
         leaseImages: true,
         leaseMessages: true,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
     return leases.map((lease) => ({
       ...lease,

@@ -28,6 +28,9 @@ export class LeaseService {
       include: {
         leaseImages: true,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
     return leases.map((lease) => ({
       ...lease,
@@ -42,6 +45,9 @@ export class LeaseService {
       },
       include: {
         leaseImages: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
     return leases.map((lease) => ({
