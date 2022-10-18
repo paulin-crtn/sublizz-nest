@@ -106,7 +106,8 @@ export class AuthController {
     if (!isEmail(email)) {
       throw new BadRequestException('Email is not valid.');
     }
-    return await this.authService.issuePasswordResetToken(email);
+    await this.authService.issuePasswordResetToken(email);
+    return { statusCode: 200, message: 'Password reset email sent' };
   }
 
   @HttpCode(HttpStatus.OK)

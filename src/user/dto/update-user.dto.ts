@@ -1,10 +1,19 @@
-import { IsString, Length, IsEmail, IsOptional, IsUrl } from 'class-validator';
+import {
+  IsString,
+  Length,
+  IsEmail,
+  IsOptional,
+  IsUrl,
+  MaxLength,
+  ValidateIf,
+} from 'class-validator';
 
 export class UpdateUserDto {
   @IsString()
   @Length(3, 30)
   firstName: string;
 
+  @ValidateIf((user) => user.lastName !== '')
   @IsOptional()
   @IsString()
   @Length(3, 30)
@@ -13,17 +22,20 @@ export class UpdateUserDto {
   @IsEmail()
   email: string;
 
+  @ValidateIf((user) => user.password !== '')
   @IsOptional()
   @IsString()
   @Length(8, 20)
   password?: string;
 
+  @ValidateIf((user) => user.profilePictureUrl !== '')
   @IsOptional()
   @IsUrl()
   profilePictureUrl?: string;
 
+  @ValidateIf((user) => user.standardMessage !== '')
   @IsOptional()
   @IsString()
-  @Length(0, 2000)
+  @MaxLength(2000)
   standardMessage?: string;
 }
