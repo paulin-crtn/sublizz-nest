@@ -23,7 +23,7 @@ const mandatoryRequestData: { key: string; invalidValues: any[] }[] = [
 const optionalRequestData: { key: string; invalidValues: any[] }[] = [
   { key: 'lastName', invalidValues: ['', 'a', true, 9999] },
   { key: 'password', invalidValues: ['', 'abc', true, 9999] },
-  { key: 'profilePictureUrl', invalidValues: ['', 'abc', true, 9999] },
+  { key: 'profilePictureName', invalidValues: [true, 9999] },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -62,7 +62,7 @@ describe('GET /users/me', () => {
         firstName: 'firstname',
         lastName: null,
         email: 'email@mail.com',
-        profilePictureUrl: null,
+        profilePictureName: null,
       });
   });
 
@@ -145,7 +145,7 @@ describe('PUT /users/:id', () => {
         firstName: 'new',
         lastName: 'lastname',
         email: 'firstname@mail.com', // Because user need to validate new email
-        profilePictureUrl: null,
+        profilePictureName: null,
       });
   });
 

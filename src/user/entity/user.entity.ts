@@ -10,7 +10,7 @@ export class UserEntity {
   firstName: string;
   lastName: string;
   email: string;
-  profilePictureUrl: string;
+  profilePictureName: string;
 
   @ApiHideProperty()
   @Exclude()

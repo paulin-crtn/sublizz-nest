@@ -56,6 +56,6 @@ export class LeaseDetailsEntity {
     id: number;
     firstName: string;
     lastName: string;
-    profilePictureUrl: string;
+    profilePictureName: string;
   };
 }

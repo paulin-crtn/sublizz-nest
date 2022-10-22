@@ -3,7 +3,6 @@ import {
   Length,
   IsEmail,
   IsOptional,
-  IsUrl,
   MaxLength,
   ValidateIf,
 } from 'class-validator';
@@ -28,10 +27,10 @@ export class UpdateUserDto {
   @Length(8, 20)
   password?: string;
 
-  @ValidateIf((user) => user.profilePictureUrl !== '')
+  @ValidateIf((user) => user.profilePictureName !== '')
   @IsOptional()
-  @IsUrl()
-  profilePictureUrl?: string;
+  @IsString()
+  profilePictureName?: string;
 
   @ValidateIf((user) => user.standardMessage !== '')
   @IsOptional()

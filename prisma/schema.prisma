@@ -23,7 +23,7 @@ model User {
   emailVerifiedAt DateTime?
   passwordHash String
   refreshTokenHash String?
-  profilePictureUrl String?
+  profilePictureName String?
   standardMessage String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

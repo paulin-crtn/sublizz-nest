@@ -16,7 +16,7 @@ export const fakeUser = async (firstName?: string, email?: string) => {
     email: email ?? faker.internet.email(),
     emailVerifiedAt: new Date(),
     passwordHash, // faker.internet.password()
-    profilePictureUrl: faker.internet.avatar(),
+    profilePictureName: null, // faker.internet.avatar()
     standardMessage: faker.lorem.lines(3),
   };
 };

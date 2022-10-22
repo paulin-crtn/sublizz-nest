@@ -1,13 +1,13 @@
 -- CreateTable
 CREATE TABLE "user" (
     "id" SERIAL NOT NULL,
-    "firstName" VARCHAR(20) NOT NULL,
-    "lastName" VARCHAR(20),
+    "firstName" VARCHAR(30) NOT NULL,
+    "lastName" VARCHAR(30),
     "email" VARCHAR(30) NOT NULL,
     "emailVerifiedAt" TIMESTAMP(3),
     "passwordHash" TEXT NOT NULL,
     "refreshTokenHash" TEXT,
-    "profilePictureUrl" TEXT,
+    "profilePictureName" TEXT,
     "standardMessage" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
