@@ -27,7 +27,7 @@ export class UpdateUserDto {
   @Length(8, 20)
   password?: string;
 
-  @ValidateIf((user) => user.profilePictureName !== '')
+  @ValidateIf((user) => user.profilePictureName !== null)
   @IsOptional()
   @IsString()
   profilePictureName?: string;
