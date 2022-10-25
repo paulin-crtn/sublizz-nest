@@ -36,8 +36,8 @@ const mandatoryRequestData: { key: string; invalidValues: any[] }[] = [
 const optionalRequestData: { key: string; invalidValues: any[] }[] = [
   { key: 'houseNumber', invalidValues: ['', 'abcdefghijklm'] },
   { key: 'description', invalidValues: [true, 0] },
-  { key: 'gpsLatitude', invalidValues: ['', 'abc', 9] },
-  { key: 'gpsLongitude', invalidValues: ['', 'abc', 9] },
+  { key: 'gpsLatitude', invalidValues: ['', 'abc'] },
+  { key: 'gpsLongitude', invalidValues: ['', 'abc'] },
   {
     key: 'leaseImages',
     invalidValues: [
