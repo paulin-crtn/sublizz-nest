@@ -3,6 +3,8 @@ import {
   IsArray,
   IsDate,
   IsEnum,
+  IsLatitude,
+  IsLongitude,
   IsNumber,
   IsNumberString,
   IsOptional,
@@ -36,14 +38,12 @@ export class LeaseDto {
   city: string;
 
   @IsOptional()
-  @IsNumberString()
-  @Length(1, 15)
-  gpsLatitude?: string;
+  @IsLatitude()
+  gpsLatitude?: number;
 
   @IsOptional()
-  @IsNumberString()
-  @Length(1, 15)
-  gpsLongitude?: string;
+  @IsLongitude()
+  gpsLongitude?: number;
 
   @IsOptional()
   @IsString()
