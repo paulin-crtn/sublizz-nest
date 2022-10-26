@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime';
 import { LeaseTypeEnum } from '../lease/enum';
 import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -29,10 +30,16 @@ export class LeaseMessageService {
         createdAt: 'desc',
       },
     });
-    return leases.map((lease) => ({
-      ...lease,
-      type: lease.type as LeaseTypeEnum,
-    }));
+    return leases.map((lease) => {
+      const gpsLatitude = new Decimal(lease.gpsLatitude).toNumber();
+      const gpsLongitude = new Decimal(lease.gpsLongitude).toNumber();
+      return {
+        ...lease,
+        type: lease.type as LeaseTypeEnum,
+        gpsLatitude,
+        gpsLongitude,
+      };
+    });
   }
 
   async store(fromUser: User, dto: LeaseMessageDto) {

@@ -6,6 +6,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Decimal } from '@prisma/client/runtime';
 import { PrismaService } from '../prisma/prisma.service';
 import { LeaseDto } from './dto';
 import { LeaseTypeEnum } from './enum';
@@ -32,10 +33,16 @@ export class LeaseService {
         createdAt: 'desc',
       },
     });
-    return leases.map((lease) => ({
-      ...lease,
-      type: lease.type as LeaseTypeEnum,
-    }));
+    return leases.map((lease) => {
+      const gpsLatitude = new Decimal(lease.gpsLatitude).toNumber();
+      const gpsLongitude = new Decimal(lease.gpsLongitude).toNumber();
+      return {
+        ...lease,
+        type: lease.type as LeaseTypeEnum,
+        gpsLatitude,
+        gpsLongitude,
+      };
+    });
   }
 
   async getUserLeases(userId: number) {
@@ -50,10 +57,16 @@ export class LeaseService {
         createdAt: 'desc',
       },
     });
-    return leases.map((lease) => ({
-      ...lease,
-      type: lease.type as LeaseTypeEnum,
-    }));
+    return leases.map((lease) => {
+      const gpsLatitude = new Decimal(lease.gpsLatitude).toNumber();
+      const gpsLongitude = new Decimal(lease.gpsLongitude).toNumber();
+      return {
+        ...lease,
+        type: lease.type as LeaseTypeEnum,
+        gpsLatitude,
+        gpsLongitude,
+      };
+    });
   }
 
   async getLease(id: number) {
@@ -76,7 +89,12 @@ export class LeaseService {
     if (!lease) {
       throw new NotFoundException('Lease does not exist.');
     }
-    return { ...lease, type: lease.type as LeaseTypeEnum };
+    return {
+      ...lease,
+      type: lease.type as LeaseTypeEnum,
+      gpsLatitude: new Decimal(lease.gpsLatitude).toNumber(),
+      gpsLongitude: new Decimal(lease.gpsLongitude).toNumber(),
+    };
   }
 
   async store(userId: number, dto: LeaseDto) {
@@ -106,7 +124,12 @@ export class LeaseService {
         },
       },
     });
-    return { ...lease, type: lease.type as LeaseTypeEnum };
+    return {
+      ...lease,
+      type: lease.type as LeaseTypeEnum,
+      gpsLatitude: new Decimal(lease.gpsLatitude).toNumber(),
+      gpsLongitude: new Decimal(lease.gpsLongitude).toNumber(),
+    };
   }
 
   async update(id: number, userId: number, dto: LeaseDto) {
@@ -150,7 +173,12 @@ export class LeaseService {
         },
       },
     });
-    return { ...lease, type: lease.type as LeaseTypeEnum };
+    return {
+      ...lease,
+      type: lease.type as LeaseTypeEnum,
+      gpsLatitude: new Decimal(lease.gpsLatitude).toNumber(),
+      gpsLongitude: new Decimal(lease.gpsLongitude).toNumber(),
+    };
   }
 
   async delete(id: number, userId: number) {
