@@ -30,7 +30,7 @@ CREATE TABLE "lease" (
     "surface" INTEGER NOT NULL,
     "room" INTEGER NOT NULL,
     "startDate" TIMESTAMP(3) NOT NULL,
-    "endDate" TIMESTAMP(3) NOT NULL,
+    "endDate" TIMESTAMP(3),
     "isDateFlexible" INTEGER NOT NULL,
     "pricePerMonth" INTEGER NOT NULL,
     "isPublished" INTEGER NOT NULL,

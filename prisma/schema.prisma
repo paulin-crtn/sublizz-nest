@@ -51,7 +51,7 @@ model Lease {
   surface Int
   room Int
   startDate DateTime
-  endDate DateTime
+  endDate DateTime?
   isDateFlexible Int
   pricePerMonth Int
   isPublished Int

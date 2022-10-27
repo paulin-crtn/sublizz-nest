@@ -45,7 +45,7 @@ export class LeaseController {
   @Get('user')
   async getUserLeases(@GetUser('id') userId: number) {
     const leases = await this.leaseService.getUserLeases(userId);
-    return leases.map((lease) => new LeaseEntity(lease));
+    return leases.map((lease) => new LeaseDetailsEntity(lease));
   }
 
   @HttpCode(HttpStatus.OK)
@@ -79,12 +79,13 @@ export class LeaseController {
 
   @UseGuards(AccessJwtGuard)
   @ApiBearerAuth()
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @Delete(':id')
   async delete(
     @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return await this.leaseService.delete(id, userId);
+    await this.leaseService.delete(id, userId);
+    return { statusCode: 200, message: 'Lease deleted' };
   }
 }

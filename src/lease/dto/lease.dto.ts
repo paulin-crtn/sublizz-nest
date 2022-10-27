@@ -9,7 +9,6 @@ import {
   IsNumberString,
   IsOptional,
   IsString,
-  IsUrl,
   Length,
   Max,
   Min,
@@ -65,6 +64,7 @@ export class LeaseDto {
   @IsDate()
   startDate: Date;
 
+  @IsOptional()
   @Type(() => Date)
   @IsDate()
   endDate: Date;
@@ -88,6 +88,6 @@ export class LeaseDto {
 
   @IsOptional()
   @IsArray()
-  @IsUrl(undefined, { each: true })
+  @IsString({ each: true })
   leaseImages: string[];
 }
