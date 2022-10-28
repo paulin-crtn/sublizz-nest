@@ -114,7 +114,7 @@ describe('GET /leases', () => {
           isPublished: index % 2 === 0 ? 1 : 0, // Overide fake lease value
           leaseImages: {
             createMany: {
-              data: leaseImages.map((url) => ({ url })),
+              data: leaseImages.map((name) => ({ name })),
             },
           },
         },
@@ -155,7 +155,7 @@ describe('GET /leases/:id', () => {
         ...fakeLease(user.id),
         leaseImages: {
           createMany: {
-            data: leaseImages.map((url) => ({ url })),
+            data: leaseImages.map((name) => ({ name })),
           },
         },
       },
@@ -203,7 +203,7 @@ describe('GET /leases/user', () => {
         ...fakeLease(user.id),
         leaseImages: {
           createMany: {
-            data: leaseImages.map((url) => ({ url })),
+            data: leaseImages.map((name) => ({ name })),
           },
         },
       },
@@ -391,7 +391,7 @@ describe('PUT /leases/:id', () => {
         ...fakeLease(user.id),
         leaseImages: {
           createMany: {
-            data: leaseImages.map((url) => ({ url })),
+            data: leaseImages.map((name) => ({ name })),
           },
         },
       },
@@ -513,7 +513,7 @@ describe('DELETE /leases/:id', () => {
         ...fakeLease(user.id),
         leaseImages: {
           createMany: {
-            data: leaseImages.map((url) => ({ url })),
+            data: leaseImages.map((name) => ({ name })),
           },
         },
       },
@@ -579,7 +579,7 @@ describe('DELETE /leases/:id', () => {
         ...fakeLease(userWithLease.id),
         leaseImages: {
           createMany: {
-            data: leaseImages.map((url) => ({ url })),
+            data: leaseImages.map((name) => ({ name })),
           },
         },
       },
