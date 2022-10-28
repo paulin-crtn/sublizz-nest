@@ -23,7 +23,6 @@ export class LeaseMessageService {
         },
       },
       include: {
-        leaseImages: true,
         leaseMessages: true,
       },
       orderBy: {

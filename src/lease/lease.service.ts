@@ -34,13 +34,12 @@ export class LeaseService {
       },
     });
     return leases.map((lease) => {
-      const gpsLatitude = new Decimal(lease.gpsLatitude).toNumber();
-      const gpsLongitude = new Decimal(lease.gpsLongitude).toNumber();
       return {
         ...lease,
         type: lease.type as LeaseTypeEnum,
-        gpsLatitude,
-        gpsLongitude,
+        gpsLatitude: new Decimal(lease.gpsLatitude).toNumber(),
+        gpsLongitude: new Decimal(lease.gpsLongitude).toNumber(),
+        leaseImages: lease.leaseImages.map((image) => image.name),
       };
     });
   }
@@ -58,13 +57,12 @@ export class LeaseService {
       },
     });
     return leases.map((lease) => {
-      const gpsLatitude = new Decimal(lease.gpsLatitude).toNumber();
-      const gpsLongitude = new Decimal(lease.gpsLongitude).toNumber();
       return {
         ...lease,
         type: lease.type as LeaseTypeEnum,
-        gpsLatitude,
-        gpsLongitude,
+        gpsLatitude: new Decimal(lease.gpsLatitude).toNumber(),
+        gpsLongitude: new Decimal(lease.gpsLongitude).toNumber(),
+        leaseImages: lease.leaseImages.map((image) => image.name),
       };
     });
   }
@@ -94,6 +92,7 @@ export class LeaseService {
       type: lease.type as LeaseTypeEnum,
       gpsLatitude: new Decimal(lease.gpsLatitude).toNumber(),
       gpsLongitude: new Decimal(lease.gpsLongitude).toNumber(),
+      leaseImages: lease.leaseImages.map((image) => image.name),
     };
   }
 
@@ -107,7 +106,7 @@ export class LeaseService {
         leaseImages: {
           createMany: {
             data: leaseImages
-              ? leaseImages.map((url: string) => ({ url }))
+              ? leaseImages.map((name: string) => ({ name }))
               : [],
           },
         },
@@ -129,6 +128,7 @@ export class LeaseService {
       type: lease.type as LeaseTypeEnum,
       gpsLatitude: new Decimal(lease.gpsLatitude).toNumber(),
       gpsLongitude: new Decimal(lease.gpsLongitude).toNumber(),
+      leaseImages: lease.leaseImages.map((image) => image.name),
     };
   }
 
@@ -156,7 +156,7 @@ export class LeaseService {
           deleteMany: {},
           createMany: {
             data: leaseImages
-              ? leaseImages.map((url: string) => ({ url }))
+              ? leaseImages.map((name: string) => ({ name }))
               : [],
           },
         },
@@ -178,6 +178,7 @@ export class LeaseService {
       type: lease.type as LeaseTypeEnum,
       gpsLatitude: new Decimal(lease.gpsLatitude).toNumber(),
       gpsLongitude: new Decimal(lease.gpsLongitude).toNumber(),
+      leaseImages: lease.leaseImages.map((image) => image.name),
     };
   }
 

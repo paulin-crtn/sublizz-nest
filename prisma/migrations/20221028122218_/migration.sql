@@ -44,7 +44,7 @@ CREATE TABLE "lease" (
 CREATE TABLE "lease_img" (
     "id" SERIAL NOT NULL,
     "leaseId" INTEGER NOT NULL,
-    "url" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

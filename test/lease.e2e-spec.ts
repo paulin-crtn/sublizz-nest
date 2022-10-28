@@ -40,7 +40,7 @@ const optionalRequestData: { key: string; invalidValues: any[] }[] = [
   { key: 'gpsLongitude', invalidValues: ['', 'abc'] },
   {
     key: 'leaseImages',
-    invalidValues: [123456],
+    invalidValues: [123456, 'abc', [123456]],
   },
 ];
 
@@ -62,10 +62,7 @@ function isResponseOK(response: LeaseEntity) {
   expect(response.updatedAt).toBeDefined();
   expect(response.leaseImages).toBeDefined();
   expect(response.leaseImages.length).toBe(4);
-  expect(response.leaseImages[0].url).toBeDefined();
-  expect(response.leaseImages[1].url).toBeDefined();
-  expect(response.leaseImages[2].url).toBeDefined();
-  expect(response.leaseImages[3].url).toBeDefined();
+  expect(response.leaseImages[0]).toBeDefined();
 }
 
 function isResponseDetailsOK(response: LeaseDetailsEntity) {
@@ -85,10 +82,7 @@ function isResponseDetailsOK(response: LeaseDetailsEntity) {
   expect(response.updatedAt).toBeDefined();
   expect(response.leaseImages).toBeDefined();
   expect(response.leaseImages.length).toBe(4);
-  expect(response.leaseImages[0].url).toBeDefined();
-  expect(response.leaseImages[1].url).toBeDefined();
-  expect(response.leaseImages[2].url).toBeDefined();
-  expect(response.leaseImages[3].url).toBeDefined();
+  expect(response.leaseImages[0]).toBeDefined();
   expect(response.user.id).toBeDefined();
   expect(response.user.firstName).toBeDefined();
   expect(response.user.lastName).toBeDefined();

@@ -48,9 +48,7 @@ export class LeaseDetailsEntity {
   isPublished: number;
   createdAt: Date;
   updatedAt: Date;
-
-  @Type(() => LeaseImageEntity)
-  leaseImages: LeaseImageEntity[];
+  leaseImages: string[];
 
   user: {
     id: number;

@@ -65,8 +65,7 @@ export class LeaseEntity {
   createdAt: Date;
   updatedAt: Date;
 
-  @Type(() => LeaseImageEntity)
-  leaseImages: LeaseImageEntity[];
+  leaseImages: string[];
 
   @Type(() => LeaseMessageEntity)
   leaseMessages: LeaseMessageEntity[];
