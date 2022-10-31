@@ -13,6 +13,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -34,8 +35,8 @@ export class LeaseController {
 
   @HttpCode(HttpStatus.OK)
   @Get()
-  async getLeases() {
-    const leases = await this.leaseService.getLeases();
+  async getLeases(@Query('city') city: string | undefined) {
+    const leases = await this.leaseService.getLeases(city);
     return leases.map((lease) => new LeaseEntity(lease));
   }
 

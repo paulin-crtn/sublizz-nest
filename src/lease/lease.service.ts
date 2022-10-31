@@ -21,10 +21,11 @@ export class LeaseService {
   /* -------------------------------------------------------------------------- */
   /*                              PUBLIC FUNCTIONS                              */
   /* -------------------------------------------------------------------------- */
-  async getLeases() {
+  async getLeases(city: string | undefined) {
     const leases = await this.prismaService.lease.findMany({
       where: {
         isPublished: 1,
+        ...(city ? { city } : {}),
       },
       include: {
         leaseImages: true,
