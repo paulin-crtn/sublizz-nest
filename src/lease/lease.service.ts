@@ -25,7 +25,7 @@ export class LeaseService {
     const leases = await this.prismaService.lease.findMany({
       where: {
         isPublished: 1,
-        ...(city ? { city } : {}),
+        ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
       },
       include: {
         leaseImages: true,
