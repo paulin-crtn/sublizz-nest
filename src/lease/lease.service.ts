@@ -24,7 +24,12 @@ export class LeaseService {
   async getLeases(city: string | undefined, page: string | undefined) {
     const RESULTS_PER_PAGE = 5;
     const data = await this.prismaService.$transaction([
-      this.prismaService.lease.count(),
+      this.prismaService.lease.count({
+        where: {
+          isPublished: 1,
+          ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
+        },
+      }),
       this.prismaService.lease.findMany({
         where: {
           isPublished: 1,
