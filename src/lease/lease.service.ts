@@ -21,28 +21,37 @@ export class LeaseService {
   /* -------------------------------------------------------------------------- */
   /*                              PUBLIC FUNCTIONS                              */
   /* -------------------------------------------------------------------------- */
-  async getLeases(city: string | undefined) {
-    const leases = await this.prismaService.lease.findMany({
-      where: {
-        isPublished: 1,
-        ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
-      },
-      include: {
-        leaseImages: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-    return leases.map((lease) => {
-      return {
-        ...lease,
-        type: lease.type as LeaseTypeEnum,
-        gpsLatitude: new Decimal(lease.gpsLatitude).toNumber(),
-        gpsLongitude: new Decimal(lease.gpsLongitude).toNumber(),
-        leaseImages: lease.leaseImages.map((image) => image.name),
-      };
-    });
+  async getLeases(city: string | undefined, page: string | undefined) {
+    const RESULTS_PER_PAGE = 5;
+    const data = await this.prismaService.$transaction([
+      this.prismaService.lease.count(),
+      this.prismaService.lease.findMany({
+        where: {
+          isPublished: 1,
+          ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
+        },
+        include: {
+          leaseImages: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip: page ? Number(page) * RESULTS_PER_PAGE - RESULTS_PER_PAGE : 0,
+        take: RESULTS_PER_PAGE,
+      }),
+    ]);
+    return {
+      totalCount: data[0],
+      leases: data[1].map((lease) => {
+        return {
+          ...lease,
+          type: lease.type as LeaseTypeEnum,
+          gpsLatitude: new Decimal(lease.gpsLatitude).toNumber(),
+          gpsLongitude: new Decimal(lease.gpsLongitude).toNumber(),
+          leaseImages: lease.leaseImages.map((image) => image.name),
+        };
+      }),
+    };
   }
 
   async getUserLeases(userId: number) {

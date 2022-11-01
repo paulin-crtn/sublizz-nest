@@ -35,9 +35,18 @@ export class LeaseController {
 
   @HttpCode(HttpStatus.OK)
   @Get()
-  async getLeases(@Query('city') city: string | undefined) {
-    const leases = await this.leaseService.getLeases(city);
-    return leases.map((lease) => new LeaseEntity(lease));
+  async getLeases(
+    @Query('city') city: string | undefined,
+    @Query('page') page: string | undefined,
+  ) {
+    const { totalCount, leases } = await this.leaseService.getLeases(
+      city,
+      page,
+    );
+    return {
+      totalCount,
+      leases: leases.map((lease) => new LeaseEntity(lease)),
+    };
   }
 
   @UseGuards(AccessJwtGuard)
