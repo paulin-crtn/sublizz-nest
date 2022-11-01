@@ -125,9 +125,9 @@ describe('GET /leases', () => {
       .spec()
       .get('/leases')
       .expectStatus(200)
-      .expectJsonLength(2)
       .returns('res.body');
 
+    expect(response.leases.length).toBe(2);
     response.leases.forEach((lease: LeaseEntity) => isResponseOK(lease));
   });
 });
