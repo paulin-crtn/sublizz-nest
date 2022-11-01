@@ -128,7 +128,7 @@ describe('GET /leases', () => {
       .expectJsonLength(2)
       .returns('res.body');
 
-    response.data.forEach((lease: LeaseEntity) => isResponseOK(lease));
+    response.leases.forEach((lease: LeaseEntity) => isResponseOK(lease));
   });
 });
 
