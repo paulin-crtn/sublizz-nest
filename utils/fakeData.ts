@@ -11,8 +11,8 @@ import { LeaseTypeEnum } from '../src/lease/enum';
 export const fakeUser = async (firstName?: string, email?: string) => {
   const passwordHash: string = await argon.hash('password');
   return {
-    firstName: firstName ?? faker.name.firstName(),
-    lastName: faker.name.lastName(),
+    firstName: firstName ?? faker.name.firstName().slice(0, 10), // slice() because sometimes faker returns a string too long
+    lastName: faker.name.lastName().slice(0, 10), // slice() because sometimes faker returns a string too long
     email: email ?? faker.internet.email(),
     emailVerifiedAt: new Date(),
     passwordHash, // faker.internet.password()
