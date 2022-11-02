@@ -24,6 +24,7 @@ const main = async () => {
       { type: LeaseTypeEnum.SHARE },
       { type: LeaseTypeEnum.STUDENT },
       { type: LeaseTypeEnum.SUBLEASE },
+      { type: LeaseTypeEnum.SEASONAL },
     ],
   });
 
