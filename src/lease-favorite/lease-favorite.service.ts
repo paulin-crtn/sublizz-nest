@@ -11,7 +11,11 @@ export class LeaseFavoriteService {
         userId,
       },
       include: {
-        lease: true,
+        lease: {
+          include: {
+            leaseImages: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -31,7 +35,11 @@ export class LeaseFavoriteService {
         leaseId,
       },
       include: {
-        lease: true,
+        lease: {
+          include: {
+            leaseImages: true,
+          },
+        },
       },
     });
   }
