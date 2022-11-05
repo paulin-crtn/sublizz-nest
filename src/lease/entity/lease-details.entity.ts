@@ -2,7 +2,8 @@
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
 import { ApiHideProperty } from '@nestjs/swagger';
-import { Exclude, Type } from 'class-transformer';
+import { Decimal } from '@prisma/client/runtime';
+import { Exclude, Transform, Type } from 'class-transformer';
 import { LeaseTypeEnum } from '../enum';
 import { LeaseImageEntity } from './index';
 
@@ -32,12 +33,16 @@ export class LeaseDetailsEntity {
   userId: number;
 
   type: LeaseTypeEnum;
-  houseNumber?: string;
   street: string;
   postCode: string;
   city: string;
+
+  @Transform(({ value }: { value: Decimal }) => new Decimal(value).toNumber())
   gpsLatitude?: number;
+
+  @Transform(({ value }: { value: Decimal }) => new Decimal(value).toNumber())
   gpsLongitude?: number;
+
   description?: string;
   surface: number;
   room: number;

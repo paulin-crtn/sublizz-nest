@@ -3,6 +3,7 @@ CREATE TABLE "user" (
     "id" SERIAL NOT NULL,
     "firstName" VARCHAR(30) NOT NULL,
     "lastName" VARCHAR(30),
+    "phoneNumber" VARCHAR(10),
     "email" VARCHAR(30) NOT NULL,
     "emailVerifiedAt" TIMESTAMP(3),
     "passwordHash" TEXT NOT NULL,
@@ -20,7 +21,6 @@ CREATE TABLE "lease" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
     "type" VARCHAR(15) NOT NULL,
-    "houseNumber" VARCHAR(10),
     "street" VARCHAR(30) NOT NULL,
     "postCode" VARCHAR(5) NOT NULL,
     "city" VARCHAR(30) NOT NULL,
@@ -71,6 +71,16 @@ CREATE TABLE "lease_message" (
 );
 
 -- CreateTable
+CREATE TABLE "lease_favorite" (
+    "id" SERIAL NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "leaseId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "lease_favorite_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "email_verification" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
@@ -113,6 +123,12 @@ ALTER TABLE "lease_message" ADD CONSTRAINT "lease_message_leaseId_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "lease_message" ADD CONSTRAINT "lease_message_fromUserId_fkey" FOREIGN KEY ("fromUserId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "lease_favorite" ADD CONSTRAINT "lease_favorite_leaseId_fkey" FOREIGN KEY ("leaseId") REFERENCES "lease"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "lease_favorite" ADD CONSTRAINT "lease_favorite_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "email_verification" ADD CONSTRAINT "email_verification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;

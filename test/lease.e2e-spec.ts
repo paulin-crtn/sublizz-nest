@@ -33,7 +33,6 @@ const mandatoryRequestData: { key: string; invalidValues: any[] }[] = [
 ];
 
 const optionalRequestData: { key: string; invalidValues: any[] }[] = [
-  { key: 'houseNumber', invalidValues: ['', 'abcdefghijklm'] },
   { key: 'endDate', invalidValues: ['', 'a'] },
   { key: 'description', invalidValues: [true, 0] },
   { key: 'gpsLatitude', invalidValues: ['', 'abc'] },

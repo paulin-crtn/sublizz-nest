@@ -19,11 +19,6 @@ export class LeaseDto {
   @IsEnum(LeaseTypeEnum)
   type: string;
 
-  @IsOptional()
-  @IsString()
-  @Length(1, 7)
-  houseNumber?: string;
-
   @IsString()
   @Length(3, 30)
   street: string;

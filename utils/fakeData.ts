@@ -29,7 +29,6 @@ export const fakeLease = (userId: number) => ({
     LeaseTypeEnum.STUDENT,
     LeaseTypeEnum.SUBLEASE,
   ]),
-  houseNumber: faker.address.buildingNumber(),
   street: faker.address.street(),
   postCode: faker.address.zipCode('#####'),
   city: faker.address.cityName(),
