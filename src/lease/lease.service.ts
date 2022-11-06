@@ -1,9 +1,15 @@
 /* -------------------------------------------------------------------------- */
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { LeaseDto } from './dto';
+import { isAfter, isBefore } from 'date-fns';
 
 /* -------------------------------------------------------------------------- */
 /*                                LEASE SERVICE                               */
@@ -77,7 +83,7 @@ export class LeaseService {
   }
 
   async store(userId: number, dto: LeaseDto) {
-    // TO DO : check start date is before end date
+    await this._checkDate(dto.startDate, dto.endDate);
     const { leaseImages, ...leaseDto } = dto;
     return await this.prismaService.lease.create({
       data: {
@@ -106,15 +112,18 @@ export class LeaseService {
   }
 
   async update(id: number, userId: number, dto: LeaseDto) {
-    const leaseDb = await this.prismaService.lease.findUniqueOrThrow({
+    const leaseDb = await this.prismaService.lease.findUnique({
       where: {
         id,
       },
     });
+    if (!leaseDb) {
+      throw new NotFoundException('Lease does not exist.');
+    }
     if (leaseDb.userId !== userId) {
       throw new ForbiddenException('Access to resource denied.');
     }
-    // TO DO : check start date is before end date
+    await this._checkDate(dto.startDate, dto.endDate);
     const { leaseImages, ...leaseDto } = dto;
     return await this.prismaService.lease.update({
       where: {
@@ -146,11 +155,14 @@ export class LeaseService {
   }
 
   async delete(id: number, userId: number) {
-    const lease = await this.prismaService.lease.findUniqueOrThrow({
+    const lease = await this.prismaService.lease.findUnique({
       where: {
         id,
       },
     });
+    if (!lease) {
+      throw new NotFoundException('Lease does not exist.');
+    }
     if (lease.userId !== userId) {
       throw new ForbiddenException('Access to resource denied.');
     }
@@ -160,5 +172,14 @@ export class LeaseService {
       },
     });
     // TODO: delete file from storage
+  }
+
+  private async _checkDate(startDate: Date, endDate: Date) {
+    if (isBefore(startDate, new Date())) {
+      throw new BadRequestException('Start date cannot be before today');
+    }
+    if (isAfter(startDate, endDate)) {
+      throw new BadRequestException('Start date cannot be after end date');
+    }
   }
 }

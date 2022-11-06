@@ -170,8 +170,8 @@ describe('GET /leases/:id', () => {
     isResponseDetailsOK(response);
   });
 
-  it('should return status 500 when lease does not exist', async () => {
-    return pactum.spec().get('/leases/1').expectStatus(500);
+  it('should return status 404 when lease does not exist', async () => {
+    return pactum.spec().get('/leases/1').expectStatus(404);
   });
 
   it('should return status 400 when the id pass in url param is invalid', async () => {
@@ -535,7 +535,7 @@ describe('DELETE /leases/:id', () => {
       .expectStatus(200);
   });
 
-  it('should return status 500 when lease does not exist', async () => {
+  it('should return status 404 when lease does not exist', async () => {
     // Create 1 fake user
     const user = await prismaService.user.create({ data: await fakeUser() });
     // Payload
@@ -553,7 +553,7 @@ describe('DELETE /leases/:id', () => {
       .spec()
       .delete('/leases/9999999')
       .withHeaders('Authorization', `Bearer ${jwt}`)
-      .expectStatus(500);
+      .expectStatus(404);
   });
 
   it('should return status 401 when lease does not belong to user', async () => {
