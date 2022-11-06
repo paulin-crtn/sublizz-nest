@@ -21,6 +21,10 @@ const mandatoryRequestData: { key: string; invalidValues: any[] }[] = [
 ];
 
 const optionalRequestData: { key: string; invalidValues: any[] }[] = [
+  {
+    key: 'phoneNumber',
+    invalidValues: ['', 'a', 12, '01234567890', '0123'],
+  },
   { key: 'lastName', invalidValues: ['', 'a', true, 9999] },
   { key: 'password', invalidValues: ['', 'abc', true, 9999] },
   { key: 'profilePictureName', invalidValues: [true, 9999] },
