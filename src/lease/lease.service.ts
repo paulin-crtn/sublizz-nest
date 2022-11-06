@@ -64,7 +64,7 @@ export class LeaseService {
   }
 
   async getLease(id: number) {
-    return await this.prismaService.lease.findUniqueOrThrow({
+    const lease = await this.prismaService.lease.findUnique({
       where: {
         id,
       },
@@ -80,6 +80,10 @@ export class LeaseService {
         },
       },
     });
+    if (!lease) {
+      throw new NotFoundException('Lease does not exist.');
+    }
+    return lease;
   }
 
   async store(userId: number, dto: LeaseDto) {
