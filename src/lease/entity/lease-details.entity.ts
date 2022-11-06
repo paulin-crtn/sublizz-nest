@@ -3,7 +3,7 @@
 /* -------------------------------------------------------------------------- */
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Decimal } from '@prisma/client/runtime';
-import { Exclude, Transform, Type } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 import { LeaseTypeEnum } from '../enum';
 import { ILeaseImage } from '../interfaces/ILeaseImage';
 

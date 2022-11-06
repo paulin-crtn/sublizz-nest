@@ -5,6 +5,7 @@ import {
   IsOptional,
   MaxLength,
   ValidateIf,
+  IsNumberString,
 } from 'class-validator';
 
 export class UpdateUserDto {
@@ -17,6 +18,12 @@ export class UpdateUserDto {
   @IsString()
   @Length(3, 30)
   lastName?: string;
+
+  @ValidateIf((user) => user.phoneNumber !== '')
+  @IsOptional()
+  @IsNumberString()
+  @Length(10, 10)
+  phoneNumber?: string;
 
   @IsEmail()
   email: string;
