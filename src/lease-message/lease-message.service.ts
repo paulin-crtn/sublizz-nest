@@ -14,7 +14,7 @@ export class LeaseMessageService {
   ) {}
 
   async getUserMessages(userId: number) {
-    const leases = await this.prismaService.lease.findMany({
+    return await this.prismaService.lease.findMany({
       where: {
         leaseMessages: {
           some: {
@@ -29,20 +29,10 @@ export class LeaseMessageService {
         createdAt: 'desc',
       },
     });
-    return leases.map((lease) => {
-      const gpsLatitude = new Decimal(lease.gpsLatitude).toNumber();
-      const gpsLongitude = new Decimal(lease.gpsLongitude).toNumber();
-      return {
-        ...lease,
-        type: lease.type as LeaseTypeEnum,
-        gpsLatitude,
-        gpsLongitude,
-      };
-    });
   }
 
   async store(fromUser: User, dto: LeaseMessageDto) {
-    const lease = await this.prismaService.lease.findUnique({
+    const lease = await this.prismaService.lease.findUniqueOrThrow({
       where: {
         id: dto.leaseId,
       },
@@ -50,9 +40,6 @@ export class LeaseMessageService {
         user: true,
       },
     });
-    if (!lease) {
-      throw new NotFoundException('Lease does not exist.');
-    }
     await this.prismaService.leaseMessage.create({
       data: {
         leaseId: lease.id,

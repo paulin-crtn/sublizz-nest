@@ -1,15 +1,9 @@
 /* -------------------------------------------------------------------------- */
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { Decimal } from '@prisma/client/runtime';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { LeaseDto } from './dto';
-import { LeaseTypeEnum } from './enum';
 
 /* -------------------------------------------------------------------------- */
 /*                                LEASE SERVICE                               */
@@ -45,22 +39,12 @@ export class LeaseService {
         take: RESULTS_PER_PAGE,
       }),
     ]);
-    return {
-      totalCount: data[0],
-      leases: data[1].map((lease) => {
-        return {
-          ...lease,
-          type: lease.type as LeaseTypeEnum,
-          gpsLatitude: new Decimal(lease.gpsLatitude).toNumber(),
-          gpsLongitude: new Decimal(lease.gpsLongitude).toNumber(),
-          leaseImages: lease.leaseImages.map((image) => image.name),
-        };
-      }),
-    };
+    const [totalCount, leases] = data;
+    return { totalCount, leases };
   }
 
   async getUserLeases(userId: number) {
-    const leases = await this.prismaService.lease.findMany({
+    return await this.prismaService.lease.findMany({
       where: {
         userId,
       },
@@ -71,19 +55,10 @@ export class LeaseService {
         createdAt: 'desc',
       },
     });
-    return leases.map((lease) => {
-      return {
-        ...lease,
-        type: lease.type as LeaseTypeEnum,
-        gpsLatitude: new Decimal(lease.gpsLatitude).toNumber(),
-        gpsLongitude: new Decimal(lease.gpsLongitude).toNumber(),
-        leaseImages: lease.leaseImages.map((image) => image.name),
-      };
-    });
   }
 
   async getLease(id: number) {
-    const lease = await this.prismaService.lease.findUnique({
+    return await this.prismaService.lease.findUniqueOrThrow({
       where: {
         id,
       },
@@ -99,22 +74,12 @@ export class LeaseService {
         },
       },
     });
-    if (!lease) {
-      throw new NotFoundException('Lease does not exist.');
-    }
-    return {
-      ...lease,
-      type: lease.type as LeaseTypeEnum,
-      gpsLatitude: new Decimal(lease.gpsLatitude).toNumber(),
-      gpsLongitude: new Decimal(lease.gpsLongitude).toNumber(),
-      leaseImages: lease.leaseImages.map((image) => image.name),
-    };
   }
 
   async store(userId: number, dto: LeaseDto) {
     // TO DO : check start date is before end date
     const { leaseImages, ...leaseDto } = dto;
-    const lease = await this.prismaService.lease.create({
+    return await this.prismaService.lease.create({
       data: {
         userId,
         ...leaseDto,
@@ -138,30 +103,20 @@ export class LeaseService {
         },
       },
     });
-    return {
-      ...lease,
-      type: lease.type as LeaseTypeEnum,
-      gpsLatitude: new Decimal(lease.gpsLatitude).toNumber(),
-      gpsLongitude: new Decimal(lease.gpsLongitude).toNumber(),
-      leaseImages: lease.leaseImages.map((image) => image.name),
-    };
   }
 
   async update(id: number, userId: number, dto: LeaseDto) {
-    const leaseDb = await this.prismaService.lease.findUnique({
+    const leaseDb = await this.prismaService.lease.findUniqueOrThrow({
       where: {
         id,
       },
     });
-    if (!leaseDb) {
-      throw new NotFoundException('Lease does not exist.');
-    }
     if (leaseDb.userId !== userId) {
       throw new ForbiddenException('Access to resource denied.');
     }
     // TO DO : check start date is before end date
     const { leaseImages, ...leaseDto } = dto;
-    const lease = await this.prismaService.lease.update({
+    return await this.prismaService.lease.update({
       where: {
         id,
       },
@@ -188,24 +143,14 @@ export class LeaseService {
         },
       },
     });
-    return {
-      ...lease,
-      type: lease.type as LeaseTypeEnum,
-      gpsLatitude: new Decimal(lease.gpsLatitude).toNumber(),
-      gpsLongitude: new Decimal(lease.gpsLongitude).toNumber(),
-      leaseImages: lease.leaseImages.map((image) => image.name),
-    };
   }
 
   async delete(id: number, userId: number) {
-    const lease = await this.prismaService.lease.findUnique({
+    const lease = await this.prismaService.lease.findUniqueOrThrow({
       where: {
         id,
       },
     });
-    if (!lease) {
-      throw new NotFoundException('Lease does not exist.');
-    }
     if (lease.userId !== userId) {
       throw new ForbiddenException('Access to resource denied.');
     }

@@ -5,7 +5,7 @@ import { ApiHideProperty } from '@nestjs/swagger';
 import { Decimal } from '@prisma/client/runtime';
 import { Exclude, Transform, Type } from 'class-transformer';
 import { LeaseTypeEnum } from '../enum';
-import { LeaseImageEntity } from './index';
+import { ILeaseImage } from '../interfaces/ILeaseImage';
 
 /* -------------------------------------------------------------------------- */
 /*                                    CLASS                                   */
@@ -37,10 +37,10 @@ export class LeaseDetailsEntity {
   postCode: string;
   city: string;
 
-  @Transform(({ value }: { value: Decimal }) => new Decimal(value).toNumber())
+  @Transform(({ value }) => new Decimal(value).toNumber())
   gpsLatitude?: number;
 
-  @Transform(({ value }: { value: Decimal }) => new Decimal(value).toNumber())
+  @Transform(({ value }) => new Decimal(value).toNumber())
   gpsLongitude?: number;
 
   description?: string;
@@ -53,6 +53,10 @@ export class LeaseDetailsEntity {
   isPublished: number;
   createdAt: Date;
   updatedAt: Date;
+
+  @Transform(({ value }) =>
+    value.map((leaseImage: ILeaseImage) => leaseImage.name),
+  )
   leaseImages: string[];
 
   user: {

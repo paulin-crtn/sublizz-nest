@@ -35,7 +35,7 @@ export class LeaseMessageController {
   @Get('user')
   async getUserMessages(@GetUser('id') userId: number) {
     const leases = await this.leaseMessageService.getUserMessages(userId);
-    return leases.map((lease) => new LeaseEntity(lease));
+    return leases.map((lease) => new LeaseEntity(lease as unknown));
   }
 
   @UseGuards(AccessJwtGuard)

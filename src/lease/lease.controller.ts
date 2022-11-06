@@ -45,7 +45,7 @@ export class LeaseController {
     );
     return {
       totalCount,
-      leases: leases.map((lease) => new LeaseEntity(lease)),
+      leases: leases.map((lease) => new LeaseEntity(lease as unknown)),
     };
   }
 
@@ -55,14 +55,14 @@ export class LeaseController {
   @Get('user')
   async getUserLeases(@GetUser('id') userId: number) {
     const leases = await this.leaseService.getUserLeases(userId);
-    return leases.map((lease) => new LeaseDetailsEntity(lease));
+    return leases.map((lease) => new LeaseDetailsEntity(lease as unknown));
   }
 
   @HttpCode(HttpStatus.OK)
   @Get(':id')
   async getLease(@Param('id', ParseIntPipe) id: number) {
     const lease = await this.leaseService.getLease(id);
-    return new LeaseDetailsEntity(lease);
+    return new LeaseDetailsEntity(lease as unknown);
   }
 
   @UseGuards(AccessJwtGuard)
@@ -71,7 +71,7 @@ export class LeaseController {
   @Post()
   async store(@GetUser('id') userId: number, @Body() dto: LeaseDto) {
     const lease = await this.leaseService.store(userId, dto);
-    return new LeaseDetailsEntity(lease);
+    return new LeaseDetailsEntity(lease as unknown);
   }
 
   @UseGuards(AccessJwtGuard)
@@ -84,7 +84,7 @@ export class LeaseController {
     @Body() dto: LeaseDto,
   ) {
     const lease = await this.leaseService.update(id, userId, dto);
-    return new LeaseDetailsEntity(lease);
+    return new LeaseDetailsEntity(lease as unknown);
   }
 
   @UseGuards(AccessJwtGuard)

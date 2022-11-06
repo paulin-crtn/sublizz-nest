@@ -6,7 +6,7 @@ import { Decimal } from '@prisma/client/runtime';
 import { Exclude, Transform, Type } from 'class-transformer';
 import { LeaseMessageEntity } from '../../lease-message/entity';
 import { LeaseTypeEnum } from '../enum';
-import { LeaseImageEntity } from './index';
+import { ILeaseImage } from '../interfaces/ILeaseImage';
 
 /* -------------------------------------------------------------------------- */
 /*                                    CLASS                                   */
@@ -33,7 +33,7 @@ export class LeaseEntity {
   @ApiHideProperty()
   userId: number;
 
-  type: string;
+  type: LeaseTypeEnum;
 
   @Exclude()
   @ApiHideProperty()
@@ -42,10 +42,10 @@ export class LeaseEntity {
   postCode: string;
   city: string;
 
-  @Transform(({ value }: { value: Decimal }) => new Decimal(value).toNumber())
+  @Transform(({ value }) => new Decimal(value).toNumber())
   gpsLatitude: number;
 
-  @Transform(({ value }: { value: Decimal }) => new Decimal(value).toNumber())
+  @Transform(({ value }) => new Decimal(value).toNumber())
   gpsLongitude: number;
 
   @Exclude()
@@ -66,6 +66,9 @@ export class LeaseEntity {
   createdAt: Date;
   updatedAt: Date;
 
+  @Transform(({ value }) =>
+    value.map((leaseImage: ILeaseImage) => leaseImage.name),
+  )
   leaseImages: string[];
 
   @Type(() => LeaseMessageEntity)
