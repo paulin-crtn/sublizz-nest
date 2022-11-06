@@ -175,7 +175,6 @@ export class LeaseService {
         id,
       },
     });
-    // TODO: delete file from storage
   }
 
   private async _checkDate(startDate: Date, endDate: Date) {

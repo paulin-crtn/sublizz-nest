@@ -284,7 +284,7 @@ describe('DELETE /users/:id', () => {
       .spec()
       .delete(`/users/${user.id}`)
       .withHeaders('Authorization', `Bearer ${jwt}`)
-      .expectStatus(204);
+      .expectStatus(200);
   });
 
   it('should return status 404 when user does not exist', async () => {
