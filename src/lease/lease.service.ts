@@ -87,7 +87,20 @@ export class LeaseService {
   }
 
   async store(userId: number, dto: LeaseDto) {
-    await this._checkDate(dto.startDate, dto.endDate);
+    // Count user leases
+    const userLeasesCount = await this.prismaService.lease.count({
+      where: {
+        userId,
+      },
+    });
+    if (userLeasesCount >= 2) {
+      throw new ForbiddenException(
+        'Un utilisateur ne peut pas ajouter plus de 2 annonces.',
+      );
+    }
+    // Check dates
+    await this._checkDates(dto.startDate, dto.endDate);
+    // Store data
     const { leaseImages, ...leaseDto } = dto;
     return await this.prismaService.lease.create({
       data: {
@@ -127,7 +140,7 @@ export class LeaseService {
     if (leaseDb.userId !== userId) {
       throw new ForbiddenException('Access to resource denied.');
     }
-    await this._checkDate(dto.startDate, dto.endDate);
+    await this._checkDates(dto.startDate, dto.endDate);
     const { leaseImages, ...leaseDto } = dto;
     return await this.prismaService.lease.update({
       where: {
@@ -177,7 +190,7 @@ export class LeaseService {
     });
   }
 
-  private async _checkDate(startDate: Date, endDate: Date) {
+  private async _checkDates(startDate: Date, endDate: Date) {
     if (isBefore(startDate, new Date())) {
       throw new BadRequestException('Start date cannot be before today');
     }
