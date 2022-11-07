@@ -17,7 +17,10 @@ model User {
   emailVerification EmailVerification[]
   passwordReset PasswordReset[]
 
+  userType UserRole @relation(fields: [role], references: [role], onUpdate: NoAction, onDelete: NoAction)
+
   id Int @id @default(autoincrement())
+  role String @db.VarChar(10)
   firstName String @db.VarChar(30)
   lastName String? @db.VarChar(30)
   phoneNumber String? @db.VarChar(10)
@@ -31,6 +34,15 @@ model User {
   updatedAt DateTime @updatedAt
 
   @@map(name: "user")
+}
+
+model UserRole {
+  users User[]
+  
+  id Int @id @default(autoincrement())
+  role String @db.VarChar(10) @unique
+
+  @@map(name: "user_role")
 }
 
 model Lease {

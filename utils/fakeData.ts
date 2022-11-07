@@ -4,6 +4,7 @@
 import { faker } from '@faker-js/faker';
 import argon from 'argon2';
 import { LeaseTypeEnum } from '../src/lease/enum';
+import { UserRoleEnum } from '../src/user/enum';
 
 /* -------------------------------------------------------------------------- */
 /*                                  FUNCTIONS                                 */
@@ -11,6 +12,7 @@ import { LeaseTypeEnum } from '../src/lease/enum';
 export const fakeUser = async (firstName?: string, email?: string) => {
   const passwordHash: string = await argon.hash('password');
   return {
+    role: faker.helpers.arrayElement([UserRoleEnum.SEEKER, UserRoleEnum.OWNER]),
     firstName: firstName ?? faker.name.firstName().slice(0, 10), // slice() because sometimes faker returns a string too long
     lastName: faker.name.lastName().slice(0, 10), // slice() because sometimes faker returns a string too long
     email: email ?? faker.internet.email(),
@@ -28,6 +30,7 @@ export const fakeLease = (userId: number) => ({
     LeaseTypeEnum.SHARE,
     LeaseTypeEnum.STUDENT,
     LeaseTypeEnum.SUBLEASE,
+    LeaseTypeEnum.SEASONAL,
   ]),
   street: faker.address.street(),
   postCode: faker.address.zipCode('#####'),

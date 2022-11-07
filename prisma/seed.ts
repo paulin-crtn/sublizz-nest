@@ -3,6 +3,7 @@
 /* -------------------------------------------------------------------------- */
 import { PrismaClient } from '@prisma/client';
 import { LeaseTypeEnum } from '../src/lease/enum';
+import { UserRoleEnum } from '../src/user/enum';
 import { fakeUser, fakeLease, fakeLeaseMessage } from '../utils/fakeData';
 
 /* -------------------------------------------------------------------------- */
@@ -16,6 +17,11 @@ const prisma = new PrismaClient();
 const main = async () => {
   // Initialization
   console.log('Seeding database...');
+
+  // Create user role
+  await prisma.userRole.createMany({
+    data: [{ role: UserRoleEnum.SEEKER }, { role: UserRoleEnum.OWNER }],
+  });
 
   // Create lease type
   await prisma.leaseType.createMany({
@@ -41,22 +47,13 @@ const main = async () => {
     data: await fakeUser('luigi', 'luigi@mail.com'),
   });
 
-  // Create 6 fake leases with 3 leaseImage each
+  // Create 6 fake leases
   const leaseIds = [];
   for (let index = 0; index < 6; index++) {
-    // const leaseImages = [];
-    // for (let index = 0; index < 3; index++) {
-    //   leaseImages.push(fakeLeaseImage());
-    // }
     const lease = fakeLease(mario.id);
     const leaseDb = await prisma.lease.create({
       data: {
         ...lease,
-        // leaseImages: {
-        //   createMany: {
-        //     data: leaseImages.map((url) => ({ url })),
-        //   },
-        // },
       },
     });
     leaseIds.push(leaseDb.id);

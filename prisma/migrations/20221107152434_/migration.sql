@@ -1,6 +1,7 @@
 -- CreateTable
 CREATE TABLE "user" (
     "id" SERIAL NOT NULL,
+    "role" VARCHAR(10) NOT NULL,
     "firstName" VARCHAR(30) NOT NULL,
     "lastName" VARCHAR(30),
     "phoneNumber" VARCHAR(10),
@@ -14,6 +15,14 @@ CREATE TABLE "user" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_role" (
+    "id" SERIAL NOT NULL,
+    "role" VARCHAR(10) NOT NULL,
+
+    CONSTRAINT "user_role_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -107,7 +116,13 @@ CREATE TABLE "password_reset" (
 CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "user_role_role_key" ON "user_role"("role");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "lease_type_type_key" ON "lease_type"("type");
+
+-- AddForeignKey
+ALTER TABLE "user" ADD CONSTRAINT "user_role_fkey" FOREIGN KEY ("role") REFERENCES "user_role"("role") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE "lease" ADD CONSTRAINT "lease_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
