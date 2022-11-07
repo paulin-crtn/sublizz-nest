@@ -7,10 +7,12 @@ export class UserEntity {
   }
 
   id: number;
+  role: string;
   firstName: string;
   lastName: string;
   email: string;
   profilePictureName: string;
+  standardMessage: string;
 
   @ApiHideProperty()
   @Exclude()

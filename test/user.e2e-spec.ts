@@ -43,6 +43,7 @@ describe('GET /users/me', () => {
   it('should return the authenticated user when a valid token is provided', async () => {
     const user = await prismaService.user.create({
       data: {
+        role: 'owner',
         firstName: 'firstname',
         email: 'email@mail.com',
         passwordHash: 'password',
@@ -63,10 +64,13 @@ describe('GET /users/me', () => {
       .expectStatus(200)
       .expectJsonMatch({
         id: user.id,
+        role: 'owner',
         firstName: 'firstname',
         lastName: null,
         email: 'email@mail.com',
         profilePictureName: null,
+        phoneNumber: null,
+        standardMessage: null,
       });
   });
 
@@ -119,8 +123,9 @@ describe('PUT /users/:id', () => {
     // Create user
     const user = await prismaService.user.create({
       data: {
+        role: 'owner',
         firstName: 'firstname',
-        email: 'firstname@mail.com',
+        email: 'email@mail.com',
         passwordHash: 'password',
         emailVerifiedAt: new Date(),
       },
@@ -139,6 +144,7 @@ describe('PUT /users/:id', () => {
       .put(`/users/${user.id}`)
       .withHeaders({ Authorization: `Bearer ${token}` })
       .withBody({
+        role: 'owner', // role, email and firstName should always be present in payload (even if they don't change)
         firstName: 'new',
         lastName: 'lastname',
         email: 'new@mail.com',
@@ -146,10 +152,13 @@ describe('PUT /users/:id', () => {
       .expectStatus(200)
       .expectJsonMatch({
         id: user.id,
+        role: 'owner',
         firstName: 'new',
         lastName: 'lastname',
-        email: 'firstname@mail.com', // Because user need to validate new email
+        email: 'email@mail.com', // Because user need to validate email
         profilePictureName: null,
+        phoneNumber: null,
+        standardMessage: null,
       });
   });
 
@@ -170,6 +179,7 @@ describe('PUT /users/:id', () => {
       .put('/users/999999999')
       .withHeaders({ Authorization: `Bearer ${token}` })
       .withBody({
+        role: 'owner',
         firstName: 'new',
         email: 'new@mail.com',
       })
@@ -179,12 +189,7 @@ describe('PUT /users/:id', () => {
   it('should return status 400 when a mandatory attribute is missing', async () => {
     // Create user
     const user = await prismaService.user.create({
-      data: {
-        firstName: 'firstname',
-        email: 'firstname@mail.com',
-        passwordHash: 'password',
-        emailVerifiedAt: new Date(),
-      },
+      data: await fakeUser(),
     });
     // Create token
     const token = await jwtService.signAsync(
@@ -210,12 +215,7 @@ describe('PUT /users/:id', () => {
   it('should return status 400 when any attribute is invalid', async () => {
     // Create user
     const user = await prismaService.user.create({
-      data: {
-        firstName: 'firstname',
-        email: 'firstname@mail.com',
-        passwordHash: 'password',
-        emailVerifiedAt: new Date(),
-      },
+      data: await fakeUser(),
     });
     // Payload
     const payload = {

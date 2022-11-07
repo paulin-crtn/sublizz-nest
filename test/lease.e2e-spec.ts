@@ -562,11 +562,7 @@ describe('DELETE /leases/:id', () => {
       data: await fakeUser(),
     });
     const userWithLease = await prismaService.user.create({
-      data: {
-        firstName: 'first',
-        passwordHash: 'password',
-        email: 'second@mail.com',
-      },
+      data: await fakeUser(),
     });
     // Create 1 fake lease with 4 leaseImage
     const leaseImages = [];
