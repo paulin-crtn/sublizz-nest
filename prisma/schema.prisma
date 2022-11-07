@@ -17,7 +17,7 @@ model User {
   emailVerification EmailVerification[]
   passwordReset PasswordReset[]
 
-  userType UserRole @relation(fields: [role], references: [role], onUpdate: NoAction, onDelete: NoAction)
+  userRole UserRole @relation(fields: [role], references: [role], onUpdate: NoAction, onDelete: NoAction)
 
   id Int @id @default(autoincrement())
   role String @db.VarChar(10)
