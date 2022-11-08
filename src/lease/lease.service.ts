@@ -75,6 +75,7 @@ export class LeaseService {
             id: true,
             firstName: true,
             lastName: true,
+            phoneNumber: true,
             profilePictureName: true,
           },
         },
