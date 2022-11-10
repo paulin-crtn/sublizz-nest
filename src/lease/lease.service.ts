@@ -10,6 +10,8 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { LeaseDto } from './dto';
 import { isAfter } from 'date-fns';
+import { CITIES_COORDINATES } from '../../data/citiesCoordinates';
+import { Decimal } from '@prisma/client/runtime';
 
 /* -------------------------------------------------------------------------- */
 /*                                LEASE SERVICE                               */
@@ -22,18 +24,55 @@ export class LeaseService {
   /*                              PUBLIC FUNCTIONS                              */
   /* -------------------------------------------------------------------------- */
   async getLeases(city: string | undefined, page: string | undefined) {
+    // CONSTANT
     const RESULTS_PER_PAGE = 5;
+    // CLOSE COORDINATES
+    let closeCoordinates = undefined;
+    if (city) {
+      closeCoordinates = this._findCloseCoordinates(city);
+    }
+    // PRISMA TRANSACTION
     const data = await this.prismaService.$transaction([
+      // COUNT TOTAL DATA
       this.prismaService.lease.count({
         where: {
           isPublished: 1,
-          ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
+          ...(city && !closeCoordinates
+            ? { city: { contains: city, mode: 'insensitive' } }
+            : {}),
+          ...(city && closeCoordinates
+            ? {
+                gpsLatitude: {
+                  gte: closeCoordinates.latitude.start,
+                  lte: closeCoordinates.latitude.end,
+                },
+                gpsLongitude: {
+                  gte: closeCoordinates.longitude.start,
+                  lte: closeCoordinates.longitude.end,
+                },
+              }
+            : {}),
         },
       }),
+      // FIND DATA (with pagination, if any)
       this.prismaService.lease.findMany({
         where: {
           isPublished: 1,
-          ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
+          ...(city && !closeCoordinates
+            ? { city: { contains: city, mode: 'insensitive' } }
+            : {}),
+          ...(city && closeCoordinates
+            ? {
+                gpsLatitude: {
+                  gte: closeCoordinates.latitude.start,
+                  lte: closeCoordinates.latitude.end,
+                },
+                gpsLongitude: {
+                  gte: closeCoordinates.longitude.start,
+                  lte: closeCoordinates.longitude.end,
+                },
+              }
+            : {}),
         },
         include: {
           leaseImages: true,
@@ -197,5 +236,33 @@ export class LeaseService {
         'La date de début de peut pas être après la date de fin.',
       );
     }
+  }
+
+  private _findCloseCoordinates(queryCity: string) {
+    // Find queryCity coordinates
+    const city = CITIES_COORDINATES.find(
+      (data) => data.city.toLocaleLowerCase() === queryCity.toLocaleLowerCase(),
+    );
+    if (!city) {
+      return undefined;
+    }
+    // Latitude
+    const aroundLatitude = {
+      start: Number(city.lat) - 0.2, // 110.574 km * 0.2 = 22.1km
+      end: Number(city.lat) + 0.2, // 110.574 km * 0.2 = 22.1km
+    };
+    // Longitude
+    // https://stackoverflow.com/questions/1253499/simple-calculations-for-working-with-lat-lon-and-km-distance
+    const oneDegreeToKm = Math.abs(111.32 * Math.cos(Number(city.lng)));
+    const lngDegreeToSubstract = 1 / (oneDegreeToKm / 22); // 1 = 1 degree and 22 = 22km
+    const aroundLongitude = {
+      start: Number(city.lng) - lngDegreeToSubstract,
+      end: Number(city.lng) + lngDegreeToSubstract,
+    };
+    // Return
+    return {
+      latitude: aroundLatitude,
+      longitude: aroundLongitude,
+    };
   }
 }
