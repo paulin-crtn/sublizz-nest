@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { LeaseDto } from './dto';
-import { isAfter, isBefore } from 'date-fns';
+import { isAfter } from 'date-fns';
 
 /* -------------------------------------------------------------------------- */
 /*                                LEASE SERVICE                               */
@@ -192,11 +192,10 @@ export class LeaseService {
   }
 
   private async _checkDates(startDate: Date, endDate: Date) {
-    if (isBefore(startDate, new Date())) {
-      throw new BadRequestException('Start date cannot be before today');
-    }
     if (isAfter(startDate, endDate)) {
-      throw new BadRequestException('Start date cannot be after end date');
+      throw new BadRequestException(
+        'La date de début de peut pas être après la date de fin.',
+      );
     }
   }
 }
