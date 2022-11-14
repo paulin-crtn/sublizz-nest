@@ -25,13 +25,6 @@ export class MailService {
       this.configService.get('APP_PORT');
   }
 
-  /**
-   * Send a confirmation email to the user
-   *
-   * @param user
-   * @param token
-   * @param emailVerification
-   */
   async sendUserEmailVerificationToken(
     user: User,
     token: string,
@@ -55,12 +48,6 @@ export class MailService {
     }
   }
 
-  /**
-   * Send a reset password token to the user
-   *
-   * @param user
-   * @param token
-   */
   async sendUserResetPasswordToken(user: User, token: string) {
     const url = `${this.baseUrl}/auth/reset-password?email=${user.email}&token=${token}`;
     try {
@@ -106,12 +93,6 @@ export class MailService {
     }
   }
 
-  /**
-   * Send a lease report to the admin
-   *
-   * @param leaseId
-   * @param userId
-   */
   async sendAdminLeaseReport(userId: number, leaseId: number, reason: string) {
     try {
       await this.mailerService.sendMail({
@@ -127,6 +108,24 @@ export class MailService {
     } catch (e) {
       throw new Error(
         'An error occcured while sending admin lease report: ' + e,
+      );
+    }
+  }
+
+  async sendAdminHelpMessage(userId: number, message: string) {
+    try {
+      await this.mailerService.sendMail({
+        to: 'contact@haftwald.com',
+        subject: 'Un utilisateur vous a envoyé une suggestion',
+        template: './help-us',
+        context: {
+          userId,
+          message,
+        },
+      });
+    } catch (e) {
+      throw new Error(
+        'An error occcured while sending admin help message: ' + e,
       );
     }
   }

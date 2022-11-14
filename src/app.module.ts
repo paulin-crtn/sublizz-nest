@@ -8,6 +8,7 @@ import { MailModule } from './mail/mail.module';
 import { LeaseReportModule } from './lease-report/lease-report.module';
 import { LeaseMessageModule } from './lease-message/lease-message.module';
 import { LeaseFavoriteModule } from './lease-favorite/lease-favorite.module';
+import { HelpUsModule } from './help-us/help-us.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { LeaseFavoriteModule } from './lease-favorite/lease-favorite.module';
     LeaseReportModule,
     LeaseMessageModule,
     LeaseFavoriteModule,
+    HelpUsModule,
   ],
   controllers: [],
   providers: [],
