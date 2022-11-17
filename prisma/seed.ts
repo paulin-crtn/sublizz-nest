@@ -47,9 +47,9 @@ const main = async () => {
     data: await fakeUser('luigi', 'luigi@mail.com'),
   });
 
-  // Create 6 fake leases
+  // Create 15 fake leases
   const leaseIds = [];
-  for (let index = 0; index < 6; index++) {
+  for (let index = 0; index < 15; index++) {
     const lease = fakeLease(mario.id);
     const leaseDb = await prisma.lease.create({
       data: {

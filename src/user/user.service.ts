@@ -40,7 +40,7 @@ export class UserService {
       },
     });
     if (!user) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException('Utilisateur non trouvé.');
     }
     if (!user.emailVerifiedAt) {
       throw new UnauthorizedException('Email must be verified.');
@@ -64,7 +64,7 @@ export class UserService {
       },
     });
     if (!user) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException('Utilisateur non trouvé.');
     }
     if (user.id !== userId) {
       throw new ForbiddenException('Access to resource denied.');
@@ -106,7 +106,7 @@ export class UserService {
       },
     });
     if (!user) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException('Utilisateur non trouvé.');
     }
     if (user.id !== userId) {
       throw new ForbiddenException('Access to resource denied.');

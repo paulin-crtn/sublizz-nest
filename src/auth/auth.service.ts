@@ -96,7 +96,7 @@ export class AuthService {
     // Find the user by email
     const user = await this.userService.getUserByEmail(dto.email);
     if (!user) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException('Utilisateur non trouvé.');
     }
     // Compare password
     const isPasswordCorrect = await argon.verify(
@@ -105,7 +105,7 @@ export class AuthService {
     );
     // If password incorrect throw exception
     if (!isPasswordCorrect) {
-      throw new UnauthorizedException('Incorrect password.');
+      throw new UnauthorizedException('Mot de passe incorrect.');
     }
     // Generate tokens
     const [accessToken, refreshToken] = await Promise.all([
