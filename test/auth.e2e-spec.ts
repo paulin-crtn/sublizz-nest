@@ -396,7 +396,7 @@ describe('GET /auth/confirm-email', () => {
     await pactum
       .spec()
       .get('/auth/confirm-email')
-      .withQueryParams('emailVerificationId', 9999999999)
+      .withQueryParams('emailVerificationId', 9999999)
       .withQueryParams('token', 'token')
       .expectStatus(404);
   });
