@@ -48,9 +48,3 @@ export const fakeLease = (userId: number) => ({
 });
 
 export const fakeLeaseImage = () => faker.image.imageUrl();
-
-export const fakeLeaseMessage = (leaseId: number, fromUserId: number) => ({
-  leaseId,
-  fromUserId,
-  content: faker.lorem.lines(3),
-});

@@ -6,9 +6,10 @@ import { UserModule } from './user/user.module';
 import { LeaseModule } from './lease/lease.module';
 import { MailModule } from './mail/mail.module';
 import { LeaseReportModule } from './lease-report/lease-report.module';
-import { LeaseMessageModule } from './lease-message/lease-message.module';
 import { LeaseFavoriteModule } from './lease-favorite/lease-favorite.module';
 import { HelpUsModule } from './help-us/help-us.module';
+import { ConversationModule } from './conversation/conversation.module';
+import { ConversationMessageModule } from './conversation-message/conversation-message.module';
 
 @Module({
   imports: [
@@ -21,9 +22,10 @@ import { HelpUsModule } from './help-us/help-us.module';
     LeaseModule,
     MailModule,
     LeaseReportModule,
-    LeaseMessageModule,
     LeaseFavoriteModule,
     HelpUsModule,
+    ConversationModule,
+    ConversationMessageModule,
   ],
   controllers: [],
   providers: [],

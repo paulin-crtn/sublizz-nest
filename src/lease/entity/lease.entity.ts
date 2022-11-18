@@ -3,8 +3,7 @@
 /* -------------------------------------------------------------------------- */
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Decimal } from '@prisma/client/runtime';
-import { Exclude, Transform, Type } from 'class-transformer';
-import { LeaseMessageEntity } from '../../lease-message/entity';
+import { Exclude, Transform } from 'class-transformer';
 import { LeaseTypeEnum } from '../enum';
 import { ILeaseImage } from '../interfaces/ILeaseImage';
 
@@ -70,7 +69,4 @@ export class LeaseEntity {
     value.map((leaseImage: ILeaseImage) => leaseImage.name),
   )
   leaseImages: string[];
-
-  @Type(() => LeaseMessageEntity)
-  leaseMessages?: LeaseMessageEntity[];
 }

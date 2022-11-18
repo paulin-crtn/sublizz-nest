@@ -4,7 +4,8 @@
 import { PrismaClient } from '@prisma/client';
 import { LeaseTypeEnum } from '../src/lease/enum';
 import { UserRoleEnum } from '../src/user/enum';
-import { fakeUser, fakeLease, fakeLeaseMessage } from '../utils/fakeData';
+import { fakeUser, fakeLease } from '../utils/fakeData';
+import randomToken from 'rand-token';
 
 /* -------------------------------------------------------------------------- */
 /*                               INITIALIZATION                               */
@@ -46,6 +47,9 @@ const main = async () => {
   const luigi = await prisma.user.create({
     data: await fakeUser('luigi', 'luigi@mail.com'),
   });
+  const yoshi = await prisma.user.create({
+    data: await fakeUser('yoshi', 'yoshi@mail.com'),
+  });
 
   // Create 15 fake leases
   const leaseIds = [];
@@ -59,13 +63,26 @@ const main = async () => {
     leaseIds.push(leaseDb.id);
   }
 
-  // Create 1 fake lease messages
-  const leaseMessage = fakeLeaseMessage(leaseIds[0], luigi.id);
-  await prisma.leaseMessage.create({
-    data: {
-      ...leaseMessage,
-    },
-  });
+  // Create 2 conversations with 3 messages each
+  for (let i = 0; i < 2; i++) {
+    const conversationId = randomToken.generate(16);
+    await prisma.conversation.create({
+      data: {
+        id: conversationId,
+      },
+    });
+    for (let j = 0; j < 3; j++) {
+      await prisma.conversationMessage.create({
+        data: {
+          conversationId,
+          leaseId: leaseIds[0],
+          fromUserId: i === 0 ? luigi.id : yoshi.id,
+          toUserId: mario.id,
+          content: 'lorem ipsum ' + j,
+        },
+      });
+    }
+  }
 };
 
 main()

@@ -11,7 +11,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { LeaseDto } from './dto';
 import { isAfter } from 'date-fns';
 import { CITIES_COORDINATES } from '../../data/citiesCoordinates';
-import { Decimal } from '@prisma/client/runtime';
 
 /* -------------------------------------------------------------------------- */
 /*                                LEASE SERVICE                               */

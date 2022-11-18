@@ -12,8 +12,9 @@ datasource db {
 
 model User {
   leases Lease[]
-  leaseMessages LeaseMessage[]
   leaseFavorites LeaseFavorite[]
+  messageFromUser ConversationMessage[] @relation("fromUser")
+  messageToUser ConversationMessage[] @relation("toUser")
   emailVerification EmailVerification[]
   passwordReset PasswordReset[]
 
@@ -47,8 +48,8 @@ model UserRole {
 
 model Lease {
   leaseImages LeaseImage[]
-  leaseMessages LeaseMessage[]
   leaseFavorites LeaseFavorite[]
+  conversationMessages ConversationMessage[]
 
   user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   leaseType LeaseType @relation(fields: [type], references: [type], onUpdate: NoAction, onDelete: NoAction)
@@ -96,19 +97,6 @@ model LeaseType {
   @@map(name: "lease_type")
 }
 
-model LeaseMessage {
-  lease Lease @relation(fields: [leaseId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  user User @relation(fields: [fromUserId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-
-  id Int @id @default(autoincrement())
-  leaseId Int
-  fromUserId Int
-  content String?
-  createdAt DateTime @default(now())
-
-  @@map(name: "lease_message")
-}
-
 model LeaseFavorite {
   lease Lease @relation(fields: [leaseId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
@@ -119,6 +107,29 @@ model LeaseFavorite {
   createdAt DateTime @default(now())
 
   @@map(name: "lease_favorite")
+}
+
+model Conversation {
+  conversationMessages ConversationMessage[]
+
+  id String @db.VarChar(16) @id
+}
+
+model ConversationMessage {
+  conversation Conversation @relation(fields: [conversationId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  lease Lease @relation(fields: [leaseId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  fromUser User @relation(name: "fromUser", fields: [fromUserId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  toUser User @relation(name: "toUser", fields: [toUserId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  id Int @id @default(autoincrement())
+  conversationId String @db.VarChar(16)
+  leaseId Int
+  fromUserId Int
+  toUserId Int
+  content String
+  createdAt DateTime @default(now())
+
+  @@map(name: "message")
 }
 
 model EmailVerification {
