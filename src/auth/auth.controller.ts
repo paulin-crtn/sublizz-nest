@@ -92,7 +92,7 @@ export class AuthController {
   ) {
     const tokenSanitized = striptags(token);
     if (!tokenSanitized) {
-      throw new BadRequestException('Token is missing');
+      throw new BadRequestException('Token manquant.');
     }
     return await this.authService.confirmUserEmail(
       emailVerificationId,
@@ -104,7 +104,7 @@ export class AuthController {
   @Get('reset-password')
   async issuePasswordResetToken(@Query('email') email: string) {
     if (!isEmail(email)) {
-      throw new BadRequestException('Email is not valid.');
+      throw new BadRequestException("L'adresse email n'est pas valide.");
     }
     await this.authService.issuePasswordResetToken(email);
     return { statusCode: 200, message: 'Password reset email sent' };

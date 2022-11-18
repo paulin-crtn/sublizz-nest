@@ -121,7 +121,7 @@ export class LeaseService {
       },
     });
     if (!lease) {
-      throw new NotFoundException('Lease does not exist.');
+      throw new NotFoundException("L'annonce n'existe pas");
     }
     return lease;
   }
@@ -175,10 +175,10 @@ export class LeaseService {
       },
     });
     if (!leaseDb) {
-      throw new NotFoundException('Lease does not exist.');
+      throw new NotFoundException("L'annonce n'existe pas");
     }
     if (leaseDb.userId !== userId) {
-      throw new ForbiddenException('Access to resource denied.');
+      throw new ForbiddenException('Accès refusé');
     }
     await this._checkDates(dto.startDate, dto.endDate);
     const { leaseImages, ...leaseDto } = dto;
@@ -218,10 +218,10 @@ export class LeaseService {
       },
     });
     if (!lease) {
-      throw new NotFoundException('Lease does not exist.');
+      throw new NotFoundException("L'annonce n'existe pas");
     }
     if (lease.userId !== userId) {
-      throw new ForbiddenException('Access to resource denied.');
+      throw new ForbiddenException('Accès refusé.');
     }
     await this.prismaService.lease.delete({
       where: {

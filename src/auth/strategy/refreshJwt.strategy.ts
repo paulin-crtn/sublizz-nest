@@ -36,7 +36,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
     });
     // If user does not exist throw exception
     if (!user) {
-      throw new UnauthorizedException('User does not exist.');
+      throw new UnauthorizedException('Utilisateur non trouvé.');
     }
     // Compare password
     const isRefreshTokenCorrect = await argon.verify(
@@ -45,7 +45,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
     );
     // If password incorrect throw exception
     if (!isRefreshTokenCorrect) {
-      throw new UnauthorizedException('Invalid refresh token.');
+      throw new UnauthorizedException('Refresh token invalide.');
     }
     // Return user
     return user;

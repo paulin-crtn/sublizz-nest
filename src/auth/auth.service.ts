@@ -56,7 +56,7 @@ export class AuthService {
       validateSMTP: false, // Timeout issue
     });
     if (!res.valid) {
-      throw new BadRequestException('Email is not valid.');
+      throw new BadRequestException("L'adresse email n'est pas valide.");
     }
     // Generate the password hash
     const passwordHash = await argon.hash(dto.password);
@@ -76,7 +76,7 @@ export class AuthService {
       // Catch unique constraint violation error
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw new ConflictException('Email already taken.');
+          throw new ConflictException("L'adresse email est déjà utilisée.");
         }
       }
       throw error;
@@ -169,7 +169,7 @@ export class AuthService {
       });
     // If email verification does not exist throw exception
     if (!emailVerification) {
-      throw new NotFoundException('Email verification id does not exist.');
+      throw new NotFoundException("emailVerificationId n'existe pas.");
     }
     // Compare token
     const isTokenCorrect = await argon.verify(
@@ -178,7 +178,7 @@ export class AuthService {
     );
     // If token incorrect throw exception
     if (!isTokenCorrect) {
-      throw new UnauthorizedException('Incorrect token.');
+      throw new UnauthorizedException('Token invalide.');
     }
     // Update user
     const user = await this.prismaService.user.update({
@@ -202,7 +202,7 @@ export class AuthService {
     // Find the user by email
     const user = await this.userService.getUserByEmail(email);
     if (!user) {
-      throw new NotFoundException('User does not exist.');
+      throw new NotFoundException('Utilisateur non trouvé.');
     }
     // Generate and store reset password token
     const token = randomToken.generate(16);
@@ -232,7 +232,9 @@ export class AuthService {
     });
     // If PasswordReset does not exist throw exception
     if (!passwordReset) {
-      throw new NotFoundException('No password reset found.');
+      throw new NotFoundException(
+        'Aucune demande de réinitialisation de mot de passe trouvée.',
+      );
     }
     // Compare token
     const isTokenCorrect = await argon.verify(
@@ -241,7 +243,7 @@ export class AuthService {
     );
     // If token incorrect throw exception
     if (!isTokenCorrect) {
-      throw new UnauthorizedException('Incorrect token.');
+      throw new UnauthorizedException('Token incorrect.');
     }
     // If token expired throw exception
     const isExpired =
@@ -250,7 +252,7 @@ export class AuthService {
       await this.prismaService.passwordReset.delete({
         where: { id: passwordReset.id },
       });
-      throw new UnauthorizedException('Token has expired.');
+      throw new UnauthorizedException('Le token a expiré.');
     }
     // Update user password
     const passwordHash = await argon.hash(dto.password);

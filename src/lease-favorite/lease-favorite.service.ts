@@ -52,7 +52,7 @@ export class LeaseFavoriteService {
         },
       });
     if (leaseFavorite.userId !== userId) {
-      throw new ForbiddenException('Access to resource denied.');
+      throw new ForbiddenException('Accès refusé.');
     }
     return await this.prismaService.leaseFavorite.delete({
       where: { id },

@@ -43,7 +43,8 @@ export class MailService {
       });
     } catch (e) {
       throw new Error(
-        'An error occcured while sending user email verification token: ' + e,
+        "Une erreur est survenue pendant l'envoi du token de vérification : " +
+          e,
       );
     }
   }
@@ -62,7 +63,8 @@ export class MailService {
       });
     } catch (e) {
       throw new Error(
-        'An error occcured while sending user reset password token: ' + e,
+        "Une erreur est survenue pendant l'envoi du token de réinitialisation : " +
+          e,
       );
     }
   }
@@ -88,7 +90,7 @@ export class MailService {
       });
     } catch (e) {
       throw new Error(
-        'An error occcured while sending user lease message: ' + e,
+        "Une erreur est survenue pendant l'envoi du message : " + e,
       );
     }
   }
@@ -107,7 +109,7 @@ export class MailService {
       });
     } catch (e) {
       throw new Error(
-        'An error occcured while sending admin lease report: ' + e,
+        "Une erreur est survenue pendant l'envoi du signalement : " + e,
       );
     }
   }
@@ -125,7 +127,7 @@ export class MailService {
       });
     } catch (e) {
       throw new Error(
-        'An error occcured while sending admin help message: ' + e,
+        "Une erreur est survenue pendant l'envoi de la suggestion : " + e,
       );
     }
   }
