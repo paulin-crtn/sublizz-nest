@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import { LeaseTypeEnum } from '../src/lease/enum';
 import { UserRoleEnum } from '../src/user/enum';
 import { fakeUser, fakeLease } from '../utils/fakeData';
+import { faker } from '@faker-js/faker';
 import randomToken from 'rand-token';
 
 /* -------------------------------------------------------------------------- */
@@ -63,7 +64,7 @@ const main = async () => {
     leaseIds.push(leaseDb.id);
   }
 
-  // Create 2 conversations with 3 messages each
+  // Create 2 conversations with 10 messages each
   for (let i = 0; i < 2; i++) {
     const conversationId = randomToken.generate(16);
     await prisma.conversation.create({
@@ -71,14 +72,14 @@ const main = async () => {
         id: conversationId,
       },
     });
-    for (let j = 0; j < 3; j++) {
+    for (let j = 0; j < 10; j++) {
       await prisma.conversationMessage.create({
         data: {
           conversationId,
           leaseId: leaseIds[0],
           fromUserId: i === 0 ? luigi.id : yoshi.id,
           toUserId: mario.id,
-          content: 'lorem ipsum ' + j,
+          content: faker.lorem.lines(),
         },
       });
     }
