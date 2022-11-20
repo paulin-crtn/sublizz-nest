@@ -30,11 +30,11 @@ export class ConversationController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   @Post()
-  async generateConversationId(
+  async storeConversation(
     @GetUser('id') fromUserId: number,
     @Body() dto: StoreConversationDto,
   ) {
-    return await this.conversationService.generateConversationId(
+    return await this.conversationService.storeConversation(
       dto.leaseId,
       fromUserId,
     );

@@ -79,23 +79,31 @@ CREATE TABLE "lease_favorite" (
 );
 
 -- CreateTable
-CREATE TABLE "Conversation" (
+CREATE TABLE "conversation" (
     "id" VARCHAR(16) NOT NULL,
+    "leaseId" INTEGER NOT NULL,
 
-    CONSTRAINT "Conversation_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "conversation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "message" (
+CREATE TABLE "conversation_participant" (
     "id" SERIAL NOT NULL,
-    "conversationId" VARCHAR(16) NOT NULL,
-    "leaseId" INTEGER NOT NULL,
+    "conversationId" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
+
+    CONSTRAINT "conversation_participant_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "conversation_message" (
+    "id" SERIAL NOT NULL,
+    "conversation_id" VARCHAR(16) NOT NULL,
     "fromUserId" INTEGER NOT NULL,
-    "toUserId" INTEGER NOT NULL,
     "content" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "message_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "conversation_message_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -149,16 +157,19 @@ ALTER TABLE "lease_favorite" ADD CONSTRAINT "lease_favorite_leaseId_fkey" FOREIG
 ALTER TABLE "lease_favorite" ADD CONSTRAINT "lease_favorite_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "message" ADD CONSTRAINT "message_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "Conversation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "conversation" ADD CONSTRAINT "conversation_leaseId_fkey" FOREIGN KEY ("leaseId") REFERENCES "lease"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "message" ADD CONSTRAINT "message_leaseId_fkey" FOREIGN KEY ("leaseId") REFERENCES "lease"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "conversation_participant" ADD CONSTRAINT "conversation_participant_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "conversation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "message" ADD CONSTRAINT "message_fromUserId_fkey" FOREIGN KEY ("fromUserId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "conversation_participant" ADD CONSTRAINT "conversation_participant_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "message" ADD CONSTRAINT "message_toUserId_fkey" FOREIGN KEY ("toUserId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "conversation_message" ADD CONSTRAINT "conversation_message_conversation_id_fkey" FOREIGN KEY ("conversation_id") REFERENCES "conversation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "conversation_message" ADD CONSTRAINT "conversation_message_fromUserId_fkey" FOREIGN KEY ("fromUserId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "email_verification" ADD CONSTRAINT "email_verification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;

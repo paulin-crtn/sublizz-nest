@@ -36,23 +36,25 @@ export class ConversationMessageController {
   @HttpCode(HttpStatus.OK)
   @Get()
   async index(@GetUser('id') userId: number) {
-    const userMessages = await this.conversationMessageService.getUserMessages(
-      userId,
-    );
+    const conversationsMessages =
+      await this.conversationMessageService.getUserMessages(userId);
     const dictionary = {};
-    for await (const message of userMessages) {
-      if (!dictionary[message.conversationId]) {
-        const lease = await this.prismaService.lease.findUnique({
-          where: { id: message.leaseId },
-        });
-        const { leaseId, ...data } = message;
-        dictionary[message.conversationId] = {
-          id: message.conversationId,
-          lease,
-          messages: [data],
+    for (const conversationMessages of conversationsMessages) {
+      if (!dictionary[conversationMessages.conversationId]) {
+        const { conversationId, fromUserId, conversation, ...message } =
+          conversationMessages;
+        dictionary[conversationMessages.conversationId] = {
+          id: conversationMessages.conversationId,
+          lease: conversationMessages.conversation.lease,
+          messages: [{ ...message, fromUser: message.user }],
         };
       } else {
-        dictionary[message.conversationId].messages.push(message);
+        const { conversationId, fromUserId, conversation, ...message } =
+          conversationMessages;
+        dictionary[conversationMessages.conversationId].messages.push({
+          ...message,
+          fromUser: message.user,
+        });
       }
     }
     return Object.values(dictionary);

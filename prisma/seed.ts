@@ -71,15 +71,27 @@ const main = async () => {
       await prisma.conversation.create({
         data: {
           id: conversationId,
+          leaseId,
         },
+      });
+      await prisma.conversationParticipant.createMany({
+        data: [
+          { conversationId, userId: mario.id },
+          { conversationId, userId: i === 0 ? luigi.id : yoshi.id },
+        ],
       });
       for (let j = 0; j < 10; j++) {
         await prisma.conversationMessage.create({
           data: {
             conversationId,
-            leaseId: leaseId,
-            fromUserId: i === 0 ? luigi.id : yoshi.id,
-            toUserId: mario.id,
+            fromUserId:
+              i === 0
+                ? j % 2 === 0
+                  ? luigi.id
+                  : mario.id
+                : j % 2 === 0
+                ? yoshi.id
+                : mario.id,
             content: faker.lorem.lines(),
           },
         });

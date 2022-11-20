@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { StoreConversationMessageDto } from './dto';
 
@@ -11,24 +12,29 @@ export class ConversationMessageService {
   constructor(private prismaService: PrismaService) {}
 
   async getUserMessages(userId: number) {
+    const conversationsParticipant =
+      await this.prismaService.conversationParticipant.findMany({
+        where: { userId },
+      });
+
+    if (!conversationsParticipant.length) {
+      return [];
+    }
+    const conversationsIds = conversationsParticipant.reduce(
+      (prev, curr) => [...prev, curr.conversationId],
+      [],
+    );
     return await this.prismaService.conversationMessage.findMany({
       where: {
-        OR: [{ toUserId: userId }, { fromUserId: userId }],
+        conversationId: { in: conversationsIds },
       },
-      select: {
-        id: true,
-        conversationId: true,
-        content: true,
-        createdAt: true,
-        leaseId: true,
-        fromUser: {
-          select: {
-            id: true,
-            firstName: true,
-            profilePictureName: true,
+      include: {
+        conversation: {
+          include: {
+            lease: true,
           },
         },
-        toUser: {
+        user: {
           select: {
             id: true,
             firstName: true,
@@ -36,12 +42,11 @@ export class ConversationMessageService {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
     });
   }
 
   async storeMessage(fromUserId: number, dto: StoreConversationMessageDto) {
-    const { conversationId, leaseId, toUserId, message } = dto;
+    const { conversationId, message } = dto;
     const conversationIdDB = await this.prismaService.conversation.findUnique({
       where: {
         id: conversationId,
@@ -53,9 +58,7 @@ export class ConversationMessageService {
     return await this.prismaService.conversationMessage.create({
       data: {
         conversationId,
-        leaseId,
         fromUserId,
-        toUserId,
         content: message,
       },
     });
