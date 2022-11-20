@@ -64,24 +64,26 @@ const main = async () => {
     leaseIds.push(leaseDb.id);
   }
 
-  // Create 2 conversations with 10 messages each
-  for (let i = 0; i < 2; i++) {
-    const conversationId = randomToken.generate(16);
-    await prisma.conversation.create({
-      data: {
-        id: conversationId,
-      },
-    });
-    for (let j = 0; j < 10; j++) {
-      await prisma.conversationMessage.create({
+  // Create 2 conversations with 10 messages each for each lease
+  for await (const leaseId of leaseIds) {
+    for (let i = 0; i < 2; i++) {
+      const conversationId = randomToken.generate(16);
+      await prisma.conversation.create({
         data: {
-          conversationId,
-          leaseId: leaseIds[0],
-          fromUserId: i === 0 ? luigi.id : yoshi.id,
-          toUserId: mario.id,
-          content: faker.lorem.lines(),
+          id: conversationId,
         },
       });
+      for (let j = 0; j < 10; j++) {
+        await prisma.conversationMessage.create({
+          data: {
+            conversationId,
+            leaseId: leaseId,
+            fromUserId: i === 0 ? luigi.id : yoshi.id,
+            toUserId: mario.id,
+            content: faker.lorem.lines(),
+          },
+        });
+      }
     }
   }
 };
