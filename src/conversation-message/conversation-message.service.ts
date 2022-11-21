@@ -28,9 +28,13 @@ export class ConversationMessageService {
       where: {
         conversationId: { in: conversationsIds },
       },
-      include: {
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
         conversation: {
-          include: {
+          select: {
+            id: true,
             lease: true,
           },
         },
@@ -60,6 +64,18 @@ export class ConversationMessageService {
         conversationId,
         fromUserId,
         content: message,
+      },
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            profilePictureName: true,
+          },
+        },
       },
     });
   }

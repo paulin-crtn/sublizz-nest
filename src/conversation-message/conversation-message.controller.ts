@@ -39,22 +39,17 @@ export class ConversationMessageController {
     const conversationsMessages =
       await this.conversationMessageService.getUserMessages(userId);
     const dictionary = {};
-    for (const conversationMessages of conversationsMessages) {
-      if (!dictionary[conversationMessages.conversationId]) {
-        const { conversationId, fromUserId, conversation, ...message } =
-          conversationMessages;
-        dictionary[conversationMessages.conversationId] = {
-          id: conversationMessages.conversationId,
-          lease: conversationMessages.conversation.lease,
-          messages: [{ ...message, fromUser: message.user }],
+    for (const message of conversationsMessages) {
+      message['fromUser'] = message['user'];
+      delete message['user'];
+      if (!dictionary[message.conversation.id]) {
+        dictionary[message.conversation.id] = {
+          id: message.conversation.id,
+          lease: message.conversation.lease,
+          messages: [message],
         };
       } else {
-        const { conversationId, fromUserId, conversation, ...message } =
-          conversationMessages;
-        dictionary[conversationMessages.conversationId].messages.push({
-          ...message,
-          fromUser: message.user,
-        });
+        dictionary[message.conversation.id].messages.push(message);
       }
     }
     return Object.values(dictionary);
@@ -68,6 +63,12 @@ export class ConversationMessageController {
     @GetUser('id') fromUserId: number,
     @Body() dto: StoreConversationMessageDto,
   ) {
-    return await this.conversationMessageService.storeMessage(fromUserId, dto);
+    const message = await this.conversationMessageService.storeMessage(
+      fromUserId,
+      dto,
+    );
+    message['fromUser'] = message['user'];
+    delete message['user'];
+    return message;
   }
 }
