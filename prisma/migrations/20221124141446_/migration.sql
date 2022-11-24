@@ -98,12 +98,22 @@ CREATE TABLE "conversation_participant" (
 -- CreateTable
 CREATE TABLE "conversation_message" (
     "id" SERIAL NOT NULL,
-    "conversation_id" VARCHAR(16) NOT NULL,
+    "conversationId" VARCHAR(16) NOT NULL,
     "fromUserId" INTEGER NOT NULL,
     "content" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "conversation_message_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "message_read_state" (
+    "id" SERIAL NOT NULL,
+    "messageId" INTEGER NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "readAt" TIMESTAMP(3),
+
+    CONSTRAINT "message_read_state_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -166,10 +176,16 @@ ALTER TABLE "conversation_participant" ADD CONSTRAINT "conversation_participant_
 ALTER TABLE "conversation_participant" ADD CONSTRAINT "conversation_participant_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "conversation_message" ADD CONSTRAINT "conversation_message_conversation_id_fkey" FOREIGN KEY ("conversation_id") REFERENCES "conversation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "conversation_message" ADD CONSTRAINT "conversation_message_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "conversation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "conversation_message" ADD CONSTRAINT "conversation_message_fromUserId_fkey" FOREIGN KEY ("fromUserId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "message_read_state" ADD CONSTRAINT "message_read_state_messageId_fkey" FOREIGN KEY ("messageId") REFERENCES "conversation_message"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "message_read_state" ADD CONSTRAINT "message_read_state_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "email_verification" ADD CONSTRAINT "email_verification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;

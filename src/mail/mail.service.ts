@@ -70,22 +70,22 @@ export class MailService {
   }
 
   async sendUserLeaseMessage(
+    lease: Lease,
     fromUser: User,
-    lease: Lease & {
-      user: User;
-    },
+    toUser: User,
     message: string,
   ) {
     try {
       await this.mailerService.sendMail({
-        to: lease.user.email,
+        to: toUser.email,
         subject: `Nouveau message de ${fromUser.firstName}`,
         template: './lease-message',
         context: {
-          fromUser,
           mailto: 'mailto:' + fromUser.email,
-          message,
           lease,
+          fromUser,
+          toUser,
+          message,
         },
       });
     } catch (e) {

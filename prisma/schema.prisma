@@ -13,8 +13,9 @@ datasource db {
 model User {
   leases Lease[]
   leaseFavorites LeaseFavorite[]
-  messageFromUser ConversationMessage[]
+  conversationMessage ConversationMessage[]
   conversationParticipant ConversationParticipant[]
+  messageReadState MessageReadState[]
   emailVerification EmailVerification[]
   passwordReset PasswordReset[]
 
@@ -133,6 +134,8 @@ model ConversationParticipant {
 }
 
 model ConversationMessage {
+  messageReadState MessageReadState[]
+
   conversation Conversation @relation(fields: [conversationId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   user User @relation(fields: [fromUserId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
@@ -143,6 +146,18 @@ model ConversationMessage {
   createdAt DateTime @default(now())
 
   @@map(name: "conversation_message")
+}
+
+model MessageReadState {
+  message ConversationMessage @relation(fields: [messageId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  id Int @id @default(autoincrement())
+  messageId Int
+  userId Int
+  readAt DateTime?
+
+  @@map(name: "message_read_state")
 }
 
 model EmailVerification {

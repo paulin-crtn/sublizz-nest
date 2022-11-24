@@ -17,18 +17,19 @@ import { AccessJwtGuard } from '../auth/guard';
 import { GetUser } from '../user/decorator';
 import { ConversationMessageService } from './conversation-message.service';
 import { StoreConversationMessageDto } from './dto';
-import { PrismaService } from '../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
+import { User } from '@prisma/client';
 
 /* -------------------------------------------------------------------------- */
 /*                                 CONTROLLER                                 */
 /* -------------------------------------------------------------------------- */
-@ApiTags('conversation-message')
-@Controller('conversation-message')
+@ApiTags('conversation-messages')
+@Controller('conversation-messages')
 @UseInterceptors(ClassSerializerInterceptor)
 export class ConversationMessageController {
   constructor(
-    private prismaService: PrismaService,
     private conversationMessageService: ConversationMessageService,
+    private mailService: MailService,
   ) {}
 
   @UseGuards(AccessJwtGuard)
@@ -36,23 +37,21 @@ export class ConversationMessageController {
   @HttpCode(HttpStatus.OK)
   @Get()
   async index(@GetUser('id') userId: number) {
-    const conversationsMessages =
-      await this.conversationMessageService.getUserMessages(userId);
-    const dictionary = {};
-    for (const message of conversationsMessages) {
-      message['fromUser'] = message['user'];
-      delete message['user'];
-      if (!dictionary[message.conversation.id]) {
-        dictionary[message.conversation.id] = {
-          id: message.conversation.id,
-          lease: message.conversation.lease,
-          messages: [message],
-        };
-      } else {
-        dictionary[message.conversation.id].messages.push(message);
-      }
-    }
-    return Object.values(dictionary);
+    const conversations = await this.conversationMessageService.getUserMessages(
+      userId,
+    );
+    return conversations.map((conversation: any) => {
+      const { id, conversationParticipants, conversationMessages, lease } =
+        conversation;
+      return {
+        id,
+        participants: conversationParticipants.map(
+          (participant: any) => participant.user,
+        ),
+        messages: conversationMessages,
+        lease,
+      };
+    });
   }
 
   @UseGuards(AccessJwtGuard)
@@ -60,15 +59,24 @@ export class ConversationMessageController {
   @HttpCode(HttpStatus.CREATED)
   @Post()
   async storeMessage(
-    @GetUser('id') fromUserId: number,
+    @GetUser() fromUser: User,
     @Body() dto: StoreConversationMessageDto,
   ) {
-    const message = await this.conversationMessageService.storeMessage(
-      fromUserId,
-      dto,
+    const { conversationId, message } = dto;
+    const { lease, toUser, conversationMessage } =
+      await this.conversationMessageService.storeMessage(
+        fromUser.id,
+        conversationId,
+        message,
+      );
+    // Send email to receiver
+    await this.mailService.sendUserLeaseMessage(
+      lease,
+      fromUser,
+      toUser,
+      message,
     );
-    message['fromUser'] = message['user'];
-    delete message['user'];
-    return message;
+    // Return created message
+    return conversationMessage;
   }
 }

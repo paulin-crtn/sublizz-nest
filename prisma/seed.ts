@@ -65,7 +65,7 @@ const main = async () => {
   }
 
   // Create 2 conversations with 10 messages each for each lease
-  for await (const leaseId of leaseIds) {
+  for await (const leaseId of leaseIds.splice(0, 3)) {
     for (let i = 0; i < 2; i++) {
       const conversationId = randomToken.generate(16);
       await prisma.conversation.create({

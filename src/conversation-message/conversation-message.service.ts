@@ -1,11 +1,5 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { StoreConversationMessageDto } from './dto';
 
 @Injectable()
 export class ConversationMessageService {
@@ -24,60 +18,97 @@ export class ConversationMessageService {
       (prev, curr) => [...prev, curr.conversationId],
       [],
     );
-    return await this.prismaService.conversationMessage.findMany({
+
+    return await this.prismaService.conversation.findMany({
       where: {
-        conversationId: { in: conversationsIds },
+        id: { in: conversationsIds },
       },
       select: {
         id: true,
-        content: true,
-        createdAt: true,
-        conversation: {
+        conversationParticipants: {
           select: {
-            id: true,
-            lease: true,
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                profilePictureName: true,
+              },
+            },
           },
         },
-        user: {
+        conversationMessages: {
           select: {
             id: true,
-            firstName: true,
-            profilePictureName: true,
+            fromUserId: true,
+            content: true,
+            createdAt: true,
           },
         },
+        lease: true,
       },
     });
   }
 
-  async storeMessage(fromUserId: number, dto: StoreConversationMessageDto) {
-    const { conversationId, message } = dto;
-    const conversationIdDB = await this.prismaService.conversation.findUnique({
+  async storeMessage(
+    fromUserId: number,
+    conversationId: string,
+    message: string,
+  ) {
+    const conversation = await this.prismaService.conversation.findUnique({
       where: {
         id: conversationId,
       },
-    });
-    if (!conversationIdDB) {
-      throw new NotFoundException("Cette conversation n'existe pas");
-    }
-    return await this.prismaService.conversationMessage.create({
-      data: {
-        conversationId,
-        fromUserId,
-        content: message,
-      },
-      select: {
-        id: true,
-        content: true,
-        createdAt: true,
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            profilePictureName: true,
+      include: {
+        conversationParticipants: {
+          include: {
+            user: true,
+          },
+        },
+        lease: {
+          include: {
+            user: true,
           },
         },
       },
     });
+    if (!conversation) {
+      throw new NotFoundException("Cette conversation n'existe pas");
+    }
+    const participant = conversation.conversationParticipants.find(
+      (participant) => participant.userId !== fromUserId,
+    );
+    const conversationMessage =
+      await this.prismaService.conversationMessage.create({
+        data: {
+          conversationId,
+          fromUserId,
+          content: message,
+          messageReadState: {
+            create: {
+              userId: participant.userId,
+            },
+          },
+        },
+        select: {
+          id: true,
+          content: true,
+          createdAt: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              profilePictureName: true,
+            },
+          },
+        },
+      });
+    conversationMessage['fromUser'] = conversationMessage['user'];
+    delete conversationMessage['user'];
+    return {
+      lease: conversation.lease,
+      toUser: participant.user,
+      conversationMessage,
+    };
   }
 
   async deleteMessages() {}
