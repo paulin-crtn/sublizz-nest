@@ -44,11 +44,13 @@ export class ConversationController {
     @Body() dto: StoreConversationDto,
   ) {
     const { leaseId, message } = dto;
+    // Store conversation
     const conversationId = await this.conversationService.storeConversation(
       fromUser.id,
       leaseId,
       message,
     );
+    // Store message
     const { lease, toUser, conversationMessage } =
       await this.conversationMessageService.storeMessage(
         fromUser.id,

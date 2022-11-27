@@ -63,6 +63,7 @@ export class ConversationMessageController {
     @Body() dto: StoreConversationMessageDto,
   ) {
     const { conversationId, message } = dto;
+    // Store message
     const { lease, toUser, conversationMessage } =
       await this.conversationMessageService.storeMessage(
         fromUser.id,
