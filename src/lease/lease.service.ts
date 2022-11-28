@@ -11,35 +11,69 @@ import { PrismaService } from '../prisma/prisma.service';
 import { LeaseDto } from './dto';
 import { isAfter } from 'date-fns';
 import { CITIES_COORDINATES } from '../../data/citiesCoordinates';
+import { ILeasesWithCount } from './interfaces/ILeasesWithCount';
 
 /* -------------------------------------------------------------------------- */
 /*                                LEASE SERVICE                               */
 /* -------------------------------------------------------------------------- */
 @Injectable()
 export class LeaseService {
-  constructor(private prismaService: PrismaService) {}
+  RESULTS_PER_PAGE: number;
+
+  constructor(private prismaService: PrismaService) {
+    this.RESULTS_PER_PAGE = 5;
+  }
 
   /* -------------------------------------------------------------------------- */
   /*                              PUBLIC FUNCTIONS                              */
   /* -------------------------------------------------------------------------- */
-  async getLeases(city: string | undefined, page: string | undefined) {
-    // CONSTANT
-    const RESULTS_PER_PAGE = 5;
-    // CLOSE COORDINATES
-    let closeCoordinates = undefined;
-    if (city) {
-      closeCoordinates = this._findCloseCoordinates(city);
-    }
+  async getLeases(page: string | undefined) {
     // PRISMA TRANSACTION
     const data = await this.prismaService.$transaction([
       // COUNT TOTAL DATA
       this.prismaService.lease.count({
         where: {
           isPublished: 1,
-          ...(city && !closeCoordinates
+        },
+      }),
+      // FIND DATA (with pagination, if any)
+      this.prismaService.lease.findMany({
+        where: {
+          isPublished: 1,
+        },
+        include: {
+          leaseImages: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip: page ? +page * this.RESULTS_PER_PAGE - this.RESULTS_PER_PAGE : 0,
+        take: this.RESULTS_PER_PAGE,
+      }),
+    ]);
+    const [totalCount, leases] = data;
+    return { totalCount, leases };
+  }
+
+  async getLeasesFromCity(
+    city: string,
+    page: string | undefined,
+  ): Promise<ILeasesWithCount> {
+    // CLOSE COORDINATES
+    const { lat, lng } = CITIES_COORDINATES.find(
+      (data) => data.city.toLocaleLowerCase() === city.toLocaleLowerCase(),
+    );
+    const closeCoordinates = this._findCloseCoordinates(+lat, +lng);
+    // PRISMA TRANSACTION
+    const data = await this.prismaService.$transaction([
+      // COUNT TOTAL DATA
+      this.prismaService.lease.count({
+        where: {
+          isPublished: 1,
+          ...(!closeCoordinates
             ? { city: { contains: city, mode: 'insensitive' } }
             : {}),
-          ...(city && closeCoordinates
+          ...(closeCoordinates
             ? {
                 gpsLatitude: {
                   gte: closeCoordinates.latitude.start,
@@ -79,12 +113,39 @@ export class LeaseService {
         orderBy: {
           createdAt: 'desc',
         },
-        skip: page ? Number(page) * RESULTS_PER_PAGE - RESULTS_PER_PAGE : 0,
-        take: RESULTS_PER_PAGE,
+        skip: page ? +page * this.RESULTS_PER_PAGE - this.RESULTS_PER_PAGE : 0,
+        take: this.RESULTS_PER_PAGE,
       }),
     ]);
     const [totalCount, leases] = data;
-    return { totalCount, leases };
+    return { totalCount, leases, cityCoordinates: { lat: +lat, lng: +lng } };
+  }
+
+  async getLeasesFromCoordinates(lat: string, lng: string) {
+    // COORDINATES
+    const latitude = lat.split(',');
+    const longitude = lng.split(',');
+    // FIND DATA (with pagination, if any)
+    const leases = await this.prismaService.lease.findMany({
+      where: {
+        isPublished: 1,
+        gpsLatitude: {
+          gte: latitude[0],
+          lte: latitude[1],
+        },
+        gpsLongitude: {
+          gte: longitude[0],
+          lte: longitude[1],
+        },
+      },
+      include: {
+        leaseImages: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    return { totalCount: leases.length, leases };
   }
 
   async getUserLeases(userId: number) {
@@ -237,26 +298,19 @@ export class LeaseService {
     }
   }
 
-  private _findCloseCoordinates(queryCity: string) {
-    // Find queryCity coordinates
-    const city = CITIES_COORDINATES.find(
-      (data) => data.city.toLocaleLowerCase() === queryCity.toLocaleLowerCase(),
-    );
-    if (!city) {
-      return undefined;
-    }
+  private _findCloseCoordinates(lat: number, lng: number) {
     // Latitude
     const aroundLatitude = {
-      start: Number(city.lat) - 0.2, // 110.574 km * 0.2 = 22.1km
-      end: Number(city.lat) + 0.2, // 110.574 km * 0.2 = 22.1km
+      start: Number(lat) - 0.2, // 110.574 km * 0.2 = 22.1km
+      end: Number(lat) + 0.2, // 110.574 km * 0.2 = 22.1km
     };
     // Longitude
     // https://stackoverflow.com/questions/1253499/simple-calculations-for-working-with-lat-lon-and-km-distance
-    const oneDegreeToKm = Math.abs(111.32 * Math.cos(Number(city.lng)));
+    const oneDegreeToKm = Math.abs(111.32 * Math.cos(Number(lng)));
     const lngDegreeToSubstract = 1 / (oneDegreeToKm / 22); // 1 = 1 degree and 22 = 22km
     const aroundLongitude = {
-      start: Number(city.lng) - lngDegreeToSubstract,
-      end: Number(city.lng) + lngDegreeToSubstract,
+      start: Number(lng) - lngDegreeToSubstract,
+      end: Number(lng) + lngDegreeToSubstract,
     };
     // Return
     return {

@@ -22,6 +22,7 @@ import { AccessJwtGuard } from '../auth/guard';
 import { GetUser } from '../user/decorator';
 import { LeaseDto } from './dto';
 import { LeaseEntity, LeaseDetailsEntity } from './entity';
+import { ILeasesWithCount } from './interfaces/ILeasesWithCount';
 import { LeaseService } from './lease.service';
 
 /* -------------------------------------------------------------------------- */
@@ -37,15 +38,26 @@ export class LeaseController {
   @Get()
   async getLeases(
     @Query('city') city: string | undefined,
+    @Query('lat') lat: string | undefined,
+    @Query('lng') lng: string | undefined,
     @Query('page') page: string | undefined,
   ) {
-    const { totalCount, leases } = await this.leaseService.getLeases(
-      city,
-      page,
-    );
+    let data: undefined | ILeasesWithCount;
+
+    if (city) {
+      data = await this.leaseService.getLeasesFromCity(city, page);
+    } else if (lat && lng) {
+      data = await this.leaseService.getLeasesFromCoordinates(lat, lng);
+    } else {
+      data = await this.leaseService.getLeases(page);
+    }
+
     return {
-      totalCount,
-      leases: leases.map((lease) => new LeaseEntity(lease as unknown)),
+      totalCount: data.totalCount,
+      leases: data.leases.map((lease) => new LeaseEntity(lease as unknown)),
+      ...(data.cityCoordinates
+        ? { cityCoordinates: data.cityCoordinates }
+        : {}),
     };
   }
 
