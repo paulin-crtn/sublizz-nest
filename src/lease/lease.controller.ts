@@ -20,7 +20,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccessJwtGuard } from '../auth/guard';
 import { GetUser } from '../user/decorator';
-import { LeaseDto } from './dto';
+import { GetLeasesDto, StoreUpdateLeaseDto } from './dto';
 import { LeaseEntity, LeaseDetailsEntity } from './entity';
 import { ILeasesWithCount } from './interfaces/ILeasesWithCount';
 import { LeaseService } from './lease.service';
@@ -36,18 +36,18 @@ export class LeaseController {
 
   @HttpCode(HttpStatus.OK)
   @Get()
-  async getLeases(
-    @Query('city') city: string | undefined,
-    @Query('lat') lat: string | undefined,
-    @Query('lng') lng: string | undefined,
-    @Query('page') page: string | undefined,
-  ) {
+  async getLeases(@Query() queryParams: GetLeasesDto) {
+    const { city, latitudes, longitudes, page } = queryParams;
+
     let data: undefined | ILeasesWithCount;
 
     if (city) {
       data = await this.leaseService.getLeasesFromCity(city, page);
-    } else if (lat && lng) {
-      data = await this.leaseService.getLeasesFromCoordinates(lat, lng);
+    } else if (latitudes && longitudes) {
+      data = await this.leaseService.getLeasesFromCoordinates(
+        latitudes,
+        longitudes,
+      );
     } else {
       data = await this.leaseService.getLeases(page);
     }
@@ -81,7 +81,7 @@ export class LeaseController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   @Post()
-  async store(@GetUser('id') userId: number, @Body() dto: LeaseDto) {
+  async store(@GetUser('id') userId: number, @Body() dto: StoreUpdateLeaseDto) {
     const lease = await this.leaseService.store(userId, dto);
     return new LeaseDetailsEntity(lease as unknown);
   }
@@ -93,7 +93,7 @@ export class LeaseController {
   async update(
     @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: LeaseDto,
+    @Body() dto: StoreUpdateLeaseDto,
   ) {
     const lease = await this.leaseService.update(id, userId, dto);
     return new LeaseDetailsEntity(lease as unknown);

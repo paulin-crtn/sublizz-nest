@@ -8,7 +8,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { LeaseDto } from './dto';
+import { StoreUpdateLeaseDto } from './dto';
 import { isAfter } from 'date-fns';
 import { CITIES_COORDINATES } from '../../data/citiesCoordinates';
 import { ILeasesWithCount } from './interfaces/ILeasesWithCount';
@@ -27,7 +27,7 @@ export class LeaseService {
   /* -------------------------------------------------------------------------- */
   /*                              PUBLIC FUNCTIONS                              */
   /* -------------------------------------------------------------------------- */
-  async getLeases(page: string | undefined) {
+  async getLeases(page: number | undefined) {
     // PRISMA TRANSACTION
     const data = await this.prismaService.$transaction([
       // COUNT TOTAL DATA
@@ -47,7 +47,7 @@ export class LeaseService {
         orderBy: {
           createdAt: 'desc',
         },
-        skip: page ? +page * this.RESULTS_PER_PAGE - this.RESULTS_PER_PAGE : 0,
+        skip: page ? page * this.RESULTS_PER_PAGE - this.RESULTS_PER_PAGE : 0,
         take: this.RESULTS_PER_PAGE,
       }),
     ]);
@@ -57,7 +57,7 @@ export class LeaseService {
 
   async getLeasesFromCity(
     city: string,
-    page: string | undefined,
+    page: number | undefined,
   ): Promise<ILeasesWithCount> {
     // CLOSE COORDINATES
     const { lat, lng } = CITIES_COORDINATES.find(
@@ -113,7 +113,7 @@ export class LeaseService {
         orderBy: {
           createdAt: 'desc',
         },
-        skip: page ? +page * this.RESULTS_PER_PAGE - this.RESULTS_PER_PAGE : 0,
+        skip: page ? page * this.RESULTS_PER_PAGE - this.RESULTS_PER_PAGE : 0,
         take: this.RESULTS_PER_PAGE,
       }),
     ]);
@@ -121,21 +121,21 @@ export class LeaseService {
     return { totalCount, leases, cityCoordinates: { lat: +lat, lng: +lng } };
   }
 
-  async getLeasesFromCoordinates(lat: string, lng: string) {
+  async getLeasesFromCoordinates(latitudes: string, longitudes: string) {
     // COORDINATES
-    const latitude = lat.split(',');
-    const longitude = lng.split(',');
+    const latitudesArr = latitudes.split(',');
+    const longitudesArr = longitudes.split(',');
     // FIND DATA (with pagination, if any)
     const leases = await this.prismaService.lease.findMany({
       where: {
         isPublished: 1,
         gpsLatitude: {
-          gte: latitude[0],
-          lte: latitude[1],
+          gte: latitudesArr[0],
+          lte: latitudesArr[1],
         },
         gpsLongitude: {
-          gte: longitude[0],
-          lte: longitude[1],
+          gte: longitudesArr[0],
+          lte: longitudesArr[1],
         },
       },
       include: {
@@ -186,7 +186,7 @@ export class LeaseService {
     return lease;
   }
 
-  async store(userId: number, dto: LeaseDto) {
+  async store(userId: number, dto: StoreUpdateLeaseDto) {
     // Count user leases
     const userLeasesCount = await this.prismaService.lease.count({
       where: {
@@ -228,7 +228,7 @@ export class LeaseService {
     });
   }
 
-  async update(id: number, userId: number, dto: LeaseDto) {
+  async update(id: number, userId: number, dto: StoreUpdateLeaseDto) {
     const leaseDb = await this.prismaService.lease.findUnique({
       where: {
         id,

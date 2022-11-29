@@ -15,7 +15,7 @@ import {
 } from 'class-validator';
 import { LeaseTypeEnum } from '../enum';
 
-export class LeaseDto {
+export class StoreUpdateLeaseDto {
   @IsEnum(LeaseTypeEnum)
   type: string;
 
