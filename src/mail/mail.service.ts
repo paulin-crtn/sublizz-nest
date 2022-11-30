@@ -28,17 +28,17 @@ export class MailService {
     this.FRONT_URL = this.configService.get('FRONT_DOMAIN');
   }
 
-  async sendUserEmailVerificationToken(
+  async sendUserEmailVerification(
     user: User,
     token: string,
     emailVerification: EmailVerification,
   ) {
-    const url = `${this.BACK_BASE_URL}/auth/confirm-email?emailVerificationId=${emailVerification.id}&token=${token}`;
+    const url = `${this.FRONT_URL}/confirm-email?emailVerificationId=${emailVerification.id}&token=${token}`;
     try {
       await this.mailerService.sendMail({
         to: emailVerification.email,
-        subject: 'Confirmez votre email pour valider votre inscription',
-        template: './email-verification-token',
+        subject: 'Finalisez la création de votre compte',
+        template: './email-verification',
         context: {
           firstName: user.firstName,
           url,

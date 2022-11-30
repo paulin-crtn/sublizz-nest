@@ -137,7 +137,7 @@ export class UserService {
         },
       },
     );
-    await this.mailService.sendUserEmailVerificationToken(
+    await this.mailService.sendUserEmailVerification(
       user,
       token,
       emailVerification,
