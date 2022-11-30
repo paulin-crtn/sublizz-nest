@@ -214,7 +214,7 @@ export class AuthService {
       },
     });
     // Send token to user's email
-    await this.mailService.sendUserResetPasswordToken(user, token);
+    await this.mailService.sendUserResetPassword(user, token);
   }
 
   /**
@@ -264,9 +264,9 @@ export class AuthService {
         passwordHash,
       },
     });
-    // Delete PasswordReset
-    await this.prismaService.passwordReset.delete({
-      where: { id: passwordReset.id },
+    // Delete all user PasswordReset
+    await this.prismaService.passwordReset.deleteMany({
+      where: { userEmail: dto.email },
     });
   }
 

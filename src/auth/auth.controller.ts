@@ -101,7 +101,7 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('reset-password')
+  @Get('reset-password/send-token')
   async issuePasswordResetToken(@Query('email') email: string) {
     if (!isEmail(email)) {
       throw new BadRequestException("L'adresse email n'est pas valide.");
@@ -113,6 +113,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('reset-password')
   async resetUserPassword(@Body() dto: PasswordResetDto) {
-    return await this.authService.resetUserPassword(dto);
+    await this.authService.resetUserPassword(dto);
+    return { statusCode: 200, message: 'Password has been reset' };
   }
 }

@@ -5,7 +5,8 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MailService {
-  private baseUrl: string;
+  private BACK_BASE_URL: string;
+  private FRONT_URL: string;
 
   constructor(
     private mailerService: MailerService,
@@ -19,10 +20,12 @@ export class MailService {
       };
     }
     // SET BASE URL
-    this.baseUrl =
+    this.BACK_BASE_URL =
       this.configService.get('APP_DOMAIN') +
       ':' +
       this.configService.get('APP_PORT');
+    // SET FRONT URL
+    this.FRONT_URL = this.configService.get('FRONT_DOMAIN');
   }
 
   async sendUserEmailVerificationToken(
@@ -30,7 +33,7 @@ export class MailService {
     token: string,
     emailVerification: EmailVerification,
   ) {
-    const url = `${this.baseUrl}/auth/confirm-email?emailVerificationId=${emailVerification.id}&token=${token}`;
+    const url = `${this.BACK_BASE_URL}/auth/confirm-email?emailVerificationId=${emailVerification.id}&token=${token}`;
     try {
       await this.mailerService.sendMail({
         to: emailVerification.email,
@@ -49,17 +52,14 @@ export class MailService {
     }
   }
 
-  async sendUserResetPasswordToken(user: User, token: string) {
-    const url = `${this.baseUrl}/auth/reset-password?email=${user.email}&token=${token}`;
+  async sendUserResetPassword(user: User, token: string) {
+    const url = `${this.FRONT_URL}/reset-password?email=${user.email}&token=${token}`;
     try {
       await this.mailerService.sendMail({
         to: user.email,
         subject: 'Demande de changement de mot de passe',
-        template: './password-reset-token',
-        context: {
-          firstName: user.firstName,
-          url,
-        },
+        template: './password-reset',
+        context: { url },
       });
     } catch (e) {
       throw new Error(
