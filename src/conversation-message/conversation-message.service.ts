@@ -31,6 +31,7 @@ export class ConversationMessageService {
               select: {
                 id: true,
                 firstName: true,
+                lastName: true,
                 profilePictureName: true,
               },
             },
@@ -97,6 +98,7 @@ export class ConversationMessageService {
             select: {
               id: true,
               firstName: true,
+              lastName: true,
               profilePictureName: true,
             },
           },
