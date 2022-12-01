@@ -75,13 +75,14 @@ export class MailService {
     toUser: User,
     message: string,
   ) {
+    const url = `${this.FRONT_URL}/dashboard/messages`;
     try {
       await this.mailerService.sendMail({
         to: toUser.email,
         subject: `Nouveau message de ${fromUser.firstName}`,
         template: './lease-message',
         context: {
-          mailto: 'mailto:' + fromUser.email,
+          url,
           lease,
           fromUser,
           toUser,
