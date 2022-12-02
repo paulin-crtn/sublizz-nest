@@ -89,9 +89,13 @@ export class ConversationController {
     @GetUser('id') userId: number,
     @Param('conversationId') conversationId: string,
   ) {
-    return await this.conversationService.setConversationAsRead(
+    await this.conversationService.setConversationAsRead(
       userId,
       conversationId,
     );
+    return {
+      statusCode: 200,
+      message: `Conversation ${conversationId} marked as read.`,
+    };
   }
 }
