@@ -77,7 +77,7 @@ export class ConversationMessageController {
       toUser,
       message,
     );
-    // Return created message
-    return conversationMessage;
+    // Return
+    return { statusCode: 201, message: 'Message created' };
   }
 }

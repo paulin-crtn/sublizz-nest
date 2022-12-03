@@ -64,8 +64,8 @@ export class ConversationController {
       toUser,
       message,
     );
-    // Return created message
-    return conversationMessage;
+    // Return
+    return { statusCode: 201, message: 'Conversation and message created' };
   }
 
   @UseGuards(AccessJwtGuard)

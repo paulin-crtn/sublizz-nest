@@ -31,13 +31,11 @@ export class StoreUpdateLeaseDto {
   @Length(3, 30)
   city: string;
 
-  @IsOptional()
   @IsLatitude()
-  gpsLatitude?: number;
+  gpsLatitude: number;
 
-  @IsOptional()
   @IsLongitude()
-  gpsLongitude?: number;
+  gpsLongitude: number;
 
   @IsOptional()
   @IsString()
