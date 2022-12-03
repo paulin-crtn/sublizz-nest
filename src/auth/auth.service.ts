@@ -159,7 +159,7 @@ export class AuthService {
   async confirmUserEmail(
     emailVerificationId: number,
     token: string,
-  ): Promise<{ userEmail: string }> {
+  ): Promise<{ email: string }> {
     // Find email verification
     const emailVerification =
       await this.prismaService.emailVerification.findUnique({
@@ -169,7 +169,7 @@ export class AuthService {
       });
     // If email verification does not exist throw exception
     if (!emailVerification) {
-      throw new NotFoundException("emailVerificationId n'existe pas.");
+      throw new NotFoundException('Email déjà validé ou non trouvé.');
     }
     // Compare token
     const isTokenCorrect = await argon.verify(
@@ -190,7 +190,14 @@ export class AuthService {
         emailVerifiedAt: new Date(Date.now()),
       },
     });
-    return { userEmail: user.email };
+    // Delete token
+    await this.prismaService.emailVerification.delete({
+      where: {
+        id: emailVerificationId,
+      },
+    });
+    // Return
+    return { email: user.email };
   }
 
   /**

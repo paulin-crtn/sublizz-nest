@@ -89,7 +89,7 @@ export class AuthController {
   async confirmUserEmail(
     @Query('emailVerificationId', ParseIntPipe) emailVerificationId: number,
     @Query('token') token: string,
-  ) {
+  ): Promise<{ email: string }> {
     const tokenSanitized = striptags(token);
     if (!tokenSanitized) {
       throw new BadRequestException('Token manquant.');
