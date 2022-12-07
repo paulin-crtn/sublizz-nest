@@ -45,7 +45,11 @@ export class ConversationMessageService {
             createdAt: true,
           },
         },
-        lease: true,
+        lease: {
+          include: {
+            leaseImages: true,
+          },
+        },
       },
     });
   }

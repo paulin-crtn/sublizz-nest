@@ -19,6 +19,7 @@ import { ConversationMessageService } from './conversation-message.service';
 import { StoreConversationMessageDto } from './dto';
 import { MailService } from '../mail/mail.service';
 import { User } from '@prisma/client';
+import { LeaseDetailsEntity } from '../lease/entity';
 
 /* -------------------------------------------------------------------------- */
 /*                                 CONTROLLER                                 */
@@ -49,7 +50,7 @@ export class ConversationMessageController {
           (participant: any) => participant.user,
         ),
         messages: conversationMessages,
-        lease,
+        lease: new LeaseDetailsEntity(lease as unknown),
       };
     });
   }
