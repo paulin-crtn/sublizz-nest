@@ -13,7 +13,7 @@ import {
   configService,
   jwtService,
 } from './config';
-import { fakeUser } from '../utils/fakeData';
+import { fakeUser } from '../src/utils/fakeData';
 
 /* -------------------------------------------------------------------------- */
 /*                                SIGNUP TESTS                                */

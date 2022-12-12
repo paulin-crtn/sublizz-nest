@@ -3,8 +3,8 @@
 /* -------------------------------------------------------------------------- */
 import { faker } from '@faker-js/faker';
 import argon from 'argon2';
-import { LeaseTypeEnum } from '../src/lease/enum';
-import { UserRoleEnum } from '../src/user/enum';
+import { LeaseTypeEnum } from '../app/lease/enum';
+import { UserRoleEnum } from '../app/user/enum';
 
 /* -------------------------------------------------------------------------- */
 /*                                  FUNCTIONS                                 */
