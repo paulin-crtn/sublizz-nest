@@ -100,7 +100,8 @@ describe('GET /leases', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should return all published leases', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 3 fake lease with 4 leaseImage each
     for (let index = 0; index < 3; index++) {
       const leaseImages = [];
@@ -143,7 +144,8 @@ describe('GET /leases/:id', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should return the lease corresponding to the id pass in url param', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 fake lease with 4 leaseImage
     const leaseImages = [];
     for (let index = 0; index < 4; index++) {
@@ -191,7 +193,8 @@ describe('GET /leases/user', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should return all user leases', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 fake lease with 4 leaseImage
     const leaseImages = [];
     for (let index = 0; index < 4; index++) {
@@ -257,7 +260,8 @@ describe('POST /leases', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should store a lease when access_token and all attributes are valid', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 lease
     const lease = fakeLease(user.id);
     // Create 4 fake leaseImage
@@ -292,7 +296,8 @@ describe('POST /leases', () => {
 
   it('should return status 400 when a mandatory attribute is missing', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 lease
     const lease = fakeLease(user.id);
 
@@ -324,7 +329,8 @@ describe('POST /leases', () => {
 
   it('should return status 400 when any attribute is invalid', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 lease
     const lease = fakeLease(user.id);
     // Payload
@@ -379,7 +385,8 @@ describe('PUT /leases/:id', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should update a lease when access_token and all attributes are valid', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 fake lease with 4 leaseImage
     const leaseImages = [];
     for (let index = 0; index < 4; index++) {
@@ -419,7 +426,8 @@ describe('PUT /leases/:id', () => {
 
   it('should return status 400 when a mandatory attribute is missing', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 lease
     const lease = fakeLease(user.id);
     // Payload
@@ -447,7 +455,8 @@ describe('PUT /leases/:id', () => {
 
   it('should return status 400 when any attribute is invalid', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 lease
     const lease = fakeLease(user.id);
     // Payload
@@ -501,7 +510,8 @@ describe('DELETE /leases/:id', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should delete a lease when access_token is valid', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 fake lease with 4 leaseImage
     const leaseImages = [];
     for (let index = 0; index < 4; index++) {
@@ -537,7 +547,8 @@ describe('DELETE /leases/:id', () => {
 
   it('should return status 404 when lease does not exist', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Payload
     const payload = {
       sub: user.id,

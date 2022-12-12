@@ -164,7 +164,8 @@ describe('PUT /users/:id', () => {
 
   it('should return status 404 when user does not exist', async () => {
     // Create user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create token
     const token = await jwtService.signAsync(
       { sub: user.id, email: user.email },
@@ -188,9 +189,8 @@ describe('PUT /users/:id', () => {
 
   it('should return status 400 when a mandatory attribute is missing', async () => {
     // Create user
-    const user = await prismaService.user.create({
-      data: await fakeUser(),
-    });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create token
     const token = await jwtService.signAsync(
       { sub: user.id, email: user.email },
@@ -214,9 +214,8 @@ describe('PUT /users/:id', () => {
 
   it('should return status 400 when any attribute is invalid', async () => {
     // Create user
-    const user = await prismaService.user.create({
-      data: await fakeUser(),
-    });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Payload
     const payload = {
       sub: user.id,
@@ -268,7 +267,8 @@ describe('DELETE /users/:id', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should delete the authenticated user when access_token is valid', async () => {
     // Create user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Payload
     const payload = {
       sub: user.id,
@@ -289,7 +289,8 @@ describe('DELETE /users/:id', () => {
 
   it('should return status 404 when user does not exist', async () => {
     // Create user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Payload
     const payload = {
       sub: user.id,
@@ -310,7 +311,8 @@ describe('DELETE /users/:id', () => {
 
   it('should return status 401 when user does not match authenticated user', async () => {
     // Create user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Payload
     const payload = {
       sub: 99999999,

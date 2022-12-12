@@ -43,9 +43,8 @@ describe('POST /auth/signup', () => {
   });
 
   it('should return status 409 when email already exists', async () => {
-    await prismaService.user.create({
-      data: await fakeUser('name', 'firstname@mail.com'),
-    });
+    const data = await fakeUser('name', 'firstname@mail.com');
+    await prismaService.user.create({ data });
     return pactum
       .spec()
       .post('/auth/signup')
@@ -139,9 +138,8 @@ describe('POST /auth/signin', () => {
 
   /* ---------------------------------- TESTS --------------------------------- */
   it('should signin a user when credentials are valid and email is verified', async () => {
-    const user = await prismaService.user.create({
-      data: await fakeUser('firstname', 'firstname@mail.com'),
-    });
+    const data = await fakeUser('firstname', 'firstname@mail.com');
+    const user = await prismaService.user.create({ data });
     const response = await pactum
       .spec()
       .post('/auth/signin')
@@ -187,9 +185,8 @@ describe('POST /auth/signin', () => {
   });
 
   it('should return status 401 when password is invalid', async () => {
-    await prismaService.user.create({
-      data: await fakeUser('firstname', 'firstname@mail.com'),
-    });
+    const data = await fakeUser('firstname', 'firstname@mail.com');
+    await prismaService.user.create({ data });
     return pactum
       .spec()
       .post('/auth/signin')
@@ -223,9 +220,8 @@ describe('POST /auth/logout', () => {
 
   /* ---------------------------------- TESTS --------------------------------- */
   it('should logout a user when access_token is provided and valid', async () => {
-    let user = await prismaService.user.create({
-      data: await fakeUser(),
-    });
+    const data = await fakeUser();
+    let user = await prismaService.user.create({ data });
     const token = await jwtService.signAsync(
       { sub: user.id, email: user.email },
       {
@@ -262,9 +258,8 @@ describe('POST /auth/refresh', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should refresh tokens when the provided refresh_token is valid', async () => {
     // Create user
-    let user = await prismaService.user.create({
-      data: await fakeUser(),
-    });
+    const data = await fakeUser();
+    let user = await prismaService.user.create({ data });
     // Generate the refresh token
     const refreshToken = randomToken.generate(32);
     const refreshTokenHash = await argon.hash(refreshToken);
@@ -402,9 +397,8 @@ describe('GET /auth/confirm-email', () => {
 
   it('should return status 401 when token is invalid', async () => {
     // Create user
-    const user = await prismaService.user.create({
-      data: await fakeUser(),
-    });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Generate the token
     const token = randomToken.generate(32);
     const tokenHash = await argon.hash(token);
@@ -507,9 +501,8 @@ describe('POST /auth/reset-password', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should reset user password when all attributes are valid', async () => {
     // Create user
-    const user = await prismaService.user.create({
-      data: await fakeUser(),
-    });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Generate the token
     const token = randomToken.generate(32);
     const tokenHash = await argon.hash(token);
@@ -586,9 +579,8 @@ describe('POST /auth/reset-password', () => {
 
   it('should return status 401 when token is invalid', async () => {
     // Create user
-    const user = await prismaService.user.create({
-      data: await fakeUser(),
-    });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Generate the token
     const token = randomToken.generate(32);
     const tokenHash = await argon.hash(token);
@@ -613,9 +605,8 @@ describe('POST /auth/reset-password', () => {
 
   it('should return status 401 when token has expired', async () => {
     // Create user
-    const user = await prismaService.user.create({
-      data: await fakeUser(),
-    });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Generate the token
     const token = randomToken.generate(32);
     const tokenHash = await argon.hash(token);
