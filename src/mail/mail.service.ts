@@ -20,10 +20,7 @@ export class MailService {
       };
     }
     // SET BASE URL
-    this.BACK_BASE_URL =
-      this.configService.get('APP_DOMAIN') +
-      ':' +
-      this.configService.get('APP_PORT');
+    this.BACK_BASE_URL = this.configService.get('APP_DOMAIN');
     // SET FRONT URL
     this.FRONT_URL = this.configService.get('FRONT_DOMAIN');
   }
