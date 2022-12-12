@@ -569,11 +569,13 @@ describe('DELETE /leases/:id', () => {
 
   it('should return status 401 when lease does not belong to user', async () => {
     // Create 2 fakes user
+    const fakeUser1 = await fakeUser();
     const userAuthenticated = await prismaService.user.create({
-      data: await fakeUser(),
+      data: fakeUser1,
     });
+    const fakeUser2 = await fakeUser();
     const userWithLease = await prismaService.user.create({
-      data: await fakeUser(),
+      data: fakeUser2,
     });
     // Create 1 fake lease with 4 leaseImage
     const leaseImages = [];

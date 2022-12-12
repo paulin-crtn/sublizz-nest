@@ -40,9 +40,7 @@ export const beforeTests = async (): Promise<void> => {
   jwtService = app.get(JwtService);
 
   // Pactum
-  pactum.request.setBaseUrl(
-    process.env.APP_DOMAIN + ':' + process.env.APP_PORT,
-  );
+  pactum.request.setBaseUrl(process.env.APP_DOMAIN);
 };
 
 /**
