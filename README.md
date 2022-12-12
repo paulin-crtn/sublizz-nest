@@ -21,8 +21,8 @@ The application is made with [Nest](https://github.com/nestjs/nest) and uses a *
 # PostgreSQL database in a Docker container
 $ docker-compose up -d
 
-# Run database migration
-npm run prisma:migrate:test
+# Run database migrations and seeds
+npm run prisma:migrate:test && npm run prisma:seed:test
 
 # Run e2e tests
 npm run test:e2e

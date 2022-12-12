@@ -20,7 +20,10 @@ export class PrismaService extends PrismaClient {
         this.passwordReset.deleteMany(),
         this.emailVerification.deleteMany(),
         this.leaseImage.deleteMany(),
+        this.leaseFavorite.deleteMany(),
         this.lease.deleteMany(),
+        this.conversationMessage.deleteMany(),
+        this.conversation.deleteMany(),
         this.user.deleteMany(),
       ]);
     } catch (e) {

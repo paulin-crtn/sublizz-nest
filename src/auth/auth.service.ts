@@ -56,7 +56,7 @@ export class AuthService {
       validateSMTP: false, // Timeout issue
     });
     if (!res.valid) {
-      throw new BadRequestException('Email is not valid.');
+      throw new BadRequestException("L'adresse email n'est pas valide.");
     }
     // Generate the password hash
     const passwordHash = await argon.hash(dto.password);
@@ -64,6 +64,7 @@ export class AuthService {
       // Save the new user in the db
       const user = await this.prismaService.user.create({
         data: {
+          role: dto.role,
           firstName: dto.firstName,
           email: dto.email,
           passwordHash,
@@ -75,7 +76,7 @@ export class AuthService {
       // Catch unique constraint violation error
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw new ConflictException('Email already taken.');
+          throw new ConflictException("L'adresse email est déjà utilisée.");
         }
       }
       throw error;
@@ -95,7 +96,7 @@ export class AuthService {
     // Find the user by email
     const user = await this.userService.getUserByEmail(dto.email);
     if (!user) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException('Utilisateur non trouvé.');
     }
     // Compare password
     const isPasswordCorrect = await argon.verify(
@@ -104,11 +105,11 @@ export class AuthService {
     );
     // If password incorrect throw exception
     if (!isPasswordCorrect) {
-      throw new UnauthorizedException('Incorrect password.');
+      throw new UnauthorizedException('Mot de passe incorrect.');
     }
     // Generate tokens
     const [accessToken, refreshToken] = await Promise.all([
-      this._issueAccessToken(user.id, user.email),
+      this._issueAccessToken(user.id),
       this._issueRefreshToken(user.id),
     ]);
     // Return tokens
@@ -126,7 +127,7 @@ export class AuthService {
   ): Promise<{ accessToken: string; newRefreshToken: string }> {
     // Generate new tokens
     const [accessToken, newRefreshToken] = await Promise.all([
-      this._issueAccessToken(user.id, user.email),
+      this._issueAccessToken(user.id),
       this._issueRefreshToken(user.id),
     ]);
     // Return new tokens
@@ -158,7 +159,7 @@ export class AuthService {
   async confirmUserEmail(
     emailVerificationId: number,
     token: string,
-  ): Promise<{ userEmail: string }> {
+  ): Promise<{ email: string }> {
     // Find email verification
     const emailVerification =
       await this.prismaService.emailVerification.findUnique({
@@ -168,7 +169,7 @@ export class AuthService {
       });
     // If email verification does not exist throw exception
     if (!emailVerification) {
-      throw new NotFoundException('Email verification id does not exist.');
+      throw new NotFoundException('Email déjà validé ou non trouvé.');
     }
     // Compare token
     const isTokenCorrect = await argon.verify(
@@ -177,7 +178,7 @@ export class AuthService {
     );
     // If token incorrect throw exception
     if (!isTokenCorrect) {
-      throw new UnauthorizedException('Incorrect token.');
+      throw new UnauthorizedException('Token invalide.');
     }
     // Update user
     const user = await this.prismaService.user.update({
@@ -189,7 +190,14 @@ export class AuthService {
         emailVerifiedAt: new Date(Date.now()),
       },
     });
-    return { userEmail: user.email };
+    // Delete token
+    await this.prismaService.emailVerification.delete({
+      where: {
+        id: emailVerificationId,
+      },
+    });
+    // Return
+    return { email: user.email };
   }
 
   /**
@@ -201,7 +209,7 @@ export class AuthService {
     // Find the user by email
     const user = await this.userService.getUserByEmail(email);
     if (!user) {
-      throw new NotFoundException('User does not exist.');
+      throw new NotFoundException('Utilisateur non trouvé.');
     }
     // Generate and store reset password token
     const token = randomToken.generate(16);
@@ -213,7 +221,7 @@ export class AuthService {
       },
     });
     // Send token to user's email
-    await this.mailService.sendUserResetPasswordToken(user, token);
+    await this.mailService.sendUserResetPassword(user, token);
   }
 
   /**
@@ -231,7 +239,9 @@ export class AuthService {
     });
     // If PasswordReset does not exist throw exception
     if (!passwordReset) {
-      throw new NotFoundException('No password reset found.');
+      throw new NotFoundException(
+        'Aucune demande de réinitialisation de mot de passe trouvée.',
+      );
     }
     // Compare token
     const isTokenCorrect = await argon.verify(
@@ -240,7 +250,7 @@ export class AuthService {
     );
     // If token incorrect throw exception
     if (!isTokenCorrect) {
-      throw new UnauthorizedException('Incorrect token.');
+      throw new UnauthorizedException('Token incorrect.');
     }
     // If token expired throw exception
     const isExpired =
@@ -249,7 +259,7 @@ export class AuthService {
       await this.prismaService.passwordReset.delete({
         where: { id: passwordReset.id },
       });
-      throw new UnauthorizedException('Token has expired.');
+      throw new UnauthorizedException('Le token a expiré.');
     }
     // Update user password
     const passwordHash = await argon.hash(dto.password);
@@ -261,9 +271,9 @@ export class AuthService {
         passwordHash,
       },
     });
-    // Delete PasswordReset
-    await this.prismaService.passwordReset.delete({
-      where: { id: passwordReset.id },
+    // Delete all user PasswordReset
+    await this.prismaService.passwordReset.deleteMany({
+      where: { userEmail: dto.email },
     });
   }
 
@@ -274,17 +284,12 @@ export class AuthService {
    * Issue an access token
    *
    * @param userId
-   * @param email
    * @returns
    */
-  private async _issueAccessToken(
-    userId: number,
-    email: string,
-  ): Promise<string> {
+  private async _issueAccessToken(userId: number): Promise<string> {
     // Payload
     const payload = {
       sub: userId,
-      email,
     };
     // JWT access token
     return await this.jwtService.signAsync(payload, {

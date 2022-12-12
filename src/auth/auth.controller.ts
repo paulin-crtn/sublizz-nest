@@ -17,7 +17,6 @@ import {
   ApiBearerAuth,
   ApiCookieAuth,
   ApiOkResponse,
-  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { User } from '@prisma/client';
@@ -35,11 +34,9 @@ import { accessTokenResponse, userEmailResponse } from './swagger';
 /* -------------------------------------------------------------------------- */
 const COOKIE_NAME = 'refresh_token';
 const COOKIE_OPTIONS = {
-  path: '/',
   expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
   httpOnly: true,
   secure: process.env.NODE_ENV !== 'dev',
-  // domain: 'sublizz.com',
 };
 
 /* -------------------------------------------------------------------------- */
@@ -53,7 +50,8 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Post('signup')
   async signUp(@Body() dto: SignUpDto) {
-    return await this.authService.signUp(dto);
+    await this.authService.signUp(dto);
+    return { statusCode: 201, message: 'User created' };
   }
 
   @HttpCode(HttpStatus.OK)
@@ -66,7 +64,7 @@ export class AuthController {
   }
 
   @UseGuards(RefreshJwtGuard)
-  @ApiCookieAuth()
+  @ApiCookieAuth('refresh_token')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse(accessTokenResponse)
   @Post('refresh')
@@ -91,10 +89,10 @@ export class AuthController {
   async confirmUserEmail(
     @Query('emailVerificationId', ParseIntPipe) emailVerificationId: number,
     @Query('token') token: string,
-  ) {
+  ): Promise<{ email: string }> {
     const tokenSanitized = striptags(token);
     if (!tokenSanitized) {
-      throw new BadRequestException('Token is missing');
+      throw new BadRequestException('Token manquant.');
     }
     return await this.authService.confirmUserEmail(
       emailVerificationId,
@@ -103,17 +101,19 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('reset-password')
+  @Get('reset-password/send-token')
   async issuePasswordResetToken(@Query('email') email: string) {
     if (!isEmail(email)) {
-      throw new BadRequestException('Email is not valid.');
+      throw new BadRequestException("L'adresse email n'est pas valide.");
     }
-    return await this.authService.issuePasswordResetToken(email);
+    await this.authService.issuePasswordResetToken(email);
+    return { statusCode: 200, message: 'Password reset email sent' };
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('reset-password')
   async resetUserPassword(@Body() dto: PasswordResetDto) {
-    return await this.authService.resetUserPassword(dto);
+    await this.authService.resetUserPassword(dto);
+    return { statusCode: 200, message: 'Password has been reset' };
   }
 }

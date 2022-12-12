@@ -13,14 +13,16 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccessJwtGuard } from '../auth/guard';
 import { GetUser } from '../user/decorator';
-import { LeaseDto } from './dto';
+import { GetLeasesDto, StoreUpdateLeaseDto } from './dto';
 import { LeaseEntity, LeaseDetailsEntity } from './entity';
+import { ILeasesWithCount } from './interfaces/ILeasesWithCount';
 import { LeaseService } from './lease.service';
 
 /* -------------------------------------------------------------------------- */
@@ -31,11 +33,32 @@ import { LeaseService } from './lease.service';
 @UseInterceptors(ClassSerializerInterceptor)
 export class LeaseController {
   constructor(private leaseService: LeaseService) {}
+
   @HttpCode(HttpStatus.OK)
   @Get()
-  async getLeases() {
-    const leases = await this.leaseService.getLeases();
-    return leases.map((lease) => new LeaseEntity(lease));
+  async getLeases(@Query() queryParams: GetLeasesDto) {
+    const { city, latitudes, longitudes, page } = queryParams;
+
+    let data: undefined | ILeasesWithCount;
+
+    if (city) {
+      data = await this.leaseService.getLeasesFromCity(city, page);
+    } else if (latitudes && longitudes) {
+      data = await this.leaseService.getLeasesFromCoordinates(
+        latitudes,
+        longitudes,
+      );
+    } else {
+      data = await this.leaseService.getLeases(page);
+    }
+
+    return {
+      totalCount: data.totalCount,
+      leases: data.leases.map((lease) => new LeaseEntity(lease as unknown)),
+      ...(data.cityCoordinates
+        ? { cityCoordinates: data.cityCoordinates }
+        : {}),
+    };
   }
 
   @UseGuards(AccessJwtGuard)
@@ -44,21 +67,23 @@ export class LeaseController {
   @Get('user')
   async getUserLeases(@GetUser('id') userId: number) {
     const leases = await this.leaseService.getUserLeases(userId);
-    return leases.map((lease) => new LeaseEntity(lease));
+    return leases.map((lease) => new LeaseDetailsEntity(lease as unknown));
   }
 
   @HttpCode(HttpStatus.OK)
   @Get(':id')
   async getLease(@Param('id', ParseIntPipe) id: number) {
-    return new LeaseDetailsEntity(await this.leaseService.getLease(id));
+    const lease = await this.leaseService.getLease(id);
+    return new LeaseDetailsEntity(lease as unknown);
   }
 
   @UseGuards(AccessJwtGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   @Post()
-  async store(@GetUser('id') userId: number, @Body() dto: LeaseDto) {
-    return new LeaseDetailsEntity(await this.leaseService.store(userId, dto));
+  async store(@GetUser('id') userId: number, @Body() dto: StoreUpdateLeaseDto) {
+    const lease = await this.leaseService.store(userId, dto);
+    return new LeaseDetailsEntity(lease as unknown);
   }
 
   @UseGuards(AccessJwtGuard)
@@ -68,21 +93,21 @@ export class LeaseController {
   async update(
     @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: LeaseDto,
+    @Body() dto: StoreUpdateLeaseDto,
   ) {
-    return new LeaseDetailsEntity(
-      await this.leaseService.update(id, userId, dto),
-    );
+    const lease = await this.leaseService.update(id, userId, dto);
+    return new LeaseDetailsEntity(lease as unknown);
   }
 
   @UseGuards(AccessJwtGuard)
   @ApiBearerAuth()
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @Delete(':id')
   async delete(
     @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return await this.leaseService.delete(id, userId);
+    await this.leaseService.delete(id, userId);
+    return { statusCode: 200, message: 'Lease deleted' };
   }
 }

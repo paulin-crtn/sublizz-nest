@@ -1,6 +1,18 @@
-import { IsString, Length, IsEmail, IsOptional, IsUrl } from 'class-validator';
+import {
+  IsString,
+  Length,
+  IsEmail,
+  IsOptional,
+  MaxLength,
+  IsNumberString,
+  IsEnum,
+} from 'class-validator';
+import { UserRoleEnum } from '../enum';
 
 export class UpdateUserDto {
+  @IsEnum(UserRoleEnum)
+  role: UserRoleEnum;
+
   @IsString()
   @Length(3, 30)
   firstName: string;
@@ -9,6 +21,11 @@ export class UpdateUserDto {
   @IsString()
   @Length(3, 30)
   lastName?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  @Length(10, 10)
+  phoneNumber?: string;
 
   @IsEmail()
   email: string;
@@ -19,6 +36,11 @@ export class UpdateUserDto {
   password?: string;
 
   @IsOptional()
-  @IsUrl()
-  profilePictureUrl?: string;
+  @IsString()
+  profilePictureName?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  standardMessage?: string;
 }

@@ -40,10 +40,10 @@ export class UserService {
       },
     });
     if (!user) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException('Utilisateur non trouvé.');
     }
     if (!user.emailVerifiedAt) {
-      throw new UnauthorizedException('Email must be verified.');
+      throw new UnauthorizedException("L'adresse email doit être vérifiée.");
     }
     return user;
   }
@@ -64,10 +64,10 @@ export class UserService {
       },
     });
     if (!user) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException('Utilisateur non trouvé.');
     }
     if (user.id !== userId) {
-      throw new ForbiddenException('Access to resource denied.');
+      throw new ForbiddenException('Accès refusé.');
     }
 
     // Data
@@ -106,10 +106,10 @@ export class UserService {
       },
     });
     if (!user) {
-      throw new NotFoundException('User not found.');
+      throw new NotFoundException('Utilisateur non trouvé.');
     }
     if (user.id !== userId) {
-      throw new ForbiddenException('Access to resource denied.');
+      throw new ForbiddenException('Accès refusé.');
     }
     await this.prismaService.user.delete({
       where: {
@@ -137,7 +137,7 @@ export class UserService {
         },
       },
     );
-    await this.mailService.sendUserEmailVerificationToken(
+    await this.mailService.sendUserEmailVerification(
       user,
       token,
       emailVerification,

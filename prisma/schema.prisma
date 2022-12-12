@@ -12,41 +12,62 @@ datasource db {
 
 model User {
   leases Lease[]
+  leaseFavorites LeaseFavorite[]
+  conversationMessage ConversationMessage[]
+  conversationParticipant ConversationParticipant[]
+  messageReadState MessageReadState[]
   emailVerification EmailVerification[]
   passwordReset PasswordReset[]
 
+  userRole UserRole @relation(fields: [role], references: [role], onUpdate: NoAction, onDelete: NoAction)
+
   id Int @id @default(autoincrement())
-  firstName String @db.VarChar(20)
-  lastName String? @db.VarChar(20)
+  role String @db.VarChar(10)
+  firstName String @db.VarChar(30)
+  lastName String? @db.VarChar(30)
+  phoneNumber String? @db.VarChar(10)
   email String @db.VarChar(30) @unique
   emailVerifiedAt DateTime?
   passwordHash String
   refreshTokenHash String?
-  profilePictureUrl String?
+  profilePictureName String?
+  standardMessage String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map(name: "user")
 }
 
+model UserRole {
+  users User[]
+  
+  id Int @id @default(autoincrement())
+  role String @db.VarChar(10) @unique
+
+  @@map(name: "user_role")
+}
+
 model Lease {
   leaseImages LeaseImage[]
+  leaseFavorites LeaseFavorite[]
+  conversation Conversation[]
 
   user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  leaseType LeaseType @relation(fields: [type], references: [type], onUpdate: NoAction, onDelete: NoAction)
 
   id Int @id @default(autoincrement())
   userId Int
-  houseNumber String? @db.VarChar(10)
+  type String @db.VarChar(15)
   street String @db.VarChar(30)
   postCode String @db.VarChar(5)
   city String @db.VarChar(30)
-  gpsLatitude String? @db.VarChar(15)
-  gpsLongitude String? @db.VarChar(15)
+  gpsLatitude Decimal? @db.Decimal(8, 6)
+  gpsLongitude Decimal? @db.Decimal(9, 6)
   description String?
   surface Int
   room Int
   startDate DateTime
-  endDate DateTime
+  endDate DateTime?
   isDateFlexible Int
   pricePerMonth Int
   isPublished Int
@@ -61,11 +82,82 @@ model LeaseImage {
   
   id Int @id @default(autoincrement())
   leaseId Int
-  url String
+  name String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map(name: "lease_img")
+}
+
+model LeaseType {
+  leases Lease[]
+  
+  id Int @id @default(autoincrement())
+  type String @db.VarChar(15) @unique
+
+  @@map(name: "lease_type")
+}
+
+model LeaseFavorite {
+  lease Lease @relation(fields: [leaseId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  id Int @id @default(autoincrement())
+  userId Int
+  leaseId Int
+  createdAt DateTime @default(now())
+
+  @@map(name: "lease_favorite")
+}
+
+model Conversation {
+  conversationParticipants ConversationParticipant[]
+  conversationMessages ConversationMessage[]
+
+  lease Lease @relation(fields: [leaseId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  id String @db.VarChar(16) @id
+  leaseId Int
+
+  @@map(name: "conversation")
+}
+
+model ConversationParticipant {
+  conversation Conversation @relation(fields: [conversationId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  id Int @id @default(autoincrement())
+  conversationId String
+  userId Int
+
+  @@map(name: "conversation_participant")
+}
+
+model ConversationMessage {
+  messageReadState MessageReadState[]
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user User @relation(fields: [fromUserId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  id Int @id @default(autoincrement())
+  conversationId String @db.VarChar(16)
+  fromUserId Int
+  content String
+  createdAt DateTime @default(now())
+
+  @@map(name: "conversation_message")
+}
+
+model MessageReadState {
+  message ConversationMessage @relation(fields: [messageId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  id Int @id @default(autoincrement())
+  messageId Int
+  userId Int
+  readAt DateTime?
+
+  @@map(name: "message_read_state")
 }
 
 model EmailVerification {

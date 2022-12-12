@@ -54,12 +54,13 @@ export class UserController {
 
   @UseGuards(AccessJwtGuard)
   @ApiBearerAuth()
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @Delete(':id')
   async delete(
     @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return await this.userService.delete(id, userId);
+    await this.userService.delete(id, userId);
+    return { statusCode: 200, message: 'User deleted' };
   }
 }

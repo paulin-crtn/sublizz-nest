@@ -1,8 +1,11 @@
 /* -------------------------------------------------------------------------- */
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
-import { Type } from 'class-transformer';
-import { LeaseImageEntity } from './index';
+import { ApiHideProperty } from '@nestjs/swagger';
+import { Decimal } from '@prisma/client/runtime';
+import { Exclude, Transform } from 'class-transformer';
+import { LeaseTypeEnum } from '../enum';
+import { ILeaseImage } from '../interfaces/ILeaseImage';
 
 /* -------------------------------------------------------------------------- */
 /*                                    CLASS                                   */
@@ -24,13 +27,22 @@ export class LeaseDetailsEntity {
   }
 
   id: number;
+
+  @Exclude()
+  @ApiHideProperty()
   userId: number;
-  houseNumber?: string;
+
+  type: LeaseTypeEnum;
   street: string;
   postCode: string;
   city: string;
-  gpsLatitude?: string;
-  gpsLongitude?: string;
+
+  @Transform(({ value }) => new Decimal(value).toNumber())
+  gpsLatitude?: number;
+
+  @Transform(({ value }) => new Decimal(value).toNumber())
+  gpsLongitude?: number;
+
   description?: string;
   surface: number;
   room: number;
@@ -42,8 +54,15 @@ export class LeaseDetailsEntity {
   createdAt: Date;
   updatedAt: Date;
 
-  @Type(() => LeaseImageEntity)
-  leaseImages: LeaseImageEntity[];
+  @Transform(({ value }) =>
+    value.map((leaseImage: ILeaseImage) => leaseImage.name),
+  )
+  leaseImages: string[];
 
-  user: { firstName: string; lastName: string };
+  user: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    profilePictureName: string;
+  };
 }

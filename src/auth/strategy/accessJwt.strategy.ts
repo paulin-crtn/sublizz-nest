@@ -27,7 +27,7 @@ export class AccessJwtStrategy extends PassportStrategy(
     });
     // If user does not exist throw exception
     if (!user) {
-      throw new UnauthorizedException('User does not exist.');
+      throw new UnauthorizedException('Utilisateur non trouvé.');
     }
     // Return user
     return user;

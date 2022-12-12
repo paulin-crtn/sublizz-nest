@@ -2,21 +2,22 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsDate,
+  IsEnum,
+  IsLatitude,
+  IsLongitude,
   IsNumber,
   IsNumberString,
   IsOptional,
   IsString,
-  IsUrl,
   Length,
   Max,
   Min,
 } from 'class-validator';
+import { LeaseTypeEnum } from '../enum';
 
-export class LeaseDto {
-  @IsOptional()
-  @IsString()
-  @Length(1, 7)
-  houseNumber?: string;
+export class StoreUpdateLeaseDto {
+  @IsEnum(LeaseTypeEnum)
+  type: string;
 
   @IsString()
   @Length(3, 30)
@@ -30,15 +31,11 @@ export class LeaseDto {
   @Length(3, 30)
   city: string;
 
-  @IsOptional()
-  @IsNumberString()
-  @Length(1, 15)
-  gpsLatitude?: string;
+  @IsLatitude()
+  gpsLatitude: number;
 
-  @IsOptional()
-  @IsNumberString()
-  @Length(1, 15)
-  gpsLongitude?: string;
+  @IsLongitude()
+  gpsLongitude: number;
 
   @IsOptional()
   @IsString()
@@ -60,6 +57,7 @@ export class LeaseDto {
   @IsDate()
   startDate: Date;
 
+  @IsOptional()
   @Type(() => Date)
   @IsDate()
   endDate: Date;
@@ -83,6 +81,6 @@ export class LeaseDto {
 
   @IsOptional()
   @IsArray()
-  @IsUrl(undefined, { each: true })
+  @IsString({ each: true })
   leaseImages: string[];
 }

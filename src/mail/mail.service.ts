@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { EmailVerification, User } from '@prisma/client';
+import { EmailVerification, Lease, User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MailService {
-  private baseUrl: string;
+  private BACK_BASE_URL: string;
+  private FRONT_URL: string;
 
   constructor(
     private mailerService: MailerService,
@@ -19,30 +20,25 @@ export class MailService {
       };
     }
     // SET BASE URL
-    this.baseUrl =
+    this.BACK_BASE_URL =
       this.configService.get('APP_DOMAIN') +
       ':' +
       this.configService.get('APP_PORT');
+    // SET FRONT URL
+    this.FRONT_URL = this.configService.get('FRONT_DOMAIN');
   }
 
-  /**
-   * Send a confirmation email to the user
-   *
-   * @param user
-   * @param token
-   * @param emailVerification
-   */
-  async sendUserEmailVerificationToken(
+  async sendUserEmailVerification(
     user: User,
     token: string,
     emailVerification: EmailVerification,
   ) {
-    const url = `${this.baseUrl}/auth/confirm-email?emailVerificationId=${emailVerification.id}&token=${token}`;
+    const url = `${this.FRONT_URL}/confirm-email?emailVerificationId=${emailVerification.id}&token=${token}`;
     try {
       await this.mailerService.sendMail({
         to: emailVerification.email,
-        subject: 'Confirmez votre email pour valider votre inscription',
-        template: './email-verification-token',
+        subject: 'Finalisez la création de votre compte',
+        template: './email-verification',
         context: {
           firstName: user.firstName,
           url,
@@ -50,32 +46,89 @@ export class MailService {
       });
     } catch (e) {
       throw new Error(
-        'An error occcured while sending user email verification token: ' + e,
+        "Une erreur est survenue pendant l'envoi du token de vérification : " +
+          e,
       );
     }
   }
 
-  /**
-   * Send a reset password token to the user
-   *
-   * @param user
-   * @param token
-   */
-  async sendUserResetPasswordToken(user: User, token: string) {
-    const url = `${this.baseUrl}/auth/reset-password?email=${user.email}&token=${token}`;
+  async sendUserResetPassword(user: User, token: string) {
+    const url = `${this.FRONT_URL}/reset-password?email=${user.email}&token=${token}`;
     try {
       await this.mailerService.sendMail({
         to: user.email,
         subject: 'Demande de changement de mot de passe',
-        template: './password-reset-token',
+        template: './password-reset',
+        context: { url },
+      });
+    } catch (e) {
+      throw new Error(
+        "Une erreur est survenue pendant l'envoi du token de réinitialisation : " +
+          e,
+      );
+    }
+  }
+
+  async sendUserLeaseMessage(
+    lease: Lease,
+    fromUser: User,
+    toUser: User,
+    message: string,
+  ) {
+    const url = `${this.FRONT_URL}/dashboard/messages`;
+    try {
+      await this.mailerService.sendMail({
+        to: toUser.email,
+        subject: `Nouveau message de ${fromUser.firstName}`,
+        template: './lease-message',
         context: {
-          firstName: user.firstName,
           url,
+          lease,
+          fromUser,
+          toUser,
+          message,
         },
       });
     } catch (e) {
       throw new Error(
-        'An error occcured while sending user reset password token: ' + e,
+        "Une erreur est survenue pendant l'envoi du message : " + e,
+      );
+    }
+  }
+
+  async sendAdminLeaseReport(userId: number, leaseId: number, reason: string) {
+    try {
+      await this.mailerService.sendMail({
+        to: 'contact@haftwald.com',
+        subject: "Signalement d'une annonce",
+        template: './lease-report',
+        context: {
+          userId,
+          leaseId,
+          reason,
+        },
+      });
+    } catch (e) {
+      throw new Error(
+        "Une erreur est survenue pendant l'envoi du signalement : " + e,
+      );
+    }
+  }
+
+  async sendAdminHelpMessage(userId: number, message: string) {
+    try {
+      await this.mailerService.sendMail({
+        to: 'contact@haftwald.com',
+        subject: 'Un utilisateur vous a envoyé une suggestion',
+        template: './help-us',
+        context: {
+          userId,
+          message,
+        },
+      });
+    } catch (e) {
+      throw new Error(
+        "Une erreur est survenue pendant l'envoi de la suggestion : " + e,
       );
     }
   }

@@ -17,13 +17,13 @@ import {
 /*                             REQUEST ATTRIBUTES                             */
 /* -------------------------------------------------------------------------- */
 const mandatoryRequestData: { key: string; invalidValues: any[] }[] = [
+  { key: 'type', invalidValues: [null, '', 'a', 123456] },
   { key: 'street', invalidValues: [null, '', 'a'] },
   { key: 'postCode', invalidValues: [null, '', 'a', 123456] },
   { key: 'city', invalidValues: [null, '', 'a'] },
   { key: 'surface', invalidValues: [null, '', 'a', 0, 10000] },
   { key: 'room', invalidValues: [null, '', 'a', 0, 10000] },
   { key: 'startDate', invalidValues: [null, '', 'a'] },
-  { key: 'endDate', invalidValues: [null, '', 'a'] },
   { key: 'isDateFlexible', invalidValues: [null, 'a', '2', 2] },
   {
     key: 'pricePerMonth',
@@ -33,18 +33,13 @@ const mandatoryRequestData: { key: string; invalidValues: any[] }[] = [
 ];
 
 const optionalRequestData: { key: string; invalidValues: any[] }[] = [
-  { key: 'houseNumber', invalidValues: ['', 'abcdefghijklm'] },
+  { key: 'endDate', invalidValues: ['', 'a'] },
   { key: 'description', invalidValues: [true, 0] },
-  { key: 'gpsLatitude', invalidValues: ['', 'abc', 9] },
-  { key: 'gpsLongitude', invalidValues: ['', 'abc', 9] },
+  { key: 'gpsLatitude', invalidValues: ['', 'abc'] },
+  { key: 'gpsLongitude', invalidValues: ['', 'abc'] },
   {
     key: 'leaseImages',
-    invalidValues: [
-      'abc',
-      'http://google.com',
-      ['abc'],
-      ['abc', 'http://google.com'],
-    ],
+    invalidValues: [123456, 'abc', [123456]],
   },
 ];
 
@@ -52,47 +47,45 @@ const optionalRequestData: { key: string; invalidValues: any[] }[] = [
 /*                                  RESPONSE                                  */
 /* -------------------------------------------------------------------------- */
 function isResponseOK(response: LeaseEntity) {
-  expect(response.id).not.toBe(null);
-  expect(response.userId).not.toBe(null);
-  expect(response.postCode).not.toBe(null);
-  expect(response.city).not.toBe(null);
-  expect(response.surface).not.toBe(null);
-  expect(response.room).not.toBe(null);
-  expect(response.startDate).not.toBe(null);
-  expect(response.endDate).not.toBe(null);
-  expect(response.isDateFlexible).not.toBe(null);
-  expect(response.pricePerMonth).not.toBe(null);
-  expect(response.createdAt).not.toBe(null);
-  expect(response.updatedAt).not.toBe(null);
-  expect(response.leaseImages).not.toBe(null);
+  expect(response.id).toBeDefined();
+  expect(response.type).toBeDefined();
+  expect(response.postCode).toBeDefined();
+  expect(response.city).toBeDefined();
+  expect(response.surface).toBeDefined();
+  expect(response.room).toBeDefined();
+  expect(response.startDate).toBeDefined();
+  expect(response.endDate).toBeDefined();
+  expect(response.isDateFlexible).toBeDefined();
+  expect(response.pricePerMonth).toBeDefined();
+  expect(response.createdAt).toBeDefined();
+  expect(response.updatedAt).toBeDefined();
+  expect(response.leaseImages).toBeDefined();
   expect(response.leaseImages.length).toBe(4);
-  expect(response.leaseImages[0].url).not.toBe(null);
-  expect(response.leaseImages[1].url).not.toBe(null);
-  expect(response.leaseImages[2].url).not.toBe(null);
-  expect(response.leaseImages[3].url).not.toBe(null);
+  expect(response.leaseImages[0]).toBeDefined();
 }
 
 function isResponseDetailsOK(response: LeaseDetailsEntity) {
-  expect(response.id).not.toBe(null);
-  expect(response.userId).not.toBe(null);
-  expect(response.street).not.toBe(null);
-  expect(response.postCode).not.toBe(null);
-  expect(response.city).not.toBe(null);
-  expect(response.surface).not.toBe(null);
-  expect(response.room).not.toBe(null);
-  expect(response.startDate).not.toBe(null);
-  expect(response.endDate).not.toBe(null);
-  expect(response.isDateFlexible).not.toBe(null);
-  expect(response.pricePerMonth).not.toBe(null);
-  expect(response.isPublished).not.toBe(null);
-  expect(response.createdAt).not.toBe(null);
-  expect(response.updatedAt).not.toBe(null);
-  expect(response.leaseImages).not.toBe(null);
+  expect(response.id).toBeDefined();
+  expect(response.type).toBeDefined();
+  expect(response.street).toBeDefined();
+  expect(response.postCode).toBeDefined();
+  expect(response.city).toBeDefined();
+  expect(response.surface).toBeDefined();
+  expect(response.room).toBeDefined();
+  expect(response.startDate).toBeDefined();
+  expect(response.endDate).toBeDefined();
+  expect(response.isDateFlexible).toBeDefined();
+  expect(response.pricePerMonth).toBeDefined();
+  expect(response.isPublished).toBeDefined();
+  expect(response.createdAt).toBeDefined();
+  expect(response.updatedAt).toBeDefined();
+  expect(response.leaseImages).toBeDefined();
   expect(response.leaseImages.length).toBe(4);
-  expect(response.leaseImages[0].url).not.toBe(null);
-  expect(response.leaseImages[1].url).not.toBe(null);
-  expect(response.leaseImages[2].url).not.toBe(null);
-  expect(response.leaseImages[3].url).not.toBe(null);
+  expect(response.leaseImages[0]).toBeDefined();
+  expect(response.user.id).toBeDefined();
+  expect(response.user.firstName).toBeDefined();
+  expect(response.user.lastName).toBeDefined();
+  expect(response.user.profilePictureName).toBeDefined();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -107,7 +100,8 @@ describe('GET /leases', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should return all published leases', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 3 fake lease with 4 leaseImage each
     for (let index = 0; index < 3; index++) {
       const leaseImages = [];
@@ -120,7 +114,7 @@ describe('GET /leases', () => {
           isPublished: index % 2 === 0 ? 1 : 0, // Overide fake lease value
           leaseImages: {
             createMany: {
-              data: leaseImages.map((url) => ({ url })),
+              data: leaseImages.map((name) => ({ name })),
             },
           },
         },
@@ -131,10 +125,10 @@ describe('GET /leases', () => {
       .spec()
       .get('/leases')
       .expectStatus(200)
-      .expectJsonLength(2)
       .returns('res.body');
 
-    response.forEach((lease: LeaseEntity) => isResponseOK(lease));
+    expect(response.leases.length).toBe(2);
+    response.leases.forEach((lease: LeaseEntity) => isResponseOK(lease));
   });
 });
 
@@ -150,7 +144,8 @@ describe('GET /leases/:id', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should return the lease corresponding to the id pass in url param', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 fake lease with 4 leaseImage
     const leaseImages = [];
     for (let index = 0; index < 4; index++) {
@@ -161,7 +156,7 @@ describe('GET /leases/:id', () => {
         ...fakeLease(user.id),
         leaseImages: {
           createMany: {
-            data: leaseImages.map((url) => ({ url })),
+            data: leaseImages.map((name) => ({ name })),
           },
         },
       },
@@ -198,7 +193,8 @@ describe('GET /leases/user', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should return all user leases', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 fake lease with 4 leaseImage
     const leaseImages = [];
     for (let index = 0; index < 4; index++) {
@@ -209,7 +205,7 @@ describe('GET /leases/user', () => {
         ...fakeLease(user.id),
         leaseImages: {
           createMany: {
-            data: leaseImages.map((url) => ({ url })),
+            data: leaseImages.map((name) => ({ name })),
           },
         },
       },
@@ -264,7 +260,8 @@ describe('POST /leases', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should store a lease when access_token and all attributes are valid', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 lease
     const lease = fakeLease(user.id);
     // Create 4 fake leaseImage
@@ -299,7 +296,8 @@ describe('POST /leases', () => {
 
   it('should return status 400 when a mandatory attribute is missing', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 lease
     const lease = fakeLease(user.id);
 
@@ -331,7 +329,8 @@ describe('POST /leases', () => {
 
   it('should return status 400 when any attribute is invalid', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 lease
     const lease = fakeLease(user.id);
     // Payload
@@ -386,7 +385,8 @@ describe('PUT /leases/:id', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should update a lease when access_token and all attributes are valid', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 fake lease with 4 leaseImage
     const leaseImages = [];
     for (let index = 0; index < 4; index++) {
@@ -397,7 +397,7 @@ describe('PUT /leases/:id', () => {
         ...fakeLease(user.id),
         leaseImages: {
           createMany: {
-            data: leaseImages.map((url) => ({ url })),
+            data: leaseImages.map((name) => ({ name })),
           },
         },
       },
@@ -426,7 +426,8 @@ describe('PUT /leases/:id', () => {
 
   it('should return status 400 when a mandatory attribute is missing', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 lease
     const lease = fakeLease(user.id);
     // Payload
@@ -454,7 +455,8 @@ describe('PUT /leases/:id', () => {
 
   it('should return status 400 when any attribute is invalid', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 lease
     const lease = fakeLease(user.id);
     // Payload
@@ -508,7 +510,8 @@ describe('DELETE /leases/:id', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should delete a lease when access_token is valid', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Create 1 fake lease with 4 leaseImage
     const leaseImages = [];
     for (let index = 0; index < 4; index++) {
@@ -519,7 +522,7 @@ describe('DELETE /leases/:id', () => {
         ...fakeLease(user.id),
         leaseImages: {
           createMany: {
-            data: leaseImages.map((url) => ({ url })),
+            data: leaseImages.map((name) => ({ name })),
           },
         },
       },
@@ -539,12 +542,13 @@ describe('DELETE /leases/:id', () => {
       .spec()
       .delete(`/leases/${lease.id}`)
       .withHeaders('Authorization', `Bearer ${jwt}`)
-      .expectStatus(204);
+      .expectStatus(200);
   });
 
   it('should return status 404 when lease does not exist', async () => {
     // Create 1 fake user
-    const user = await prismaService.user.create({ data: await fakeUser() });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
     // Payload
     const payload = {
       sub: user.id,
@@ -569,11 +573,7 @@ describe('DELETE /leases/:id', () => {
       data: await fakeUser(),
     });
     const userWithLease = await prismaService.user.create({
-      data: {
-        firstName: 'first',
-        passwordHash: 'password',
-        email: 'second@mail.com',
-      },
+      data: await fakeUser(),
     });
     // Create 1 fake lease with 4 leaseImage
     const leaseImages = [];
@@ -585,7 +585,7 @@ describe('DELETE /leases/:id', () => {
         ...fakeLease(userWithLease.id),
         leaseImages: {
           createMany: {
-            data: leaseImages.map((url) => ({ url })),
+            data: leaseImages.map((name) => ({ name })),
           },
         },
       },
