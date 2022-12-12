@@ -9,6 +9,7 @@
     "node": "17.1.0"
   },
   "prisma": {
+    "schema": "src/schema.prisma",
     "seed": "ts-node prisma/seed.ts"
   },
   "scripts": {

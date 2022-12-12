@@ -7,8 +7,8 @@ import { JwtService } from '@nestjs/jwt';
 import { TestingModule, Test } from '@nestjs/testing';
 import cookieParser from 'cookie-parser';
 import pactum from 'pactum';
-import { AppModule } from '../src/app.module';
-import { PrismaService } from '../src/prisma/prisma.service';
+import { AppModule } from '../src/app/app.module';
+import { PrismaService } from '../src/app/prisma/prisma.service';
 
 /* -------------------------------------------------------------------------- */
 /*                                  FUNCTIONS                                 */
