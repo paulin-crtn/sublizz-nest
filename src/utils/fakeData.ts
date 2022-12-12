@@ -13,8 +13,8 @@ export const fakeUser = async (firstName?: string, email?: string) => {
   const passwordHash: string = await argon.hash('password');
   return {
     role: faker.helpers.arrayElement([UserRoleEnum.SEEKER, UserRoleEnum.OWNER]),
-    firstName: firstName ?? faker.name.firstName().slice(0, 10), // slice() because sometimes faker returns a string too long
-    lastName: faker.name.lastName().slice(0, 10), // slice() because sometimes faker returns a string too long
+    firstName: firstName ?? faker.name.firstName(),
+    lastName: faker.name.lastName(),
     email: email ?? faker.internet.email(),
     emailVerifiedAt: new Date(),
     passwordHash, // faker.internet.password()
