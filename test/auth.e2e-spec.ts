@@ -365,9 +365,8 @@ describe('GET /auth/confirm-email', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should confirm email when all query parameters are valid', async () => {
     // Create user
-    let user = await prismaService.user.create({
-      data: await fakeUser(),
-    });
+    const data = await fakeUser();
+    let user = await prismaService.user.create({ data });
     // Generate the token
     const token = randomToken.generate(32);
     const tokenHash = await argon.hash(token);
@@ -386,7 +385,7 @@ describe('GET /auth/confirm-email', () => {
       .withQueryParams('emailVerificationId', emailVerification.id)
       .withQueryParams('token', token)
       .expectStatus(200)
-      .expectJsonMatch({ userEmail: 'new@mail.com' });
+      .expectJsonMatch({ email: 'new@mail.com' });
     user = await prismaService.user.findUnique({ where: { id: user.id } });
     expect(user.email).toBe('new@mail.com');
     expect(user.emailVerifiedAt).toBeDefined();
@@ -455,14 +454,13 @@ describe('GET /auth/reset-password', () => {
   /* ---------------------------------- TESTS --------------------------------- */
   it('should store a reset password token in the DB when user exists', async () => {
     // Create user
-    const user = await prismaService.user.create({
-      data: await fakeUser(),
-    });
+    const data = await fakeUser();
+    const user = await prismaService.user.create({ data });
 
     // Assert
     await pactum
       .spec()
-      .get('/auth/reset-password')
+      .get('/auth/reset-password/send-token')
       .withQueryParams('email', user.email)
       .expectStatus(200);
 
@@ -474,13 +472,16 @@ describe('GET /auth/reset-password', () => {
   });
 
   it('should return status 400 when the email is not provided', () => {
-    return pactum.spec().get('/auth/reset-password').expectStatus(400);
+    return pactum
+      .spec()
+      .get('/auth/reset-password/send-token')
+      .expectStatus(400);
   });
 
   it('should return status 400 when the email is invalid', () => {
     return pactum
       .spec()
-      .get('/auth/reset-password')
+      .get('/auth/reset-password/send-token')
       .withQueryParams('email', 'email')
       .expectStatus(400);
   });
@@ -488,7 +489,7 @@ describe('GET /auth/reset-password', () => {
   it('should return status 404 when the user does not exists', () => {
     return pactum
       .spec()
-      .get('/auth/reset-password')
+      .get('/auth/reset-password/send-token')
       .withQueryParams('email', 'email@mail.com')
       .expectStatus(404);
   });
