@@ -2,11 +2,11 @@
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
 import { PrismaClient } from '@prisma/client';
-import { LeaseTypeEnum } from '../src/lease/enum';
-import { UserRoleEnum } from '../src/user/enum';
 import { fakeUser, fakeLease } from '../utils/fakeData';
 import { faker } from '@faker-js/faker';
 import randomToken from 'rand-token';
+import { UserRoleEnum } from '../app/user/enum';
+import { LeaseTypeEnum } from '../app/lease/enum';
 
 /* -------------------------------------------------------------------------- */
 /*                               INITIALIZATION                               */

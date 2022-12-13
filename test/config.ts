@@ -7,8 +7,8 @@ import { JwtService } from '@nestjs/jwt';
 import { TestingModule, Test } from '@nestjs/testing';
 import cookieParser from 'cookie-parser';
 import pactum from 'pactum';
-import { AppModule } from '../src/app.module';
-import { PrismaService } from '../src/prisma/prisma.service';
+import { AppModule } from '../src/app/app.module';
+import { PrismaService } from '../src/app/prisma/prisma.service';
 
 /* -------------------------------------------------------------------------- */
 /*                                  FUNCTIONS                                 */
@@ -32,7 +32,7 @@ export const beforeTests = async (): Promise<void> => {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.use(cookieParser());
   await app.init();
-  await app.listen(process.env.APP_PORT); // Needed for pactum
+  await app.listen(process.env.PORT); // Needed for pactum
 
   // Services
   configService = app.get(ConfigService);

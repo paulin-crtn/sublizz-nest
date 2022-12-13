@@ -2,7 +2,7 @@
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
 import pactum from 'pactum';
-import { fakeUser } from '../utils/fakeData';
+import { fakeUser } from '../src/utils/fakeData';
 import {
   beforeTests,
   afterTests,
