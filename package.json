@@ -20,7 +20,7 @@
     "start": "nest start",
     "start:dev": "dotenv -e .env.dev -- nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node /dist/main",
     "test": "dotenv -e .env.test -- jest",
     "test:watch": "dotenv -e .env.test -- jest --watch",
     "test:cov": "dotenv -e .env.test -- jest --coverage",
