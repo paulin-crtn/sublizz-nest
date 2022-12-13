@@ -1,13 +1,10 @@
 {
   "name": "sublizz-nest",
-  "version": "0.0.1",
-  "description": "An API to CRUD sub-lease publications.",
+  "version": "1.0.0",
+  "description": "Annonces de locations, de colocations et de sous-locations.",
   "author": "Paulin CARATINI",
   "private": true,
   "license": "Mozilla Public License 2.0",
-  "engines": {
-    "node": "17.1.0"
-  },
   "prisma": {
     "schema": "src/prisma/schema.prisma",
     "seed": "ts-node src/prisma/seed.ts"
