@@ -21,7 +21,7 @@ export class LeaseService {
   RESULTS_PER_PAGE: number;
 
   constructor(private prismaService: PrismaService) {
-    this.RESULTS_PER_PAGE = 5;
+    this.RESULTS_PER_PAGE = 6;
   }
 
   /* -------------------------------------------------------------------------- */
