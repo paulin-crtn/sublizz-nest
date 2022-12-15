@@ -1,5 +1,5 @@
-import { Injectable, Module } from '@nestjs/common';
-import { MailerModule, MailerService } from '@nestjs-modules/mailer';
+import { Module } from '@nestjs/common';
+import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailService } from './mail.service';
@@ -20,7 +20,7 @@ import { join } from 'path';
             user: configService.get('MAIL_USER'),
             pass: configService.get('MAIL_PASSWORD'),
           },
-          secure: false,
+          secure: process.env.NODE_ENV === 'production',
         },
         defaults: {
           from: '"La Carte des Logements" <nepasrepondre@lacartedeslogements.com>',
