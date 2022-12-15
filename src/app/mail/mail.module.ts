@@ -20,7 +20,7 @@ import { join } from 'path';
             user: configService.get('MAIL_USER'),
             pass: configService.get('MAIL_PASSWORD'),
           },
-          secure: true,
+          secure: process.env.NODE_ENV === 'production',
         },
         defaults: {
           from: '"La Carte des Logements" <nepasrepondre@lacartedeslogements.com>',
