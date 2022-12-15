@@ -9,7 +9,7 @@ CREATE TABLE "user" (
     "emailVerifiedAt" TIMESTAMP(3),
     "passwordHash" TEXT NOT NULL,
     "refreshTokenHash" TEXT,
-    "profilePictureName" TEXT,
+    "profilePictureName" VARCHAR(30),
     "standardMessage" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
