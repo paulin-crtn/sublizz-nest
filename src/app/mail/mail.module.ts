@@ -23,7 +23,7 @@ import { join } from 'path';
           secure: false,
         },
         defaults: {
-          from: '"No Reply" <noreply@example.com>',
+          from: '"La Carte des Logements" <nepasrepondre@lacartedeslogements.com>',
         },
         template: {
           dir: join(__dirname, 'templates'),
