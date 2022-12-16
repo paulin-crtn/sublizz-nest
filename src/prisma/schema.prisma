@@ -29,10 +29,10 @@ model User {
   phoneNumber String? @db.VarChar(10)
   email String @db.VarChar(30) @unique
   emailVerifiedAt DateTime?
-  passwordHash String @db.Text
-  refreshTokenHash String? @db.Text
+  passwordHash String
+  refreshTokenHash String?
   profilePictureName String? @db.VarChar(30)
-  standardMessage String? @db.Text
+  standardMessage String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
