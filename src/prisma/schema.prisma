@@ -31,7 +31,7 @@ model User {
   emailVerifiedAt DateTime?
   passwordHash String
   refreshTokenHash String?
-  profilePictureName String?
+  profilePictureName String? @db.VarChar(30)
   standardMessage String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
