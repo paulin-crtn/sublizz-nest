@@ -28,10 +28,13 @@
     "test:e2e": "dotenv -e .env.test -- jest --runInBand --verbose --config ./test/jest-e2e.json",
     "test:e2e:watch": "dotenv -e .env.test -- jest --watch --runInBand --verbose --config ./test/jest-e2e.json",
     "prisma:migrate:dev": "dotenv -e .env.dev -- npx prisma migrate dev",
-    "prisma:studio:dev": "dotenv -e .env.dev -- npx prisma studio",
     "prisma:migrate:test": "dotenv -e .env.test -- npx prisma migrate deploy",
-    "prisma:seed:test": "dotenv -e .env.test -- npx prisma db seed",
-    "prisma:migrate:prod": "dotenv -e .env -- npx prisma migrate deploy"
+    "prisma:migrate:staging": "dotenv -e .env.staging -- npx prisma migrate deploy",
+    "prisma:migrate:prod": "dotenv -e .env -- npx prisma migrate deploy",
+    "prisma:studio:dev": "dotenv -e .env.dev -- npx prisma studio",
+    "prisma:studio:staging": "dotenv -e .env.staging -- npx prisma studio",
+    "prisma:studio:prod": "dotenv -e .env -- npx prisma studio",
+    "prisma:seed:test": "dotenv -e .env.test -- npx prisma db seed"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^1.8.1",
