@@ -32,7 +32,7 @@ export const beforeTests = async (): Promise<void> => {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.use(cookieParser());
   await app.init();
-  await app.listen(process.env.PORT); // Needed for pactum
+  await app.listen(process.env.PORT || 3333); // Needed for pactum
 
   // Services
   configService = app.get(ConfigService);

@@ -2,9 +2,9 @@
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
 import { PrismaClient } from '@prisma/client';
-import { fakeUser, fakeLease } from '../utils/fakeData';
 import { faker } from '@faker-js/faker';
 import randomToken from 'rand-token';
+import { fakeUser, fakeLease } from '../utils/fakeData';
 import { UserRoleEnum } from '../app/user/enum';
 import { LeaseTypeEnum } from '../app/lease/enum';
 
@@ -32,15 +32,29 @@ const main = async () => {
       { type: LeaseTypeEnum.SHARE },
       { type: LeaseTypeEnum.STUDENT },
       { type: LeaseTypeEnum.SUBLEASE },
-      { type: LeaseTypeEnum.SEASONAL },
     ],
   });
 
-  // Stop seeding
-  if (process.env.NODE_ENV !== 'dev') {
-    return;
+  // Add fake data
+  if (process.env.NODE_ENV === 'development') {
+    await fakeData();
   }
+};
 
+main()
+  .catch((e) => {
+    console.error('Error while seeding the database: ', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+    console.log('Database seeded');
+  });
+
+/* -------------------------------------------------------------------------- */
+/*                              DEVELOPMENT DATA                              */
+/* -------------------------------------------------------------------------- */
+const fakeData = async () => {
   // Create 2 fake users
   const mario = await prisma.user.create({
     data: await fakeUser('mario', 'mario@mail.com'),
@@ -99,13 +113,3 @@ const main = async () => {
     }
   }
 };
-
-main()
-  .catch((e) => {
-    console.error('Error while seeding the database: ', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-    console.log('Database seeded');
-  });

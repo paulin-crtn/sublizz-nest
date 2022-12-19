@@ -36,7 +36,7 @@ const COOKIE_NAME = 'refresh_token';
 const COOKIE_OPTIONS = {
   expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
   httpOnly: true,
-  secure: process.env.NODE_ENV !== 'dev',
+  secure: process.env.NODE_ENV !== 'development',
 };
 
 /* -------------------------------------------------------------------------- */

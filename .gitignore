@@ -1,6 +1,7 @@
 # Environment
 .env
 .env.dev
+.env.staging
 
 # compiled output
 /dist

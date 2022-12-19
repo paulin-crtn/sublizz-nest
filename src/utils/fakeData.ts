@@ -30,7 +30,6 @@ export const fakeLease = (userId: number) => ({
     LeaseTypeEnum.SHARE,
     LeaseTypeEnum.STUDENT,
     LeaseTypeEnum.SUBLEASE,
-    LeaseTypeEnum.SEASONAL,
   ]),
   street: faker.address.street(),
   postCode: faker.address.zipCode('#####'),
