@@ -2,7 +2,7 @@
 /*                                   IMPORTS                                  */
 /* -------------------------------------------------------------------------- */
 import pactum from 'pactum';
-import { LeaseDetailsEntity, LeaseEntity } from '../src/lease/entity';
+import { LeaseDetailsEntity, LeaseEntity } from '../src/app/lease/entity';
 import { fakeLease, fakeLeaseImage, fakeUser } from '../src/utils/fakeData';
 import {
   beforeTests,

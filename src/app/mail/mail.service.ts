@@ -5,7 +5,6 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MailService {
-  private BACK_BASE_URL: string;
   private FRONT_URL: string;
 
   constructor(
@@ -19,8 +18,6 @@ export class MailService {
         return null;
       };
     }
-    // SET BASE URL
-    this.BACK_BASE_URL = this.configService.get('APP_DOMAIN');
     // SET FRONT URL
     this.FRONT_URL = this.configService.get('FRONT_DOMAIN');
   }
