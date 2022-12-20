@@ -44,6 +44,7 @@ export class AuthService {
    * @returns
    */
   async signUp(dto: SignUpDto): Promise<void> {
+    const { role, firstName, email, password } = dto;
     // Validates email address based on regex, common typos,
     // disposable email blacklists, DNS records and SMTP server response.
     const res = await validate({
@@ -58,29 +59,28 @@ export class AuthService {
     if (!res.valid) {
       throw new BadRequestException("L'adresse email n'est pas valide.");
     }
+    // Check email doesn't already exist
+    const userDB = await this.prismaService.user.findUnique({
+      where: {
+        email,
+      },
+    });
+    if (userDB) {
+      throw new ConflictException("L'adresse email est déjà utilisée.");
+    }
     // Generate the password hash
     const passwordHash = await argon.hash(dto.password);
-    try {
-      // Save the new user in the db
-      const user = await this.prismaService.user.create({
-        data: {
-          role: dto.role,
-          firstName: dto.firstName,
-          email: dto.email,
-          passwordHash,
-        },
-      });
-      // Verify the provided email belongs to the user
-      await this.userService.verifyUserEmail(user, user.email);
-    } catch (error) {
-      // Catch unique constraint violation error
-      if (error instanceof PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new ConflictException("L'adresse email est déjà utilisée.");
-        }
-      }
-      throw error;
-    }
+    // Save the new user in the db
+    const user = await this.prismaService.user.create({
+      data: {
+        role,
+        firstName,
+        email,
+        passwordHash,
+      },
+    });
+    // Verify the provided email belongs to the user
+    await this.userService.verifyUserEmail(user, user.email);
   }
 
   /**
