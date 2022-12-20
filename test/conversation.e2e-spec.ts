@@ -13,16 +13,16 @@ import {
 } from './config';
 
 /* -------------------------------------------------------------------------- */
-/*                                GET MESSAGES                                */
+/*                             STORE CONVERSATION                             */
 /* -------------------------------------------------------------------------- */
-describe('GET /conversation-messages', () => {
+describe('POST /conversations', () => {
   /* ------------------------------ CONFIGURATION ----------------------------- */
   beforeAll(async () => await beforeTests());
   beforeEach(async () => await beforeTest());
   afterAll(async () => await afterTests());
 
   /* ---------------------------------- TESTS --------------------------------- */
-  it('should return all user conversation messages', async () => {
+  it('should store a new conversation', async () => {
     // Create 2 fakes user
     const data1 = await fakeUser();
     const userAuthor = await prismaService.user.create({ data: data1 });
@@ -31,34 +31,6 @@ describe('GET /conversation-messages', () => {
     // Create fake lease
     const lease = await prismaService.lease.create({
       data: fakeLease(userAuthor.id),
-    });
-    // Create a conversation for this lease
-    const conversationId = 'RGHJNB67GHJ67';
-    await prismaService.conversation.create({
-      data: {
-        id: conversationId,
-        leaseId: lease.id,
-      },
-    });
-    await prismaService.conversationParticipant.createMany({
-      data: [
-        {
-          conversationId,
-          userId: userAuthor.id,
-        },
-        {
-          conversationId,
-          userId: senderAuthor.id,
-        },
-      ],
-    });
-    // Create a message for this conversation
-    await prismaService.conversationMessage.create({
-      data: {
-        conversationId,
-        fromUserId: senderAuthor.id,
-        content: 'lorem ipsum',
-      },
     });
     // Payload
     const payload = {
@@ -71,46 +43,15 @@ describe('GET /conversation-messages', () => {
       secret: configService.get('ACCESS_JWT_SECRET'),
     });
     // Assert
-    const response = await pactum
+    await pactum
       .spec()
-      .get('/conversation-messages')
+      .post('/conversations')
       .withHeaders('Authorization', `Bearer ${jwt}`)
-      .expectStatus(200)
-      .expectJsonLength(1)
-      .returns('res.body');
-
-    expect(response[0].id).toBe(conversationId);
-    expect(response[0].participants.length).toBe(2);
-    expect(response[0].messages.length).toBe(1);
-    expect(response[0].lease.id).toBe(lease.id);
-    expect(response[0].messages[0].fromUserId).toBe(senderAuthor.id);
-    expect(response[0].messages[0].content).toBe('lorem ipsum');
+      .withBody({ leaseId: lease.id, message: 'lorem ipsum' })
+      .expectStatus(201);
   });
 
-  it('should return status 401 when access_token is invalid', async () => {
-    return pactum
-      .spec()
-      .get('/conversation-messages')
-      .withHeaders('Authorization', `Bearer token`)
-      .expectStatus(401);
-  });
-
-  it('should return status 401 when access_token is not provided', async () => {
-    return pactum.spec().get('/conversation-messages').expectStatus(401);
-  });
-});
-
-/* -------------------------------------------------------------------------- */
-/*                                STORE MESSAGE                               */
-/* -------------------------------------------------------------------------- */
-describe('POST /conversation-messages', () => {
-  /* ------------------------------ CONFIGURATION ----------------------------- */
-  beforeAll(async () => await beforeTests());
-  beforeEach(async () => await beforeTest());
-  afterAll(async () => await afterTests());
-
-  /* ---------------------------------- TESTS --------------------------------- */
-  it('should store a conversation messages', async () => {
+  it('should return status 400 when a conversation already exists', async () => {
     // Create 2 fakes user
     const data1 = await fakeUser();
     const userAuthor = await prismaService.user.create({ data: data1 });
@@ -153,13 +94,38 @@ describe('POST /conversation-messages', () => {
     // Assert
     await pactum
       .spec()
-      .post('/conversation-messages')
+      .post('/conversations')
       .withHeaders('Authorization', `Bearer ${jwt}`)
-      .withBody({ conversationId, message: 'lorem ipsum' })
-      .expectStatus(201);
+      .withBody({ leaseId: lease.id, message: 'lorem ipsum' })
+      .expectStatus(400);
   });
 
-  it("should return status 404 when the conversation doesn't exist", async () => {
+  it("should return status 404 when the lease doesn't exist", async () => {
+    // Create 2 fakes user
+    const data1 = await fakeUser();
+    const userAuthor = await prismaService.user.create({ data: data1 });
+    const data2 = await fakeUser();
+    const senderAuthor = await prismaService.user.create({ data: data2 });
+    // Payload
+    const payload = {
+      sub: senderAuthor.id,
+      email: senderAuthor.email,
+    };
+    // JWT refresh token
+    const jwt = await jwtService.signAsync(payload, {
+      expiresIn: '15m',
+      secret: configService.get('ACCESS_JWT_SECRET'),
+    });
+    // Assert
+    await pactum
+      .spec()
+      .post('/conversations')
+      .withHeaders('Authorization', `Bearer ${jwt}`)
+      .withBody({ leaseId: 9999, message: 'lorem ipsum' })
+      .expectStatus(404);
+  });
+
+  it('should return status 400 when a lease author is starting a conversation with himself', async () => {
     // Create 1 fake user
     const data = await fakeUser();
     const user = await prismaService.user.create({ data });
@@ -180,21 +146,21 @@ describe('POST /conversation-messages', () => {
     // Assert
     await pactum
       .spec()
-      .post('/conversation-messages')
+      .post('/conversations')
       .withHeaders('Authorization', `Bearer ${jwt}`)
-      .withBody({ conversationId: 'ABCDEFGHIJKLMNO', message: 'lorem ipsum' })
-      .expectStatus(404);
+      .withBody({ leaseId: lease.id, message: 'lorem ipsum' })
+      .expectStatus(400);
   });
 
   it('should return status 401 when access_token is invalid', async () => {
     return pactum
       .spec()
-      .post('/conversation-messages')
+      .post('/conversations')
       .withHeaders('Authorization', `Bearer token`)
       .expectStatus(401);
   });
 
   it('should return status 401 when access_token is not provided', async () => {
-    return pactum.spec().post('/conversation-messages').expectStatus(401);
+    return pactum.spec().post('/conversations').expectStatus(401);
   });
 });
