@@ -27,7 +27,7 @@ model User {
   firstName String @db.VarChar(30)
   lastName String? @db.VarChar(30)
   phoneNumber String? @db.VarChar(10)
-  email String @db.VarChar(30) @unique
+  email String @db.VarChar(40) @unique
   emailVerifiedAt DateTime?
   passwordHash String
   refreshTokenHash String?

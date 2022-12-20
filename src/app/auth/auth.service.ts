@@ -187,7 +187,7 @@ export class AuthService {
       },
       data: {
         email: emailVerification.email,
-        emailVerifiedAt: new Date(Date.now()),
+        emailVerifiedAt: new Date(),
       },
     });
     // Delete token

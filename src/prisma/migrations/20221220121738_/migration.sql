@@ -5,7 +5,7 @@ CREATE TABLE "user" (
     "firstName" VARCHAR(30) NOT NULL,
     "lastName" VARCHAR(30),
     "phoneNumber" VARCHAR(10),
-    "email" VARCHAR(30) NOT NULL,
+    "email" VARCHAR(40) NOT NULL,
     "emailVerifiedAt" TIMESTAMP(3),
     "passwordHash" TEXT NOT NULL,
     "refreshTokenHash" TEXT,
