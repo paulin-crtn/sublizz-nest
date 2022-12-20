@@ -39,7 +39,7 @@ export const fakeLease = (userId: number) => ({
   description: faker.lorem.lines(),
   surface: faker.datatype.number({ min: 10, max: 100 }),
   room: faker.datatype.number({ min: 1, max: 7 }),
-  startDate: faker.date.soon(10),
+  startDate: faker.date.soon(),
   endDate: faker.date.future(),
   isDateFlexible: faker.datatype.number({ min: 0, max: 1 }),
   pricePerMonth: faker.datatype.number({ min: 200, max: 2000 }),
