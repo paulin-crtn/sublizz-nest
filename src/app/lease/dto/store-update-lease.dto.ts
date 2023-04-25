@@ -28,7 +28,7 @@ export class StoreUpdateLeaseDto {
   postCode: string;
 
   @IsString()
-  @Length(3, 30)
+  @Length(3, 40)
   city: string;
 
   @IsLatitude()

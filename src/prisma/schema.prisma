@@ -59,7 +59,7 @@ model Lease {
   id Int @id @default(autoincrement())
   userId Int
   type String @db.VarChar(15)
-  street String @db.VarChar(30)
+  street String @db.VarChar(40)
   postCode String @db.VarChar(5)
   city String @db.VarChar(30)
   gpsLatitude Decimal? @db.Decimal(8, 6)
