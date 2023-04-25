@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
-import { RootModule } from './root/root.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { LeaseModule } from './lease/lease.module';
@@ -18,7 +17,6 @@ import { ConversationMessageModule } from './conversation-message/conversation-m
       isGlobal: true,
     }),
     PrismaModule,
-    RootModule,
     AuthModule,
     UserModule,
     LeaseModule,
